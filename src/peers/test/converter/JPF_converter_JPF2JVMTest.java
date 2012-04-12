@@ -1,8 +1,8 @@
 package test.converter;
 
-import gov.nasa.jpf.jvm.ConversionException;
-import gov.nasa.jpf.jvm.Converter;
 import gov.nasa.jpf.jvm.MJIEnv;
+import gov.nasa.jpf.nhandler.ConversionException;
+import gov.nasa.jpf.nhandler.Converter;
 import gov.nasa.jpf.util.test.TestJPF;
 
 public class JPF_converter_JPF2JVMTest extends TestJPF {

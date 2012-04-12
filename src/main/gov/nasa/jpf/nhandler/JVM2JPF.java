@@ -1,4 +1,14 @@
-package gov.nasa.jpf.jvm;
+package gov.nasa.jpf.nhandler;
+
+import gov.nasa.jpf.jvm.ArrayFields;
+import gov.nasa.jpf.jvm.ClassInfo;
+import gov.nasa.jpf.jvm.DynamicElementInfo;
+import gov.nasa.jpf.jvm.ElementInfo;
+import gov.nasa.jpf.jvm.FieldInfo;
+import gov.nasa.jpf.jvm.Fields;
+import gov.nasa.jpf.jvm.MJIEnv;
+import gov.nasa.jpf.jvm.NoClassInfoException;
+import gov.nasa.jpf.jvm.StaticElementInfo;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

@@ -1,4 +1,9 @@
-package gov.nasa.jpf.jvm;
+package gov.nasa.jpf.nhandler;
+
+import gov.nasa.jpf.jvm.ClassInfo;
+import gov.nasa.jpf.jvm.MJIEnv;
+import gov.nasa.jpf.jvm.NativeMethodInfo;
+import gov.nasa.jpf.jvm.NativePeer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -85,12 +90,13 @@ public class PeerClassCreator implements Constants {
 
     if (this.peer == null) {
       _cg = new ClassGen(peerName, "java.lang.Object", peerName + ".class", Constants.ACC_PUBLIC, new String[] {});
+      _cg.addEmptyConstructor(Constants.ACC_PUBLIC);
     }
 
     _cp = _cg.getConstantPool();
     _factory = new InstructionFactory(_cg, _cp);
 
-    if (!NativePeer.peers.containsKey(className)) _cg.addEmptyConstructor(Constants.ACC_PUBLIC);
+   // if (!NativePeer.peers.containsKey(className)) _cg.addEmptyConstructor(Constants.ACC_PUBLIC);
 
     PeerClassCreator.Peers.put(className, this);
   }

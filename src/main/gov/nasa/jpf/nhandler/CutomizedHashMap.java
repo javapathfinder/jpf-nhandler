@@ -1,4 +1,4 @@
-package gov.nasa.jpf.jvm;
+package gov.nasa.jpf.nhandler;
 
 import java.util.HashMap;
 

@@ -1,4 +1,13 @@
-package gov.nasa.jpf.jvm;
+package gov.nasa.jpf.nhandler;
+
+import gov.nasa.jpf.jvm.ArrayFields;
+import gov.nasa.jpf.jvm.ClassInfo;
+import gov.nasa.jpf.jvm.DynamicElementInfo;
+import gov.nasa.jpf.jvm.ElementInfo;
+import gov.nasa.jpf.jvm.FieldInfo;
+import gov.nasa.jpf.jvm.MJIEnv;
+import gov.nasa.jpf.jvm.ReferenceArrayFields;
+import gov.nasa.jpf.jvm.StaticElementInfo;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -112,7 +121,7 @@ public class JPF2JVM {
               if (!isFinal) {
                 // If the current field is of reference type
                 if (fi.isReference()) {
-                  int fieldValueRef = sei.fields.getReferenceValue(fi.getStorageOffset());
+                  int fieldValueRef = sei.getFields().getReferenceValue(fi.getStorageOffset());
                   Object JVMField = this.getJVMObj(fieldValueRef);
                   try {
                     fld[i].set(null, JVMField);
@@ -241,7 +250,7 @@ public class JPF2JVM {
             if (fi != null && isNonStaticField) {
               // Field is of reference type
               if (fi.isReference()) {
-                int fieldValueRef = dei.fields.getReferenceValue(fi.getStorageOffset());
+                int fieldValueRef = dei.getFields().getReferenceValue(fi.getStorageOffset());
                 Object JVMField = this.getJVMObj(fieldValueRef);
                 try {
                   fld[i].set(JVMObj, JVMField);
@@ -433,35 +442,35 @@ public class JPF2JVM {
 
     // byte[]
     if (type.equals("[B")) {
-      JVMObj = ((ArrayFields) ei.fields).asByteArray();
+      JVMObj = ((ArrayFields) ei.getFields()).asByteArray();
     }
     // char[]
     else if (type.equals("[C")) {
-      JVMObj = ((ArrayFields) ei.fields).asCharArray();
+      JVMObj = ((ArrayFields) ei.getFields()).asCharArray();
     }
     // short[]
     else if (type.equals("[S")) {
-      JVMObj = ((ArrayFields) ei.fields).asShortArray();
+      JVMObj = ((ArrayFields) ei.getFields()).asShortArray();
     }
     // int[]
     else if (type.equals("[I")) {
-      JVMObj = ((ArrayFields) ei.fields).asIntArray();
+      JVMObj = ((ArrayFields) ei.getFields()).asIntArray();
     }
     // float[]
     else if (type.equals("[F")) {
-      JVMObj = ((ArrayFields) ei.fields).asFloatArray();
+      JVMObj = ((ArrayFields) ei.getFields()).asFloatArray();
     }
     // long[]
     else if (type.equals("[J")) {
-      JVMObj = ((ArrayFields) ei.fields).asLongArray();
+      JVMObj = ((ArrayFields) ei.getFields()).asLongArray();
     }
     // double[]
     else if (type.equals("[D")) {
-      JVMObj = ((ArrayFields) ei.fields).asDoubleArray();
+      JVMObj = ((ArrayFields) ei.getFields()).asDoubleArray();
     }
     // boolean[]
     else if (type.equals("[Z")) {
-      JVMObj = ((ArrayFields) ei.fields).asBooleanArray();
+      JVMObj = ((ArrayFields) ei.getFields()).asBooleanArray();
     } else {
       throw new ConversionException("Unknown array type " + type);
     }

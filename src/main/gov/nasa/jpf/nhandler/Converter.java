@@ -1,4 +1,7 @@
-package gov.nasa.jpf.jvm;
+package gov.nasa.jpf.nhandler;
+
+import gov.nasa.jpf.jvm.ClassInfo;
+import gov.nasa.jpf.jvm.MJIEnv;
 
 import java.util.HashMap;
 import java.util.HashSet;
