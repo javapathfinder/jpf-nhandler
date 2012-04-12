@@ -1,4 +1,4 @@
-package test.converter;
+package converter;
 
 import gov.nasa.jpf.jvm.MJIEnv;
 import gov.nasa.jpf.nhandler.ConversionException;
