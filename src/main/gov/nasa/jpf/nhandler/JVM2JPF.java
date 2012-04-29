@@ -399,7 +399,9 @@ public class JVM2JPF {
         if (value == JVMObj) {
           found = true;
           JPFRef = key;
-          if (update == true) this.updateJPFObj(JVMObj, JPFRef);
+          if (update == true) {
+            this.updateJPFObj(JVMObj, JPFRef);
+          }
         }
       }
     }
@@ -435,7 +437,7 @@ public class JVM2JPF {
       JPFRef = this.createNewJPFArray(JVMObj);
       this.updateArr(JVMObj, JPFRef);
     }
-    this.pinObject(JPFRef);
+
     return JPFRef;
   }
 
@@ -488,7 +490,7 @@ public class JVM2JPF {
     else {
       JPFArr = env.newObjectArray(((Object[]) JVMArr).getClass().getComponentType().getName(), ((Object[]) JVMArr).length);
     }
-    this.pinObject(JPFArr);
+
     return JPFArr;
   }
 
@@ -551,62 +553,60 @@ public class JVM2JPF {
     // byte[]
     if (type.equals("[B")) {
       byte[] JVMArr = (byte[]) JVMObj;
-      for (int i = 0; i < JVMArr.length; i++)
+      for (int i = 0; i < JVMArr.length; i++) {
         env.setByteArrayElement(ei.getObjectRef(), i, JVMArr[i]);
+      }
     }
     // char[]
     else if (type.equals("[C")) {
       char[] JVMArr = (char[]) JVMObj;
-      for (int i = 0; i < JVMArr.length; i++)
+      for (int i = 0; i < JVMArr.length; i++) {
         env.setCharArrayElement(ei.getObjectRef(), i, JVMArr[i]);
+      }
     }
     // short[]
     else if (type.equals("[S")) {
       short[] JVMArr = (short[]) JVMObj;
-      for (int i = 0; i < JVMArr.length; i++)
+      for (int i = 0; i < JVMArr.length; i++) {
         env.setShortArrayElement(ei.getObjectRef(), i, JVMArr[i]);
+      }
     }
     // int[]
     else if (type.equals("[I")) {
       int[] JVMArr = (int[]) JVMObj;
-      for (int i = 0; i < JVMArr.length; i++)
+      for (int i = 0; i < JVMArr.length; i++) {
         env.setIntArrayElement(ei.getObjectRef(), i, JVMArr[i]);
+      }
     }
     // float[]
     else if (type.equals("[F")) {
       float[] JVMArr = (float[]) JVMObj;
-      for (int i = 0; i < JVMArr.length; i++)
+      for (int i = 0; i < JVMArr.length; i++) {
         env.setFloatArrayElement(ei.getObjectRef(), i, JVMArr[i]);
+      }
     }
     // long[]
     else if (type.equals("[J")) {
       long[] JVMArr = (long[]) JVMObj;
-      for (int i = 0; i < JVMArr.length; i++)
+      for (int i = 0; i < JVMArr.length; i++) {
         env.setLongArrayElement(ei.getObjectRef(), i, JVMArr[i]);
+      }
     }
     // double[]
     else if (type.equals("[D")) {
       double[] JVMArr = (double[]) JVMObj;
-      for (int i = 0; i < JVMArr.length; i++)
+      for (int i = 0; i < JVMArr.length; i++) {
         env.setDoubleArrayElement(ei.getObjectRef(), i, JVMArr[i]);
+      }
     }
     // boolean[]
     else if (type.equals("[Z")) {
       boolean[] JVMArr = (boolean[]) JVMObj;
-      for (int i = 0; i < JVMArr.length; i++)
+      for (int i = 0; i < JVMArr.length; i++) {
         env.setBooleanArrayElement(ei.getObjectRef(), i, JVMArr[i]);
+      }
     } else {
       throw new ConversionException("Unknown array type " + type);
     }
-  }
-
-  /**
-   * Updates the given object counter for the purpose of the garbage collection.
-   * 
-   * @param obj
-   *          a JPF object
-   */
-  private void pinObject (int obj) {
-    if (obj != MJIEnv.NULL) env.getHeap().registerPinDown(obj);
   }
 }

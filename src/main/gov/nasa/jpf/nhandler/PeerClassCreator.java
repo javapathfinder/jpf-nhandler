@@ -3,7 +3,6 @@ package gov.nasa.jpf.nhandler;
 import gov.nasa.jpf.jvm.ClassInfo;
 import gov.nasa.jpf.jvm.MJIEnv;
 import gov.nasa.jpf.jvm.NativeMethodInfo;
-import gov.nasa.jpf.jvm.NativePeer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -80,15 +79,15 @@ public class PeerClassCreator implements Constants {
     String peerName = PeerClassCreator.getNativePeerClsName(className);
     this.path = PeerClassCreator.peersLocation + peerName + ".class";
 
-    try {
+    try{
       this.peer = this.loadClass(peerName);
       _cg = new ClassGen(Repository.lookupClass(this.loadClass(peerName)));
       System.out.println("   Already has a OTF peer class!");
-    } catch (ClassNotFoundException e) {
+    } catch (ClassNotFoundException e){
       // do nothing!
     }
 
-    if (this.peer == null) {
+    if (this.peer == null){
       _cg = new ClassGen(peerName, "java.lang.Object", peerName + ".class", Constants.ACC_PUBLIC, new String[] {});
       _cg.addEmptyConstructor(Constants.ACC_PUBLIC);
     }
@@ -96,7 +95,8 @@ public class PeerClassCreator implements Constants {
     _cp = _cg.getConstantPool();
     _factory = new InstructionFactory(_cg, _cp);
 
-   // if (!NativePeer.peers.containsKey(className)) _cg.addEmptyConstructor(Constants.ACC_PUBLIC);
+    // if (!NativePeer.peers.containsKey(className))
+    // _cg.addEmptyConstructor(Constants.ACC_PUBLIC);
 
     PeerClassCreator.Peers.put(className, this);
   }
@@ -111,17 +111,19 @@ public class PeerClassCreator implements Constants {
    * 
    * @return a PeerClassCreator object corresponding to the given class
    */
-  public static PeerClassCreator getPeerCreator (ClassInfo ci, MJIEnv env) {
+  public static PeerClassCreator getPeerCreator (ClassInfo ci, MJIEnv env){
     String className = ci.getName();
     PeerClassCreator peerCreator = null;
 
     // find a better place to initialize this!
-    if (PeerClassCreator.peersLocation == null) PeerClassCreator.peersLocation = env.getConfig().getPath("jpf-nhandler") + "/onthefly/";
+    if (PeerClassCreator.peersLocation == null) {
+      PeerClassCreator.peersLocation = env.getConfig().getPath("jpf-nhandler") + "/onthefly/";
+    }
 
-    if (PeerClassCreator.Peers.containsKey(className)) {
+    if (PeerClassCreator.Peers.containsKey(className)){
       peerCreator = PeerClassCreator.Peers.get(className);
       System.out.println("   Already has a PeerClassCreator!");
-    } else {
+    } else{
       System.out.println("   Does not have a PeerClassCreator!");
       peerCreator = new PeerClassCreator(ci, env);
     }
@@ -139,10 +141,12 @@ public class PeerClassCreator implements Constants {
    * @return a method of the peer class that corresponds to the given
    *         NativeMethodInfo object
    */
-  private Method getExistingMethod (NativeMethodInfo mi) {
-    if (this.peer != null) {
-      for (Method nm : this.peer.getMethods()) {
-        if (nm.getName().equals(mi.getJNIName())) return nm;
+  private Method getExistingMethod (NativeMethodInfo mi){
+    if (this.peer != null){
+      for (Method nm : this.peer.getMethods()){
+        if (nm.getName().equals(mi.getJNIName())) {
+          return nm;
+        }
       }
     }
     return null;
@@ -160,28 +164,74 @@ public class PeerClassCreator implements Constants {
    * 
    * @return a Method object corresponding to the given NativeMethodInfo object
    */
-  public Method createMethod (NativeMethodInfo mi) {
+  public Method createMethod (NativeMethodInfo mi){
     Method method = this.getExistingMethod(mi);
-    if (method != null) return method;
+    if (method != null) {
+      return method;
+    }
 
     PeerMethodCreator nmthCreator = new PeerMethodCreator(mi, env, this);
     nmthCreator.create();
 
     OutputStream out;
-    try {
+    try{
       out = new FileOutputStream(this.path);
       this._cg.getJavaClass().dump(out);
       out.close();
-    } catch (FileNotFoundException e) {
+    } catch (FileNotFoundException e){
       e.printStackTrace();
-    } catch (IOException e) {
+    } catch (IOException e){
       e.printStackTrace();
     }
 
     Class<?> peerClass = null;
-    try {
+    try{
       peerClass = this.loadClass(this._cg.getClassName());
-    } catch (ClassNotFoundException e1) {
+    } catch (ClassNotFoundException e1){
+      e1.printStackTrace();
+    }
+    this.peer = peerClass;
+    method = this.getExistingMethod(mi);
+
+    return method;
+  }
+
+  /**
+   * Creates a Method object with empty body corresponding to the given 
+   * NativeMethodInfo object within the native peer class.
+   * 
+   * @param mi
+   *          an object that represents a native method in JPF
+   * 
+   * @param env
+   *          an interface between JPF and the underlying JVM
+   * 
+   * @return a Method object corresponding to the given NativeMethodInfo object
+   */
+  public Method createEmptyMethod (NativeMethodInfo mi){
+    Method method = this.getExistingMethod(mi);
+    if (method != null) {
+      return method;
+    }
+
+    PeerMethodCreator nmthCreator = new PeerMethodCreator(mi, env, this);
+    nmthCreator.createEmpty();
+
+    OutputStream out;
+    try{
+      out = new FileOutputStream(this.path);
+      this._cg.getJavaClass().dump(out);
+      out.close();
+    } catch (FileNotFoundException e){
+      e.printStackTrace();
+    } catch (IOException e){
+      e.printStackTrace();
+    }
+
+    Class<?> peerClass = null;
+    try{
+      peerClass = this.loadClass(this._cg.getClassName());
+    } catch (ClassNotFoundException e1){
       e1.printStackTrace();
     }
     this.peer = peerClass;
@@ -201,7 +251,7 @@ public class PeerClassCreator implements Constants {
    *           when no definition for the class with the given name could be
    *           found
    */
-  private Class loadClass (String className) throws ClassNotFoundException {
+  private Class loadClass (String className) throws ClassNotFoundException{
     Class cls = null;
     URL[] urls = null;
 
@@ -209,9 +259,9 @@ public class PeerClassCreator implements Constants {
 
     URL url = null;
     URL jpf_url = null;
-    try {
+    try{
       url = otf_dir.toURL();
-    } catch (MalformedURLException e) {
+    } catch (MalformedURLException e){
       e.printStackTrace();
     }
     urls = new URL[] { url };
@@ -230,7 +280,7 @@ public class PeerClassCreator implements Constants {
    * 
    * @return a name for the on-the-fly native peer
    */
-  protected static String getNativePeerClsName (String className) {
+  protected static String getNativePeerClsName (String className){
     return (PeerClassCreator.prefix + "JPF_" + className.replace('.', '_'));
   }
 
@@ -239,16 +289,16 @@ public class PeerClassCreator implements Constants {
    * 
    * @return the native peer class
    */
-  public Class<?> getPeer () {
+  public Class<?> getPeer (){
     return this.peer;
   }
 
-  public static void main (String[] args) throws SecurityException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+  public static void main (String[] args) throws SecurityException, NoSuchMethodException, IllegalAccessException, InvocationTargetException{
     JavaClass clazz = null;
 
-    try {
-      clazz = Repository.lookupClass("gov.nasa.jpf.jvm.xJPF_java_lang_String");
-    } catch (ClassNotFoundException e) {
+    try{
+      clazz = Repository.lookupClass("gov.nasa.jpf.nhandler.Test");
+    } catch (ClassNotFoundException e){
       e.printStackTrace();
     }
 

@@ -343,7 +343,9 @@ public class JPF2JVM {
   private static Object instantiateFrom (Class cl) {
     Object JVMObj = null;
 
-    if (cl == Class.class) { return cl; }
+    if (cl == Class.class) { 
+      return cl; 
+    }
 
     Constructor ctor = getNoArgCtor(cl);
     try {
@@ -368,8 +370,11 @@ public class JPF2JVM {
     Constructor ctor = null;
 
     // Check if the given class has a constructor with no arguments
-    for (Constructor c : ctors)
-      if (c.getParameterTypes().length == 0) ctor = c;
+    for (Constructor c : ctors) {
+      if (c.getParameterTypes().length == 0) {
+        ctor = c;
+      }
+    }
 
     if (ctor == null) {
       try {
