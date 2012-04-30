@@ -132,6 +132,10 @@ public class JVMForwarder extends PropertyListenerAdapter {
     ci.putDeclaredMethod(new_m);
   }
 
+  /**
+   * at the searchStarted event, if the option nhandler.reset is set to true,
+   * all the peer classes created on the fly are removed. 
+   */
   public void searchStarted(Search search){
     Config config = search.getConfig();
     boolean reset = config.getBoolean("nhandler.reset");
