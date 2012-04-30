@@ -6,6 +6,14 @@ import gov.nasa.jpf.jvm.NativeMethodInfo;
 import gov.nasa.jpf.jvm.NativePeer;
 import gov.nasa.jpf.nhandler.PeerClassCreator;
 
+/** 
+ * This is a subclass of NativeMethodInfo which makes executeNative() skip the
+ * execution of the method by executing a method with empty body which returns
+ * a dummy value at the JVM level.
+ * 
+ * @author Nastaran Shafiei
+ * @author Franck van Breugel
+ */
 public class SkippedMethodInfo extends NativeMethodInfo {
 
   public SkippedMethodInfo (MethodInfo mi) {

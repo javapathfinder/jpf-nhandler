@@ -13,6 +13,18 @@ import gov.nasa.jpf.jvm.NativePeer;
 import gov.nasa.jpf.search.Search;
 import gov.nasa.jpf.util.MethodSpec;
 
+/**
+ * This listener makes JPF delegate or skip the execution of certain methods
+ * to the JVM level according to what is specified in the properties file.
+ * 
+ * Right after a class is loaded, JVMForwarder goes through the methods of 
+ * the class, and for the ones specified to be delegate or skipped, it replaces
+ * their MethodInfo with the subclasses of NativeMethodInfo, and that makes the
+ * executeNative() to behave differently.
+ * 
+ * @author Nastaran Shafiei
+ * @author Franck van Breugel
+ */
 public class JVMForwarder extends PropertyListenerAdapter {
   private static String[] delegate_spec = null;
 
@@ -84,7 +96,9 @@ public class JVMForwarder extends PropertyListenerAdapter {
 
     return false;
   }
-  
+
+  // We do not allow user to delegate or skip the methods of certain classes that are
+  // subjected to jpf-nhandler limitations.
   String[] builtinFiltered = {"java.lang.ClassLoader.*"};
   
   private boolean isAllowed(MethodInfo mi){
@@ -97,7 +111,7 @@ public class JVMForwarder extends PropertyListenerAdapter {
 
     return true;
   }
-  
+
   private boolean isFiltered (MethodInfo mi){
     if (filter_spec != null){
       for (String spec : filter_spec){
