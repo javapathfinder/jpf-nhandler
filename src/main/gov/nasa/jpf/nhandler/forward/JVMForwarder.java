@@ -1,10 +1,13 @@
 package gov.nasa.jpf.nhandler.forward;
 
+import java.io.File;
+
 import gov.nasa.jpf.Config;
 import gov.nasa.jpf.PropertyListenerAdapter;
 import gov.nasa.jpf.jvm.ClassInfo;
 import gov.nasa.jpf.jvm.JVM;
 import gov.nasa.jpf.jvm.MethodInfo;
+import gov.nasa.jpf.search.Search;
 import gov.nasa.jpf.util.MethodSpec;
 
 public class JVMForwarder extends PropertyListenerAdapter {
@@ -127,5 +130,21 @@ public class JVMForwarder extends PropertyListenerAdapter {
     MethodInfo new_m = new SkippedMethodInfo(mi);
     ClassInfo ci = mi.getClassInfo();
     ci.putDeclaredMethod(new_m);
+  }
+
+  public void searchStarted(Search search){
+    Config config = search.getConfig();
+    boolean reset = config.getBoolean("nhandler.reset");
+    if(reset) {
+      String path = config.getPath("jpf-nhandler") + "/onthefly";
+      File onthefly = new File(path);
+      String[] peers = onthefly.list();
+      for(String name: peers) {
+    	if(name.startsWith("OTF") && name.endsWith(".class")) {
+          File peer = new File(onthefly, name);
+          peer.delete();
+    	}
+      }
+    }
   }
 }
