@@ -1,12 +1,15 @@
 package gov.nasa.jpf.nhandler.forward;
 
 import java.io.File;
+import java.lang.reflect.Method;
 
 import gov.nasa.jpf.Config;
 import gov.nasa.jpf.PropertyListenerAdapter;
 import gov.nasa.jpf.jvm.ClassInfo;
 import gov.nasa.jpf.jvm.JVM;
 import gov.nasa.jpf.jvm.MethodInfo;
+import gov.nasa.jpf.jvm.NativeMethodInfo;
+import gov.nasa.jpf.jvm.NativePeer;
 import gov.nasa.jpf.search.Search;
 import gov.nasa.jpf.util.MethodSpec;
 
@@ -54,7 +57,7 @@ public class JVMForwarder extends PropertyListenerAdapter {
   private void delegateNatives (ClassInfo ci){
     MethodInfo[] mth = ci.getDeclaredMethodInfos();
     for (MethodInfo mi : mth){
-      if (mi.isNative()){
+      if (mi.isNative() && !isHandled(mi) && isAllowed(mi) && !isFiltered(mi)){
         delegateUnhandledNative(mi);
       }
     }
@@ -63,17 +66,45 @@ public class JVMForwarder extends PropertyListenerAdapter {
   private void skipNatives (ClassInfo ci){
     MethodInfo[] mth = ci.getDeclaredMethodInfos();
     for (MethodInfo mi : mth){
-      if (mi.isNative()){
+      if (mi.isNative() && !isHandled(mi) && isAllowed(mi) && !isFiltered(mi)){
         skipUnhandledNative(mi);
       }
     }
   }
 
+  private boolean isHandled(MethodInfo mi) {
+    NativeMethodInfo nmi = (NativeMethodInfo) mi;
+    NativePeer nativePeer = nmi.getNativePeer();
+    Method[] mth = nativePeer.getPeerClass().getMethods();
+    for(Method m: mth) {
+      if(m.getName().equals(nmi.getJNIName())) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+  
+  String[] builtinFiltered = {"java.lang.ClassLoader.*"};
+  
+  private boolean isAllowed(MethodInfo mi){
+    for(String spec : builtinFiltered){
+      MethodSpec ms = MethodSpec.createMethodSpec(spec);
+      if (ms.matches(mi)){ 
+        return false; 
+      }
+    }
+
+    return true;
+  }
+  
   private boolean isFiltered (MethodInfo mi){
     if (filter_spec != null){
       for (String spec : filter_spec){
         MethodSpec ms = MethodSpec.createMethodSpec(spec);
-        if (ms.matches(mi)){ return true; }
+        if (ms.matches(mi)){ 
+          return true; 
+        }
       }
     }
 
