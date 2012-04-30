@@ -28,6 +28,7 @@ public class SkippedNativeMethodInfo extends NativeMethodInfo {
       this.peer = new NativePeer(peerCreator.getPeer(), this.ci);
       assert (this.peer != null && mth != null);
     }
+
     return false;
   }
 }

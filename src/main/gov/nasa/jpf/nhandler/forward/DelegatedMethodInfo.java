@@ -20,11 +20,14 @@ public class DelegatedMethodInfo extends NativeMethodInfo {
   }
 
   protected boolean isUnsatisfiedLinkError (MJIEnv env){
-    System.out.println("*** DELEGATING - Native method " + this.ci.getName() + "." + this.name + " is NULL");
-    PeerClassCreator peerCreator = PeerClassCreator.getPeerCreator(this.getClassInfo(), env);
-    mth = peerCreator.createMethod(this);
-    this.peer = new NativePeer(peerCreator.getPeer(), this.ci);
-    assert (this.peer != null && mth != null);
+    if(mth == null){
+      System.out.println("*** DELEGATING - Native method " + this.ci.getName() + "." + this.name + " is NULL");
+      PeerClassCreator peerCreator = PeerClassCreator.getPeerCreator(this.getClassInfo(), env);
+      mth = peerCreator.createMethod(this);
+      this.peer = new NativePeer(peerCreator.getPeer(), this.ci);
+      assert (this.peer != null && mth != null);
+    }
+
     return false;
   }
 }

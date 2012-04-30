@@ -8,8 +8,8 @@ import gov.nasa.jpf.nhandler.PeerClassCreator;
 
 /** 
  * This is a subclass of NativeMethodInfo which makes executeNative() skip the
- * execution of the method by executing a method with empty body which returns
- * a dummy value at the JVM level.
+ * execution of the method by executing the corresponding empty method at the 
+ * JVM level which returns a dummy value.
  * 
  * @author Nastaran Shafiei
  * @author Franck van Breugel
@@ -21,11 +21,14 @@ public class SkippedMethodInfo extends NativeMethodInfo {
   }
 
   protected boolean isUnsatisfiedLinkError (MJIEnv env){
-    System.out.println("*** SKIPPING - Native method " + this.ci.getName() + "." + this.name + " is NULL");
-    PeerClassCreator peerCreator = PeerClassCreator.getPeerCreator(this.getClassInfo(), env);
-    mth = peerCreator.createEmptyMethod(this);
-    this.peer = new NativePeer(peerCreator.getPeer(), this.ci);
-    assert (this.peer != null && mth != null);
+    if(mth == null){
+      System.out.println("*** SKIPPING - Native method " + this.ci.getName() + "." + this.name + " is NULL");
+      PeerClassCreator peerCreator = PeerClassCreator.getPeerCreator(this.getClassInfo(), env);
+      mth = peerCreator.createEmptyMethod(this);
+      this.peer = new NativePeer(peerCreator.getPeer(), this.ci);
+      assert (this.peer != null && mth != null);
+    }
+
     return false;
   }
 }

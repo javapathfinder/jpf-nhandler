@@ -6,6 +6,13 @@ import gov.nasa.jpf.jvm.NativeMethodInfo;
 import gov.nasa.jpf.jvm.NativePeer;
 import gov.nasa.jpf.nhandler.PeerClassCreator;
 
+/** 
+ * This is a subclass of NativeMethodInfo which makes executeNative() delegate
+ * the execution of the unhandled native method to the JVM level.
+ * 
+ * @author Nastaran Shafiei
+ * @author Franck van Breugel
+ */
 public class DelegatedNativeMethodInfo extends NativeMethodInfo {
 
   public DelegatedNativeMethodInfo (MethodInfo mi) {
@@ -20,6 +27,7 @@ public class DelegatedNativeMethodInfo extends NativeMethodInfo {
       this.peer = new NativePeer(peerCreator.getPeer(), this.ci);
       assert (this.peer != null && mth != null);
     }
+
     return false;
   }
 }
