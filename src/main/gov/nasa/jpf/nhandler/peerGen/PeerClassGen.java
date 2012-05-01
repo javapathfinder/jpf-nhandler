@@ -1,4 +1,4 @@
-package gov.nasa.jpf.nhandler;
+package gov.nasa.jpf.nhandler.peerGen;
 
 import gov.nasa.jpf.jvm.ClassInfo;
 import gov.nasa.jpf.jvm.MJIEnv;
@@ -31,12 +31,12 @@ import org.apache.bcel.util.BCELifier;
  * @author Nastaran Shafiei
  * @author Franck van Breugel
  */
-public class PeerClassCreator implements Constants {
+public class PeerClassGen implements Constants {
 
   /**
    * Keeps the list of all PeerClassCreator objects to avoid recreating them
    */
-  private static HashMap<String, PeerClassCreator> Peers = new HashMap<String, PeerClassCreator>();
+  private static HashMap<String, PeerClassGen> Peers = new HashMap<String, PeerClassGen>();
 
   protected InstructionFactory _factory;
 
@@ -73,11 +73,11 @@ public class PeerClassCreator implements Constants {
    * @param ci
    *          a class that its native peer is going to be created
    */
-  private PeerClassCreator (ClassInfo ci, MJIEnv env) {
+  private PeerClassGen (ClassInfo ci, MJIEnv env) {
     String className = ci.getName();
     this.env = env;
-    String peerName = PeerClassCreator.getNativePeerClsName(className);
-    this.path = PeerClassCreator.peersLocation + peerName + ".class";
+    String peerName = PeerClassGen.getNativePeerClsName(className);
+    this.path = PeerClassGen.peersLocation + peerName + ".class";
 
     try{
       this.peer = this.loadClass(peerName);
@@ -98,7 +98,7 @@ public class PeerClassCreator implements Constants {
     // if (!NativePeer.peers.containsKey(className))
     // _cg.addEmptyConstructor(Constants.ACC_PUBLIC);
 
-    PeerClassCreator.Peers.put(className, this);
+    PeerClassGen.Peers.put(className, this);
   }
 
   /**
@@ -111,21 +111,21 @@ public class PeerClassCreator implements Constants {
    * 
    * @return a PeerClassCreator object corresponding to the given class
    */
-  public static PeerClassCreator getPeerCreator (ClassInfo ci, MJIEnv env){
+  public static PeerClassGen getPeerCreator (ClassInfo ci, MJIEnv env){
     String className = ci.getName();
-    PeerClassCreator peerCreator = null;
+    PeerClassGen peerCreator = null;
 
     // find a better place to initialize this!
-    if (PeerClassCreator.peersLocation == null) {
-      PeerClassCreator.peersLocation = env.getConfig().getPath("jpf-nhandler") + "/onthefly/";
+    if (PeerClassGen.peersLocation == null) {
+      PeerClassGen.peersLocation = env.getConfig().getPath("jpf-nhandler") + "/onthefly/";
     }
 
-    if (PeerClassCreator.Peers.containsKey(className)){
-      peerCreator = PeerClassCreator.Peers.get(className);
+    if (PeerClassGen.Peers.containsKey(className)){
+      peerCreator = PeerClassGen.Peers.get(className);
       System.out.println("   Already has a PeerClassCreator!");
     } else{
       System.out.println("   Does not have a PeerClassCreator!");
-      peerCreator = new PeerClassCreator(ci, env);
+      peerCreator = new PeerClassGen(ci, env);
     }
     return peerCreator;
   }
@@ -170,7 +170,7 @@ public class PeerClassCreator implements Constants {
       return method;
     }
 
-    PeerMethodCreator nmthCreator = new PeerMethodCreator(mi, env, this);
+    PeerMethodGen nmthCreator = new PeerMethodGen(mi, env, this);
     nmthCreator.create();
 
     OutputStream out;
@@ -214,7 +214,7 @@ public class PeerClassCreator implements Constants {
       return method;
     }
 
-    PeerMethodCreator nmthCreator = new PeerMethodCreator(mi, env, this);
+    PeerMethodGen nmthCreator = new PeerMethodGen(mi, env, this);
     nmthCreator.createEmpty();
 
     OutputStream out;
@@ -255,7 +255,7 @@ public class PeerClassCreator implements Constants {
     Class cls = null;
     URL[] urls = null;
 
-    File otf_dir = new File(PeerClassCreator.peersLocation);
+    File otf_dir = new File(PeerClassGen.peersLocation);
 
     URL url = null;
     URL jpf_url = null;
@@ -281,7 +281,7 @@ public class PeerClassCreator implements Constants {
    * @return a name for the on-the-fly native peer
    */
   protected static String getNativePeerClsName (String className){
-    return (PeerClassCreator.prefix + "JPF_" + className.replace('.', '_'));
+    return (PeerClassGen.prefix + "JPF_" + className.replace('.', '_'));
   }
 
   /**

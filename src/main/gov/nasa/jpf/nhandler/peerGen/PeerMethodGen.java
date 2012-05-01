@@ -1,4 +1,4 @@
-package gov.nasa.jpf.nhandler;
+package gov.nasa.jpf.nhandler.peerGen;
 
 import gov.nasa.jpf.jvm.MJIEnv;
 import gov.nasa.jpf.jvm.NativeMethodInfo;
@@ -22,7 +22,7 @@ import org.apache.bcel.generic.Type;
  * @author Nastaran Shafiei
  * @author Franck van Breugel
  */
-public class PeerMethodCreator {
+public class PeerMethodGen {
 
   private InstructionList il;
 
@@ -36,7 +36,7 @@ public class PeerMethodCreator {
 
   private MJIEnv env;
 
-  private PeerClassCreator peerCreator;
+  private PeerClassGen peerCreator;
 
   private static final int methodAcc = Constants.ACC_PUBLIC | Constants.ACC_STATIC;
 
@@ -54,15 +54,15 @@ public class PeerMethodCreator {
    *          a PeerClassCreator object that corresponds to the class of the
    *          given method
    */
-  public PeerMethodCreator (NativeMethodInfo mi, MJIEnv env, PeerClassCreator pc) {
+  public PeerMethodGen (NativeMethodInfo mi, MJIEnv env, PeerClassGen pc) {
     this.peerCreator = pc;
     this.il = new InstructionList();
     this.mi = mi;
     this.name = mi.getJNIName();
     this.ti = env.getThreadInfo();
     this.env = env;
-    Type returnType = PeerMethodCreator.getType(mi.getReturnTypeName());
-    this.nativeMth = new MethodGen(methodAcc, (returnType.equals(Type.OBJECT)) ? Type.INT : returnType, PeerMethodCreator.getArgumentsType(mi), PeerMethodCreator.getArgumentsName(mi), name, PeerClassCreator.getNativePeerClsName(mi.getClassName()), il, peerCreator._cp);
+    Type returnType = PeerMethodGen.getType(mi.getReturnTypeName());
+    this.nativeMth = new MethodGen(methodAcc, (returnType.equals(Type.OBJECT)) ? Type.INT : returnType, PeerMethodGen.getArgumentsType(mi), PeerMethodGen.getArgumentsName(mi), name, PeerClassGen.getNativePeerClsName(mi.getClassName()), il, peerCreator._cp);
   }
 
   /**
@@ -82,7 +82,7 @@ public class PeerMethodCreator {
     int jpfReturnValue = -1;
 
     if (!mi.getReturnTypeName().equals("void")){
-      if (!PeerMethodCreator.isPrimitiveType(this.mi.getReturnTypeName()))
+      if (!PeerMethodGen.isPrimitiveType(this.mi.getReturnTypeName()))
         // If the method is not of type void, converts returnValue to a JPF
         // object
         jpfReturnValue = this.convertJVM2JPF(converter, returnValue);
@@ -215,7 +215,7 @@ public class PeerMethodCreator {
       this.il.append(InstructionFactory.createLoad(Type.OBJECT, argValue));
       this.il.append(new PUSH(peerCreator._cp, i));
       // if the current argument representing an object
-      if (!PeerMethodCreator.isPrimitiveType(argTypes[i])){
+      if (!PeerMethodGen.isPrimitiveType(argTypes[i])){
         this.il.append(InstructionFactory.createLoad(Type.OBJECT, converter));
         this.il.append(InstructionFactory.createLoad(Type.INT, j));
         this.il.append(peerCreator._factory.createInvoke(conversionPkg + ".Converter", "getJVMObj", Type.OBJECT, new Type[] { Type.INT }, Constants.INVOKEVIRTUAL));
@@ -305,7 +305,7 @@ public class PeerMethodCreator {
       this.il.append(InstructionFactory.createLoad(Type.OBJECT, argType));
       this.il.append(new PUSH(peerCreator._cp, i));
 
-      if (!PeerMethodCreator.isPrimitiveType(argTypes[i])){
+      if (!PeerMethodGen.isPrimitiveType(argTypes[i])){
         il.append(new PUSH(peerCreator._cp, argTypes[i]));
         il.append(peerCreator._factory.createInvoke("java.lang.Class", "forName", new ObjectType("java.lang.Class"), new Type[] { Type.STRING }, Constants.INVOKESTATIC));
       } else{
@@ -529,7 +529,7 @@ public class PeerMethodCreator {
     int j = 2;
     for (int i = 0; i < nArgs; i++){
 
-      if (!PeerMethodCreator.isPrimitiveType(type[i])){
+      if (!PeerMethodGen.isPrimitiveType(type[i])){
         this.il.append(InstructionFactory.createLoad(Type.OBJECT, converter));
         // Loading the array element argsValue[i];
         this.il.append(InstructionFactory.createLoad(Type.OBJECT, argValue));
@@ -554,7 +554,7 @@ public class PeerMethodCreator {
   private void addReturnStatement (int returnValue){
     String returnType = this.mi.getReturnTypeName();
     // if the return type is Object
-    if (!PeerMethodCreator.isPrimitiveType(returnType)){
+    if (!PeerMethodGen.isPrimitiveType(returnType)){
       this.il.append(InstructionFactory.createLoad(Type.INT, returnValue));
       this.il.append(InstructionFactory.createReturn(Type.INT));
     } else if ("void".equals(returnType)){
@@ -614,7 +614,7 @@ public class PeerMethodCreator {
   private void addDummyReturnStatement (){
     String returnType = this.mi.getReturnTypeName();
     // if the return type is Object
-    if (!PeerMethodCreator.isPrimitiveType(returnType)) {
+    if (!PeerMethodGen.isPrimitiveType(returnType)) {
       this.il.append(new PUSH(peerCreator._cp, MJIEnv.NULL));
       this.il.append(InstructionFactory.createReturn(Type.INT));
     } else if ("void".equals(returnType)) {
@@ -713,7 +713,7 @@ public class PeerMethodCreator {
     argTypes[1] = Type.INT;
     String[] argTypesName = mi.getArgumentTypeNames();
     for (int i = 2; i < mi.getNumberOfArguments() + 2; i++){
-      Type type = PeerMethodCreator.getType(argTypesName[i - 2]);
+      Type type = PeerMethodGen.getType(argTypesName[i - 2]);
       argTypes[i] = (type == Type.OBJECT) ? Type.INT : type;
     }
     return argTypes;
