@@ -1,4 +1,4 @@
-package gov.nasa.jpf.nhandler;
+package gov.nasa.jpf.nhandler.conversion;
 
 import gov.nasa.jpf.jvm.ArrayFields;
 import gov.nasa.jpf.jvm.ClassInfo;
@@ -228,7 +228,7 @@ public class JVM2JPF {
 
         // Why do we need that? Because JPF might have not leaded the class
         // before! JPF classloader does not recognize them!
-        // I don't now why
+        // I don't now why exactly!
         // INVESTIGATE: Why not arrays?
         if (JVMObj.getClass() == Class.class) {
           try {

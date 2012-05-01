@@ -1,4 +1,4 @@
-package gov.nasa.jpf.nhandler;
+package gov.nasa.jpf.nhandler.conversion;
 
 /**
  * A ConversionException is thrown when an incorrect input parameters are sent

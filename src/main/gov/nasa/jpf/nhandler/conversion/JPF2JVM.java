@@ -1,4 +1,4 @@
-package gov.nasa.jpf.nhandler;
+package gov.nasa.jpf.nhandler.conversion;
 
 import gov.nasa.jpf.jvm.ArrayFields;
 import gov.nasa.jpf.jvm.ClassInfo;

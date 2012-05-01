@@ -40,7 +40,7 @@ public class PeerMethodCreator {
 
   private static final int methodAcc = Constants.ACC_PUBLIC | Constants.ACC_STATIC;
 
-  private static final String nhandlerPack = "gov.nasa.jpf.nhandler";
+  private static final String conversionPkg = "gov.nasa.jpf.nhandler.conversion";
 
   /**
    * Creates a new instance of the PeerMethodCreator class.
@@ -128,7 +128,7 @@ public class PeerMethodCreator {
     this.nativeMth.addException("java.lang.SecurityException");
     this.nativeMth.addException("java.lang.NoSuchMethodException");
     this.nativeMth.addException("java.lang.IllegalAccessException");
-    this.nativeMth.addException(nhandlerPack + ".ConversionException");
+    this.nativeMth.addException(conversionPkg + ".ConversionException");
     // It throws NoClassDefFoundError exception while loading OTF peers. I
     // just exclude it for now! But it has to be fixed
     // this.nativeMth.addException("java.lang.InvocationTargetException");
@@ -142,14 +142,14 @@ public class PeerMethodCreator {
    * @return an index of the local variable that represents the Converter object
    */
   private int createConverter (){
-    this.il.append(peerCreator._factory.createNew(nhandlerPack + ".Converter"));
+    this.il.append(peerCreator._factory.createNew(conversionPkg + ".Converter"));
     // Duplicate the top operand stack value
     this.il.append(InstructionConstants.DUP);
     // Load from local variable
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
-    this.il.append(peerCreator._factory.createInvoke(nhandlerPack + ".Converter", "<init>", Type.VOID, new Type[] { new ObjectType("gov.nasa.jpf.jvm.MJIEnv") }, Constants.INVOKESPECIAL));
+    this.il.append(peerCreator._factory.createInvoke(conversionPkg + ".Converter", "<init>", Type.VOID, new Type[] { new ObjectType("gov.nasa.jpf.jvm.MJIEnv") }, Constants.INVOKESPECIAL));
     // Store into local variable
-    LocalVariableGen lg = this.nativeMth.addLocalVariable("converter", new ObjectType(nhandlerPack + ".Converter"), null, null);
+    LocalVariableGen lg = this.nativeMth.addLocalVariable("converter", new ObjectType(conversionPkg + ".Converter"), null, null);
     int converter = lg.getIndex();
     this.il.append(InstructionFactory.createStore(Type.OBJECT, converter));
     return converter;
@@ -174,10 +174,10 @@ public class PeerMethodCreator {
     LocalVariableGen lg;
 
     if (this.mi.isStatic()){
-      this.il.append(peerCreator._factory.createInvoke(nhandlerPack + ".Converter", "getJVMCls", new ObjectType("java.lang.Class"), new Type[] { Type.INT }, Constants.INVOKEVIRTUAL));
+      this.il.append(peerCreator._factory.createInvoke(conversionPkg + ".Converter", "getJVMCls", new ObjectType("java.lang.Class"), new Type[] { Type.INT }, Constants.INVOKEVIRTUAL));
       lg = this.nativeMth.addLocalVariable("caller", new ObjectType("java.lang.Class"), null, null);
     } else{
-      this.il.append(peerCreator._factory.createInvoke(nhandlerPack + ".Converter", "getJVMObj", Type.OBJECT, new Type[] { Type.INT }, Constants.INVOKEVIRTUAL));
+      this.il.append(peerCreator._factory.createInvoke(conversionPkg + ".Converter", "getJVMObj", Type.OBJECT, new Type[] { Type.INT }, Constants.INVOKEVIRTUAL));
       lg = this.nativeMth.addLocalVariable("caller", Type.OBJECT, null, null);
     }
     int caller = lg.getIndex();
@@ -218,7 +218,7 @@ public class PeerMethodCreator {
       if (!PeerMethodCreator.isPrimitiveType(argTypes[i])){
         this.il.append(InstructionFactory.createLoad(Type.OBJECT, converter));
         this.il.append(InstructionFactory.createLoad(Type.INT, j));
-        this.il.append(peerCreator._factory.createInvoke(nhandlerPack + ".Converter", "getJVMObj", Type.OBJECT, new Type[] { Type.INT }, Constants.INVOKEVIRTUAL));
+        this.il.append(peerCreator._factory.createInvoke(conversionPkg + ".Converter", "getJVMObj", Type.OBJECT, new Type[] { Type.INT }, Constants.INVOKEVIRTUAL));
         j++;
       }
       // if the current argument representing a primitive type we create the
@@ -464,7 +464,7 @@ public class PeerMethodCreator {
   private int convertJVM2JPF (int converter, int JVMObj){
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, converter));
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, JVMObj));
-    this.il.append(peerCreator._factory.createInvoke(nhandlerPack + ".Converter", "getJPFObj", Type.INT, new Type[] { Type.OBJECT }, Constants.INVOKEVIRTUAL));
+    this.il.append(peerCreator._factory.createInvoke(conversionPkg + ".Converter", "getJPFObj", Type.INT, new Type[] { Type.OBJECT }, Constants.INVOKEVIRTUAL));
     LocalVariableGen lg = this.nativeMth.addLocalVariable("JPFObj", Type.INT, null, null);
     int JPFObj = lg.getIndex();
     this.il.append(InstructionFactory.createStore(Type.INT, JPFObj));
@@ -489,7 +489,7 @@ public class PeerMethodCreator {
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, converter));
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, JVMObj));
     this.il.append(InstructionFactory.createLoad(Type.INT, JPFObj));
-    this.il.append(peerCreator._factory.createInvoke(nhandlerPack + ".Converter", "updateJPFObj", Type.VOID, new Type[] { Type.OBJECT, Type.INT }, Constants.INVOKEVIRTUAL));
+    this.il.append(peerCreator._factory.createInvoke(conversionPkg + ".Converter", "updateJPFObj", Type.VOID, new Type[] { Type.OBJECT, Type.INT }, Constants.INVOKEVIRTUAL));
   }
 
   /**
@@ -506,7 +506,7 @@ public class PeerMethodCreator {
   private void getJPFClass (int converter, int JVMCls){
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, converter));
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, JVMCls));
-    this.il.append(peerCreator._factory.createInvoke(nhandlerPack + ".Converter", "getJPFCls", new ObjectType("gov.nasa.jpf.jvm.ClassInfo"), new Type[] { new ObjectType("java.lang.Class") }, Constants.INVOKEVIRTUAL));
+    this.il.append(peerCreator._factory.createInvoke(conversionPkg + ".Converter", "getJPFCls", new ObjectType("gov.nasa.jpf.jvm.ClassInfo"), new Type[] { new ObjectType("java.lang.Class") }, Constants.INVOKEVIRTUAL));
     this.il.append(InstructionConstants.POP);
   }
 
@@ -538,7 +538,7 @@ public class PeerMethodCreator {
         // Loading the nth input parameter
         this.il.append(InstructionFactory.createLoad(Type.INT, j));
         // Invoking the method "updateJPFObj"
-        this.il.append(peerCreator._factory.createInvoke(nhandlerPack + ".Converter", "updateJPFObj", Type.VOID, new Type[] { Type.OBJECT, Type.INT }, Constants.INVOKEVIRTUAL));
+        this.il.append(peerCreator._factory.createInvoke(conversionPkg + ".Converter", "updateJPFObj", Type.VOID, new Type[] { Type.OBJECT, Type.INT }, Constants.INVOKEVIRTUAL));
         j++;
       }
     }

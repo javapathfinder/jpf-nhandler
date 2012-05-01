@@ -1,7 +1,8 @@
-package gov.nasa.jpf.nhandler;
+package gov.nasa.jpf.nhandler.conversion;
 
 import gov.nasa.jpf.jvm.ClassInfo;
 import gov.nasa.jpf.jvm.MJIEnv;
+import gov.nasa.jpf.nhandler.CutomizedHashMap;
 
 import java.util.HashMap;
 import java.util.HashSet;
