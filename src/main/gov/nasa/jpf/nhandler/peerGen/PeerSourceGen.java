@@ -1,7 +1,9 @@
 package gov.nasa.jpf.nhandler.peerGen;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -11,16 +13,17 @@ public class PeerSourceGen {
   private String name;
   private String path;
 
-  protected File getSourceFile(String cname) throws IOException {
-    if(file == null) {
-      name = PeerClassGen.getNativePeerClsName(cname);
-      path = PeerClassGen.peersLocation + cname + ".java";
-      System.out.println("path: " + path);
-      file = new File(path);
-      if(!file.exists()) {
-        file.createNewFile();
-        generateMinimalPeerSource();
-      }
+  protected PeerSourceGen(String cname) throws IOException {
+    name = PeerClassGen.getNativePeerClsName(cname);
+    path = PeerClassGen.peersLocation + cname + ".java";
+    System.out.println("path: " + path);
+    file = new File(path);
+  }
+
+  protected File getSourceFile() throws IOException {
+    if(!file.exists()) {
+      file.createNewFile();
+      generateMinimalPeerSource();
     }
     
     return file;
@@ -57,16 +60,16 @@ public class PeerSourceGen {
     pw.append("\n\n");
   }
 
-  protected static void printFooter(PrintWriter pw) {
+  protected void printFooter(PrintWriter pw) {
     pw.append("}");
   }
 
-  protected static void removeFooter() {
+  protected void removeFooter() throws FileNotFoundException {
     BufferedReader bf = new BufferedReader(new FileReader("c:\\test.txt"));
   }
 
   public static void main(String[] args) throws IOException {
 	PeerSourceGen sourceGen = new PeerSourceGen("java.lang.String");
-    getSourceFile();
+    sourceGen.getSourceFile();
   }
 }
