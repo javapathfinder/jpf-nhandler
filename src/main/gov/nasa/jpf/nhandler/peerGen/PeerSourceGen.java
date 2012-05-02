@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public class PeerSouceGen {
+public class PeerSourceGen {
 
   private File file;
   private String name;

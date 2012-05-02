@@ -47,7 +47,7 @@ public class PeerClassGen implements Constants {
   /**
    * Directory that is used to keep native peers that are created on-the-fly
    */
-  private static String peersLocation = null;
+  protected static String peersLocation = "/Users/Nastaran/workspaces/bitbucket/jpf-nhandler/onthefly/";
 
   /**
    * To distinguish the on-the-fly native peers from the rest, this prefixed is
