@@ -501,7 +501,9 @@ public class JPF2JVM {
       return char.class;
     } else if (name.equals("float")) {
       return float.class;
-    } else if (name.equals("double")) { return double.class; }
+    } else if (name.equals("double")) { 
+      return double.class; 
+    }
     return null;
   }
 }

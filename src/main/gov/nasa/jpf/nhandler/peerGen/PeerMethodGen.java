@@ -1,8 +1,10 @@
 package gov.nasa.jpf.nhandler.peerGen;
 
 import gov.nasa.jpf.jvm.MJIEnv;
+import gov.nasa.jpf.jvm.MethodInfo;
 import gov.nasa.jpf.jvm.NativeMethodInfo;
 import gov.nasa.jpf.jvm.ThreadInfo;
+import gov.nasa.jpf.jvm.Types;
 
 import org.apache.bcel.Constants;
 import org.apache.bcel.generic.ArrayType;
@@ -36,11 +38,13 @@ public class PeerMethodGen {
 
   private MJIEnv env;
 
-  private PeerClassGen peerCreator;
+  private PeerClassGen peerClassGen;
 
   private static final int methodAcc = Constants.ACC_PUBLIC | Constants.ACC_STATIC;
 
   private static final String conversionPkg = "gov.nasa.jpf.nhandler.conversion";
+
+  private PeerSourceGen.MethodGen sourceGen; 
 
   /**
    * Creates a new instance of the PeerMethodCreator class.
@@ -54,15 +58,25 @@ public class PeerMethodGen {
    *          a PeerClassCreator object that corresponds to the class of the
    *          given method
    */
-  public PeerMethodGen (NativeMethodInfo mi, MJIEnv env, PeerClassGen pc) {
-    this.peerCreator = pc;
+  public PeerMethodGen (NativeMethodInfo mi, MJIEnv env, PeerClassGen pcg, PeerSourceGen psg) {
+    this.peerClassGen = pcg;
     this.il = new InstructionList();
     this.mi = mi;
-    this.name = mi.getJNIName();
+    this.name = getJNIName(mi);
     this.ti = env.getThreadInfo();
     this.env = env;
     Type returnType = PeerMethodGen.getType(mi.getReturnTypeName());
-    this.nativeMth = new MethodGen(methodAcc, (returnType.equals(Type.OBJECT)) ? Type.INT : returnType, PeerMethodGen.getArgumentsType(mi), PeerMethodGen.getArgumentsName(mi), name, PeerClassGen.getNativePeerClsName(mi.getClassName()), il, peerCreator._cp);
+    Type[] argsType = PeerMethodGen.getArgumentsType(mi);
+    this.nativeMth = new MethodGen(methodAcc, (returnType.equals(Type.OBJECT)) ? Type.INT : returnType, argsType, PeerMethodGen.getArgumentsName(mi), name, PeerClassGen.getNativePeerClsName(mi.getClassName()), il, peerClassGen._cp);
+
+    if(genSource()) {
+      this.sourceGen = psg.new MethodGen(mi);
+      this.sourceGen.printMethodHeader(returnType, name, argsType);
+    }
+  }
+
+  private boolean genSource() {
+    return(PeerSourceGen.createSource);
   }
 
   /**
@@ -82,16 +96,17 @@ public class PeerMethodGen {
     int jpfReturnValue = -1;
 
     if (!mi.getReturnTypeName().equals("void")){
-      if (!PeerMethodGen.isPrimitiveType(this.mi.getReturnTypeName()))
+      if (!PeerMethodGen.isPrimitiveType(this.mi.getReturnTypeName())){
         // If the method is not of type void, converts returnValue to a JPF
         // object
         jpfReturnValue = this.convertJVM2JPF(converter, returnValue);
-      else
+      } else {
         jpfReturnValue = returnValue;
+      }
     }
 
     if (mi.isStatic())
-      this.getJPFClass(converter, callerClass);
+      this.updateJPFClass(converter, callerClass);
     else
       this.updateJPFObj(converter, caller, 1);
 
@@ -100,8 +115,12 @@ public class PeerMethodGen {
 
     this.nativeMth.setMaxStack();
     this.nativeMth.setMaxLocals();
-    peerCreator._cg.addMethod(this.nativeMth.getMethod());
+    peerClassGen._cg.addMethod(this.nativeMth.getMethod());
     this.il.dispose();
+
+    if(genSource()) {
+      sourceGen.wrapUpSource();
+    }
   }
 
   /**
@@ -109,12 +128,20 @@ public class PeerMethodGen {
    * of this method.
    */
   public void createEmpty (){
+    if(genSource()) {
+      sourceGen.completeHeader();
+    }
+
     this.addDummyReturnStatement();
 
     this.nativeMth.setMaxStack();
     this.nativeMth.setMaxLocals();
-    peerCreator._cg.addMethod(this.nativeMth.getMethod());
+    peerClassGen._cg.addMethod(this.nativeMth.getMethod());
     this.il.dispose();
+
+    if(genSource()) {
+      sourceGen.wrapUpSource();
+    }
   }
 
   /**
@@ -124,14 +151,21 @@ public class PeerMethodGen {
    * method.
    */
   private void addException (){
-    this.nativeMth.addException("java.lang.IllegalArgumentException");
-    this.nativeMth.addException("java.lang.SecurityException");
-    this.nativeMth.addException("java.lang.NoSuchMethodException");
-    this.nativeMth.addException("java.lang.IllegalAccessException");
-    this.nativeMth.addException(conversionPkg + ".ConversionException");
+//    this.nativeMth.addException("java.lang.IllegalArgumentException");
+//    this.nativeMth.addException("java.lang.SecurityException");
+//    this.nativeMth.addException("java.lang.NoSuchMethodException");
+//    this.nativeMth.addException("java.lang.IllegalAccessException");
+//    this.nativeMth.addException("java.lang.ClassNotFoundException");
+//    this.nativeMth.addException(conversionPkg + ".ConversionException");
+//    this.nativeMth.addException("java.lang.ClassNotFoundException");
+     this.nativeMth.addException("java.lang.Exception");
+
     // It throws NoClassDefFoundError exception while loading OTF peers. I
     // just exclude it for now! But it has to be fixed
     // this.nativeMth.addException("java.lang.InvocationTargetException");
+     if(genSource()) {
+       sourceGen.printThrowsExceptions();
+     }
   }
 
   /**
@@ -142,16 +176,21 @@ public class PeerMethodGen {
    * @return an index of the local variable that represents the Converter object
    */
   private int createConverter (){
-    this.il.append(peerCreator._factory.createNew(conversionPkg + ".Converter"));
+    this.il.append(peerClassGen._factory.createNew(conversionPkg + ".Converter"));
     // Duplicate the top operand stack value
     this.il.append(InstructionConstants.DUP);
     // Load from local variable
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
-    this.il.append(peerCreator._factory.createInvoke(conversionPkg + ".Converter", "<init>", Type.VOID, new Type[] { new ObjectType("gov.nasa.jpf.jvm.MJIEnv") }, Constants.INVOKESPECIAL));
+    this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "<init>", Type.VOID, new Type[] { new ObjectType("gov.nasa.jpf.jvm.MJIEnv") }, Constants.INVOKESPECIAL));
     // Store into local variable
     LocalVariableGen lg = this.nativeMth.addLocalVariable("converter", new ObjectType(conversionPkg + ".Converter"), null, null);
     int converter = lg.getIndex();
     this.il.append(InstructionFactory.createStore(Type.OBJECT, converter));
+    
+    if(genSource()) {
+      this.sourceGen.printConvertorPart();
+    }
+    
     return converter;
   }
 
@@ -174,14 +213,18 @@ public class PeerMethodGen {
     LocalVariableGen lg;
 
     if (this.mi.isStatic()){
-      this.il.append(peerCreator._factory.createInvoke(conversionPkg + ".Converter", "getJVMCls", new ObjectType("java.lang.Class"), new Type[] { Type.INT }, Constants.INVOKEVIRTUAL));
+      this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "getJVMCls", new ObjectType("java.lang.Class"), new Type[] { Type.INT }, Constants.INVOKEVIRTUAL));
       lg = this.nativeMth.addLocalVariable("caller", new ObjectType("java.lang.Class"), null, null);
     } else{
-      this.il.append(peerCreator._factory.createInvoke(conversionPkg + ".Converter", "getJVMObj", Type.OBJECT, new Type[] { Type.INT }, Constants.INVOKEVIRTUAL));
+      this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "getJVMObj", Type.OBJECT, new Type[] { Type.INT }, Constants.INVOKEVIRTUAL));
       lg = this.nativeMth.addLocalVariable("caller", Type.OBJECT, null, null);
     }
     int caller = lg.getIndex();
     this.il.append(InstructionFactory.createStore(Type.OBJECT, caller));
+
+    if(genSource()) {
+      this.sourceGen.printCallerPart();
+    }
     return caller;
   }
 
@@ -201,11 +244,15 @@ public class PeerMethodGen {
     int nArgs = argTypes.length;
 
     /** Create an array of objects (Object[] args = new Objects[nArgs]) */
-    this.il.append(new PUSH(peerCreator._cp, nArgs));
-    this.il.append(peerCreator._factory.createNewArray(Type.OBJECT, (short) 1));
+    this.il.append(new PUSH(peerClassGen._cp, nArgs));
+    this.il.append(peerClassGen._factory.createNewArray(Type.OBJECT, (short) 1));
     LocalVariableGen lg = this.nativeMth.addLocalVariable("argValue", new ArrayType(Type.OBJECT, 1), null, null);
     int argValue = lg.getIndex();
     this.il.append(InstructionFactory.createStore(Type.OBJECT, argValue));
+
+    if(genSource()) {
+      this.sourceGen.printCreateArgsVal(nArgs);
+    }
 
     /** Setting args elements to the arguments of the native method */
     // To skip the first and second arguements (MJIEnv & objRef/clsRef)
@@ -213,64 +260,82 @@ public class PeerMethodGen {
     for (int i = 0; i < nArgs; i++){
       // Loading the array element args[i];
       this.il.append(InstructionFactory.createLoad(Type.OBJECT, argValue));
-      this.il.append(new PUSH(peerCreator._cp, i));
+      this.il.append(new PUSH(peerClassGen._cp, i));
       // if the current argument representing an object
       if (!PeerMethodGen.isPrimitiveType(argTypes[i])){
         this.il.append(InstructionFactory.createLoad(Type.OBJECT, converter));
         this.il.append(InstructionFactory.createLoad(Type.INT, j));
-        this.il.append(peerCreator._factory.createInvoke(conversionPkg + ".Converter", "getJVMObj", Type.OBJECT, new Type[] { Type.INT }, Constants.INVOKEVIRTUAL));
+        this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "getJVMObj", Type.OBJECT, new Type[] { Type.INT }, Constants.INVOKEVIRTUAL));
         j++;
-      }
-      // if the current argument representing a primitive type we create the
-      // corresponding wrapper class
-      else if ("boolean".equals(argTypes[i])){
-        this.il.append(peerCreator._factory.createNew("java.lang.Boolean"));
-        this.il.append(InstructionConstants.DUP);
-        this.il.append(InstructionFactory.createLoad(Type.BOOLEAN, j));
-        this.il.append(peerCreator._factory.createInvoke("java.lang.Boolean", "<init>", Type.VOID, new Type[] { Type.BOOLEAN }, Constants.INVOKESPECIAL));
-        j++;
-      } else if ("int".equals(argTypes[i])){
-        this.il.append(peerCreator._factory.createNew("java.lang.Integer"));
-        this.il.append(InstructionConstants.DUP);
-        this.il.append(InstructionFactory.createLoad(Type.INT, j));
-        this.il.append(peerCreator._factory.createInvoke("java.lang.Integer", "<init>", Type.VOID, new Type[] { Type.INT }, Constants.INVOKESPECIAL));
-        j++;
-      } else if ("long".equals(argTypes[i])){
-        this.il.append(peerCreator._factory.createNew("java.lang.Long"));
-        this.il.append(InstructionConstants.DUP);
-        this.il.append(InstructionFactory.createLoad(Type.LONG, j));
-        this.il.append(peerCreator._factory.createInvoke("java.lang.Long", "<init>", Type.VOID, new Type[] { Type.LONG }, Constants.INVOKESPECIAL));
-        j += 2;
-      } else if ("byte".equals(argTypes[i])){
-        this.il.append(peerCreator._factory.createNew("java.lang.Byte"));
-        this.il.append(InstructionConstants.DUP);
-        this.il.append(InstructionFactory.createLoad(Type.BYTE, j));
-        this.il.append(peerCreator._factory.createInvoke("java.lang.Byte", "<init>", Type.VOID, new Type[] { Type.BYTE }, Constants.INVOKESPECIAL));
-        j++;
-      } else if ("char".equals(argTypes[i])){
-        this.il.append(peerCreator._factory.createNew("java.lang.Character"));
-        this.il.append(InstructionConstants.DUP);
-        this.il.append(InstructionFactory.createLoad(Type.CHAR, j));
-        this.il.append(peerCreator._factory.createInvoke("java.lang.Character", "<init>", Type.VOID, new Type[] { Type.CHAR }, Constants.INVOKESPECIAL));
-        j++;
-      } else if ("short".equals(argTypes[i])){
-        this.il.append(peerCreator._factory.createNew("java.lang.Short"));
-        this.il.append(InstructionConstants.DUP);
-        this.il.append(InstructionFactory.createLoad(Type.SHORT, j));
-        this.il.append(peerCreator._factory.createInvoke("java.lang.Short", "<init>", Type.VOID, new Type[] { Type.SHORT }, Constants.INVOKESPECIAL));
-        j++;
-      } else if ("float".equals(argTypes[i])){
-        this.il.append(peerCreator._factory.createNew("java.lang.Float"));
-        this.il.append(InstructionConstants.DUP);
-        this.il.append(InstructionFactory.createLoad(Type.FLOAT, j));
-        this.il.append(peerCreator._factory.createInvoke("java.lang.Float", "<init>", Type.VOID, new Type[] { Type.FLOAT }, Constants.INVOKESPECIAL));
-        j++;
-      } else if ("double".equals(argTypes[i])){
-        this.il.append(peerCreator._factory.createNew("java.lang.Double"));
-        this.il.append(InstructionConstants.DUP);
-        this.il.append(InstructionFactory.createLoad(Type.DOUBLE, j));
-        this.il.append(peerCreator._factory.createInvoke("java.lang.Double", "<init>", Type.VOID, new Type[] { Type.DOUBLE }, Constants.INVOKESPECIAL));
-        j += 2;
+
+        if(genSource()) {
+            this.sourceGen.printSetObjArgVal(i);
+        }
+      } else {
+    	String wrapperName = null;
+        // if the current argument representing a primitive type we create the
+        // corresponding wrapper class
+        if ("boolean".equals(argTypes[i])){
+          wrapperName = "Boolean";
+          this.il.append(peerClassGen._factory.createNew("java.lang.Boolean"));
+          this.il.append(InstructionConstants.DUP);
+          this.il.append(InstructionFactory.createLoad(Type.BOOLEAN, j));
+          this.il.append(peerClassGen._factory.createInvoke("java.lang.Boolean", "<init>", Type.VOID, new Type[] { Type.BOOLEAN }, Constants.INVOKESPECIAL));
+          j++;
+        } else if ("int".equals(argTypes[i])){
+          wrapperName = "Integer";
+          this.il.append(peerClassGen._factory.createNew("java.lang.Integer"));
+          this.il.append(InstructionConstants.DUP);
+          this.il.append(InstructionFactory.createLoad(Type.INT, j));
+          this.il.append(peerClassGen._factory.createInvoke("java.lang.Integer", "<init>", Type.VOID, new Type[] { Type.INT }, Constants.INVOKESPECIAL));
+          j++;
+        } else if ("long".equals(argTypes[i])){
+          wrapperName = "Long";
+          this.il.append(peerClassGen._factory.createNew("java.lang.Long"));
+          this.il.append(InstructionConstants.DUP);
+          this.il.append(InstructionFactory.createLoad(Type.LONG, j));
+          this.il.append(peerClassGen._factory.createInvoke("java.lang.Long", "<init>", Type.VOID, new Type[] { Type.LONG }, Constants.INVOKESPECIAL));
+          j += 2;
+        } else if ("byte".equals(argTypes[i])){
+          wrapperName = "Byte";
+          this.il.append(peerClassGen._factory.createNew("java.lang.Byte"));
+          this.il.append(InstructionConstants.DUP);
+          this.il.append(InstructionFactory.createLoad(Type.BYTE, j));
+          this.il.append(peerClassGen._factory.createInvoke("java.lang.Byte", "<init>", Type.VOID, new Type[] { Type.BYTE }, Constants.INVOKESPECIAL));
+          j++;
+        } else if ("char".equals(argTypes[i])){
+          wrapperName = "Character";
+          this.il.append(peerClassGen._factory.createNew("java.lang.Character"));
+          this.il.append(InstructionConstants.DUP);
+          this.il.append(InstructionFactory.createLoad(Type.CHAR, j));
+          this.il.append(peerClassGen._factory.createInvoke("java.lang.Character", "<init>", Type.VOID, new Type[] { Type.CHAR }, Constants.INVOKESPECIAL));
+          j++;
+        } else if ("short".equals(argTypes[i])){
+          wrapperName = "Short";
+          this.il.append(peerClassGen._factory.createNew("java.lang.Short"));
+          this.il.append(InstructionConstants.DUP);
+          this.il.append(InstructionFactory.createLoad(Type.SHORT, j));
+          this.il.append(peerClassGen._factory.createInvoke("java.lang.Short", "<init>", Type.VOID, new Type[] { Type.SHORT }, Constants.INVOKESPECIAL));
+          j++;
+        } else if ("float".equals(argTypes[i])){
+          wrapperName = "Float";
+          this.il.append(peerClassGen._factory.createNew("java.lang.Float"));
+          this.il.append(InstructionConstants.DUP);
+          this.il.append(InstructionFactory.createLoad(Type.FLOAT, j));
+          this.il.append(peerClassGen._factory.createInvoke("java.lang.Float", "<init>", Type.VOID, new Type[] { Type.FLOAT }, Constants.INVOKESPECIAL));
+          j++;
+        } else if ("double".equals(argTypes[i])){
+          wrapperName = "Double";
+          this.il.append(peerClassGen._factory.createNew("java.lang.Double"));
+          this.il.append(InstructionConstants.DUP);
+          this.il.append(InstructionFactory.createLoad(Type.DOUBLE, j));
+          this.il.append(peerClassGen._factory.createInvoke("java.lang.Double", "<init>", Type.VOID, new Type[] { Type.DOUBLE }, Constants.INVOKESPECIAL));
+          j += 2;
+        }
+
+        if(genSource()) {
+          sourceGen.printSetPrimitiveArgVal(wrapperName, i);
+        }
       }
       this.il.append(InstructionConstants.AASTORE);
     }
@@ -293,40 +358,64 @@ public class PeerMethodGen {
     int nArgs = argTypes.length;
 
     /** Create an array of Class<?> (Class<?>[] argType = new Class<?>[nArgs]) */
-    this.il.append(new PUSH(peerCreator._cp, nArgs));
-    this.il.append(peerCreator._factory.createNewArray(new ObjectType("java.lang.Class"), (short) 1));
+    this.il.append(new PUSH(peerClassGen._cp, nArgs));
+    this.il.append(peerClassGen._factory.createNewArray(new ObjectType("java.lang.Class"), (short) 1));
     LocalVariableGen lg = this.nativeMth.addLocalVariable("argType", new ArrayType(new ObjectType("java.lang.Class"), 1), null, null);
     int argType = lg.getIndex();
     this.il.append(InstructionFactory.createStore(Type.OBJECT, argType));
 
-    String wrapperClsName = null;
+    if(genSource()) {
+      sourceGen.printCreateArgsType(nArgs);
+    }
+
+    String wrapper = null;
     for (int i = 0; i < nArgs; i++){
       // loading the element argType[i]
       this.il.append(InstructionFactory.createLoad(Type.OBJECT, argType));
-      this.il.append(new PUSH(peerCreator._cp, i));
+      this.il.append(new PUSH(peerClassGen._cp, i));
 
       if (!PeerMethodGen.isPrimitiveType(argTypes[i])){
-        il.append(new PUSH(peerCreator._cp, argTypes[i]));
-        il.append(peerCreator._factory.createInvoke("java.lang.Class", "forName", new ObjectType("java.lang.Class"), new Type[] { Type.STRING }, Constants.INVOKESTATIC));
+
+        if(argTypes[i].contains("[]")) {
+          il.append(InstructionFactory.createLoad(Type.OBJECT, argValue));
+          il.append(new PUSH(peerClassGen._cp, i));
+          il.append(InstructionConstants.AALOAD);
+          il.append(peerClassGen._factory.createInvoke("java.lang.Object", "getClass", new ObjectType("java.lang.Class"), Type.NO_ARGS, Constants.INVOKEVIRTUAL));
+
+          if(genSource()) {
+            sourceGen.printSetArrArgType(i);
+          }
+        } else{
+          il.append(new PUSH(peerClassGen._cp, argTypes[i]));
+          il.append(peerClassGen._factory.createInvoke("java.lang.Class", "forName", new ObjectType("java.lang.Class"), new Type[] { Type.STRING }, Constants.INVOKESTATIC));
+
+          if(genSource()) {
+            sourceGen.printSetObjArgType(argTypes[i], i);
+          }
+        }
       } else{
         if ("boolean".equals(argTypes[i]))
-          wrapperClsName = "java.lang.Boolean";
+          wrapper = "Boolean";
         else if ("int".equals(argTypes[i]))
-          wrapperClsName = "java.lang.Integer";
+          wrapper = "Integer";
         else if ("long".equals(argTypes[i]))
-          wrapperClsName = "java.lang.Long";
+          wrapper = "Long";
         else if ("byte".equals(argTypes[i]))
-          wrapperClsName = "java.lang.Byte";
+          wrapper = "Byte";
         else if ("char".equals(argTypes[i]))
-          wrapperClsName = "java.lang.Character";
+          wrapper = "Character";
         else if ("short".equals(argTypes[i]))
-          wrapperClsName = "java.lang.Short";
+          wrapper = "Short";
         else if ("float".equals(argTypes[i]))
-          wrapperClsName = "java.lang.Float";
+          wrapper = "Float";
         else if ("double".equals(argTypes[i]))
-          wrapperClsName = "java.lang.Double";
+          wrapper = "Double";
 
-        il.append(peerCreator._factory.createFieldAccess(wrapperClsName, "TYPE", new ObjectType("java.lang.Class"), Constants.GETSTATIC));
+        il.append(peerClassGen._factory.createFieldAccess( ("java.lang." + wrapper), "TYPE", new ObjectType("java.lang.Class"), Constants.GETSTATIC));
+
+        if(genSource()) {
+          sourceGen.printSetPrimitiveArgType(wrapper, i);
+        }
       }
 
       this.il.append(InstructionConstants.AASTORE);
@@ -355,10 +444,14 @@ public class PeerMethodGen {
       callerClass = caller;
     else{
       this.il.append(InstructionFactory.createLoad(Type.OBJECT, caller));
-      this.il.append(peerCreator._factory.createInvoke("java.lang.Object", "getClass", new ObjectType("java.lang.Class"), Type.NO_ARGS, Constants.INVOKEVIRTUAL));
+      this.il.append(peerClassGen._factory.createInvoke("java.lang.Object", "getClass", new ObjectType("java.lang.Class"), Type.NO_ARGS, Constants.INVOKEVIRTUAL));
       LocalVariableGen lg = this.nativeMth.addLocalVariable("callerClass", new ObjectType("java.lang.Class"), null, null);
       callerClass = lg.getIndex();
       this.il.append(InstructionFactory.createStore(Type.OBJECT, callerClass));
+
+      if(genSource()) {
+        sourceGen.printGetCallerClass();
+      }
     }
     return callerClass;
   }
@@ -381,14 +474,18 @@ public class PeerMethodGen {
   private int getMethod (int callerClass, int argType){
     String name = this.mi.getName();
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, callerClass));
-    this.il.append(new PUSH(peerCreator._cp, name));
+    this.il.append(new PUSH(peerClassGen._cp, name));
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, argType));
 
-    this.il.append(peerCreator._factory.createInvoke("java.lang.Class", "getDeclaredMethod", new ObjectType("java.lang.reflect.Method"), new Type[] { Type.STRING, new ArrayType(new ObjectType("java.lang.Class"), 1) }, Constants.INVOKEVIRTUAL));
+    this.il.append(peerClassGen._factory.createInvoke("java.lang.Class", "getDeclaredMethod", new ObjectType("java.lang.reflect.Method"), new Type[] { Type.STRING, new ArrayType(new ObjectType("java.lang.Class"), 1) }, Constants.INVOKEVIRTUAL));
 
     LocalVariableGen lg = this.nativeMth.addLocalVariable("method", new ObjectType("java.lang.reflect.Method"), null, null);
     int method = lg.getIndex();
     this.il.append(InstructionFactory.createStore(Type.OBJECT, method));
+
+    if(genSource()) {
+      sourceGen.printGetMethod(name, mi.isStatic());
+    }
     return method;
   }
 
@@ -402,8 +499,12 @@ public class PeerMethodGen {
    */
   private void setAccessible (int method){
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, method));
-    this.il.append(new PUSH(peerCreator._cp, 1));
-    this.il.append(peerCreator._factory.createInvoke("java.lang.reflect.Method", "setAccessible", Type.VOID, new Type[] { Type.BOOLEAN }, Constants.INVOKEVIRTUAL));
+    this.il.append(new PUSH(peerClassGen._cp, 1));
+    this.il.append(peerClassGen._factory.createInvoke("java.lang.reflect.Method", "setAccessible", Type.VOID, new Type[] { Type.BOOLEAN }, Constants.INVOKEVIRTUAL));
+    
+    if(genSource()) {
+      sourceGen.printSetAccessible();
+    }
   }
 
   /**
@@ -436,13 +537,17 @@ public class PeerMethodGen {
       this.il.append(InstructionFactory.createLoad(Type.OBJECT, caller));
 
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, argValue));
-    this.il.append(peerCreator._factory.createInvoke("java.lang.reflect.Method", "invoke", Type.OBJECT, new Type[] { Type.OBJECT, new ArrayType(Type.OBJECT, 1) }, Constants.INVOKEVIRTUAL));
+    this.il.append(peerClassGen._factory.createInvoke("java.lang.reflect.Method", "invoke", Type.OBJECT, new Type[] { Type.OBJECT, new ArrayType(Type.OBJECT, 1) }, Constants.INVOKEVIRTUAL));
     if (!mi.getReturnTypeName().equals("void")){
       LocalVariableGen lg = this.nativeMth.addLocalVariable("returnValue", Type.OBJECT, null, null);
       returnValue = lg.getIndex();
       this.il.append(InstructionFactory.createStore(Type.OBJECT, returnValue));
     } else{
       this.il.append(InstructionConstants.POP);
+    }
+
+    if(genSource()) {
+      sourceGen.printInvokeMethod(mi.isStatic());
     }
     return returnValue;
   }
@@ -464,10 +569,14 @@ public class PeerMethodGen {
   private int convertJVM2JPF (int converter, int JVMObj){
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, converter));
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, JVMObj));
-    this.il.append(peerCreator._factory.createInvoke(conversionPkg + ".Converter", "getJPFObj", Type.INT, new Type[] { Type.OBJECT }, Constants.INVOKEVIRTUAL));
+    this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "getJPFObj", Type.INT, new Type[] { Type.OBJECT }, Constants.INVOKEVIRTUAL));
     LocalVariableGen lg = this.nativeMth.addLocalVariable("JPFObj", Type.INT, null, null);
     int JPFObj = lg.getIndex();
     this.il.append(InstructionFactory.createStore(Type.INT, JPFObj));
+
+    if(genSource()) {
+      sourceGen.printConvertJVM2JPF();
+    }
     return JPFObj;
   }
 
@@ -489,7 +598,11 @@ public class PeerMethodGen {
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, converter));
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, JVMObj));
     this.il.append(InstructionFactory.createLoad(Type.INT, JPFObj));
-    this.il.append(peerCreator._factory.createInvoke(conversionPkg + ".Converter", "updateJPFObj", Type.VOID, new Type[] { Type.OBJECT, Type.INT }, Constants.INVOKEVIRTUAL));
+    this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "updateJPFObj", Type.VOID, new Type[] { Type.OBJECT, Type.INT }, Constants.INVOKEVIRTUAL));
+
+    if(genSource()) {
+      sourceGen.printUpdateCaller(mi.isStatic());
+    }
   }
 
   /**
@@ -503,11 +616,15 @@ public class PeerMethodGen {
    * @param JPFCls
    *          an index of the local variable that represents a JPF class
    */
-  private void getJPFClass (int converter, int JVMCls){
+  private void updateJPFClass (int converter, int JVMCls){
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, converter));
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, JVMCls));
-    this.il.append(peerCreator._factory.createInvoke(conversionPkg + ".Converter", "getJPFCls", new ObjectType("gov.nasa.jpf.jvm.ClassInfo"), new Type[] { new ObjectType("java.lang.Class") }, Constants.INVOKEVIRTUAL));
+    this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "getJPFCls", new ObjectType("gov.nasa.jpf.jvm.ClassInfo"), new Type[] { new ObjectType("java.lang.Class") }, Constants.INVOKEVIRTUAL));
     this.il.append(InstructionConstants.POP);
+
+    if(genSource()) {
+      sourceGen.printUpdateCaller(mi.isStatic());
+    }
   }
 
   /**
@@ -533,13 +650,17 @@ public class PeerMethodGen {
         this.il.append(InstructionFactory.createLoad(Type.OBJECT, converter));
         // Loading the array element argsValue[i];
         this.il.append(InstructionFactory.createLoad(Type.OBJECT, argValue));
-        this.il.append(new PUSH(peerCreator._cp, i));
+        this.il.append(new PUSH(peerClassGen._cp, i));
         this.il.append(InstructionConstants.AALOAD);
         // Loading the nth input parameter
         this.il.append(InstructionFactory.createLoad(Type.INT, j));
         // Invoking the method "updateJPFObj"
-        this.il.append(peerCreator._factory.createInvoke(conversionPkg + ".Converter", "updateJPFObj", Type.VOID, new Type[] { Type.OBJECT, Type.INT }, Constants.INVOKEVIRTUAL));
+        this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "updateJPFObj", Type.VOID, new Type[] { Type.OBJECT, Type.INT }, Constants.INVOKEVIRTUAL));
         j++;
+
+        if(genSource()) {
+          sourceGen.printUpdateJPFArgs(i);
+        }
       }
     }
   }
@@ -557,49 +678,62 @@ public class PeerMethodGen {
     if (!PeerMethodGen.isPrimitiveType(returnType)){
       this.il.append(InstructionFactory.createLoad(Type.INT, returnValue));
       this.il.append(InstructionFactory.createReturn(Type.INT));
+
+      if(genSource()) {
+        sourceGen.printReturnObj();
+      }
     } else if ("void".equals(returnType)){
       this.il.append(InstructionFactory.createReturn(Type.VOID));
+
+      if(genSource()) {
+        sourceGen.printReturn();
+      }
     } else{
-      String className = null;
+      String wrapper = null;
       String methodName = null;
       Type type = null;
       if ("boolean".equals(returnType)){
-        className = "java.lang.Boolean";
+    	wrapper = "Boolean";
         methodName = "booleanValue";
         type = Type.BOOLEAN;
       } else if ("int".equals(returnType)){
-        className = "java.lang.Integer";
+    	wrapper = "Integer";
         methodName = "intValue";
         type = Type.INT;
       } else if ("long".equals(returnType)){
-        className = "java.lang.Long";
+    	wrapper = "Long";
         methodName = "longValue";
         type = Type.LONG;
       } else if ("byte".equals(returnType)){
-        className = "java.lang.Byte";
+    	wrapper = "Byte";
         methodName = "byteValue";
         type = Type.BYTE;
       } else if ("char".equals(returnType)){
-        className = "java.lang.Character";
+    	wrapper = "Character";
         methodName = "charValue";
         type = Type.CHAR;
       } else if ("short".equals(returnType)){
-        className = "java.lang.Short";
+    	wrapper = "Short";
         methodName = "shortValue";
         type = Type.SHORT;
       } else if ("float".equals(returnType)){
-        className = "java.lang.Float";
+    	wrapper = "Float";
         methodName = "floatValue";
         type = Type.FLOAT;
       } else if ("double".equals(returnType)){
-        className = "java.lang.Double";
+    	wrapper = "Double";
         methodName = "doubleValue";
         type = Type.DOUBLE;
       }
+      String className = "java.lang." + wrapper;
       this.il.append(InstructionFactory.createLoad(Type.OBJECT, returnValue));
-      this.il.append(peerCreator._factory.createCheckCast(new ObjectType(className)));
-      this.il.append(peerCreator._factory.createInvoke(className, methodName, type, Type.NO_ARGS, Constants.INVOKEVIRTUAL));
+      this.il.append(peerClassGen._factory.createCheckCast(new ObjectType(className)));
+      this.il.append(peerClassGen._factory.createInvoke(className, methodName, type, Type.NO_ARGS, Constants.INVOKEVIRTUAL));
       this.il.append(InstructionFactory.createReturn(type));
+
+      if(genSource()) {
+        sourceGen.printReturnPrimitive(wrapper, methodName);
+      }
     }
   }
 
@@ -615,37 +749,38 @@ public class PeerMethodGen {
     String returnType = this.mi.getReturnTypeName();
     // if the return type is Object
     if (!PeerMethodGen.isPrimitiveType(returnType)) {
-      this.il.append(new PUSH(peerCreator._cp, MJIEnv.NULL));
+      this.il.append(new PUSH(peerClassGen._cp, MJIEnv.NULL));
       this.il.append(InstructionFactory.createReturn(Type.INT));
     } else if ("void".equals(returnType)) {
       this.il.append(InstructionFactory.createReturn(Type.VOID));
     } else {
       if ("boolean".equals(returnType)) {
-        this.il.append(new PUSH(peerCreator._cp, 0));
+        this.il.append(new PUSH(peerClassGen._cp, 0));
         this.il.append(InstructionFactory.createReturn(Type.BOOLEAN));
       } else if ("int".equals(returnType)) {
-        this.il.append(new PUSH(peerCreator._cp, 0));
+        this.il.append(new PUSH(peerClassGen._cp, 0));
         this.il.append(InstructionFactory.createReturn(Type.INT));
       } else if ("long".equals(returnType)) {
-        this.il.append(new PUSH(peerCreator._cp, 0));
+        this.il.append(new PUSH(peerClassGen._cp, 0));
         this.il.append(InstructionFactory.createReturn(Type.LONG));
       } else if ("byte".equals(returnType)) {
-        this.il.append(new PUSH(peerCreator._cp, 0));
+        this.il.append(new PUSH(peerClassGen._cp, 0));
         this.il.append(InstructionFactory.createReturn(Type.BYTE));
       } else if ("char".equals(returnType)) {
-        this.il.append(new PUSH(peerCreator._cp, 0));
+        this.il.append(new PUSH(peerClassGen._cp, 0));
         this.il.append(InstructionFactory.createReturn(Type.CHAR));
       } else if ("short".equals(returnType)) {
-        this.il.append(new PUSH(peerCreator._cp, 0));
+        this.il.append(new PUSH(peerClassGen._cp, 0));
         this.il.append(InstructionFactory.createReturn(Type.SHORT));
       } else if ("float".equals(returnType)) {
-        this.il.append(new PUSH(peerCreator._cp, 0.0));
+        this.il.append(new PUSH(peerClassGen._cp, 0.0));
         this.il.append(InstructionFactory.createReturn(Type.FLOAT));
       } else if ("double".equals(returnType)) {
-        this.il.append(new PUSH(peerCreator._cp, 0.0));
+        this.il.append(new PUSH(peerClassGen._cp, 0.0));
         this.il.append(InstructionFactory.createReturn(Type.DOUBLE));
       }
     }
+    sourceGen.printDummyReturnStatement();
   }
 
   /**
@@ -741,5 +876,15 @@ public class PeerMethodGen {
       argName[i] = "arg" + (i - 2);
     }
     return argName;
+  }
+  
+  private String getJNIName(MethodInfo mi) {
+    String mname = mi.getName();
+
+	if(mname.startsWith("<") && mname.endsWith(">")) {
+      mname = mname.substring(1, mname.lastIndexOf(">"));
+	}
+
+	return (Types.getJNIMangledMethodName(null, mname, mi.getSignature()));
   }
 }

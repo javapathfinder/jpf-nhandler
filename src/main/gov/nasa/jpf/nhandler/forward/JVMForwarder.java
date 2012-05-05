@@ -183,13 +183,16 @@ public class JVMForwarder extends PropertyListenerAdapter {
    */
   public void searchStarted(Search search){
     Config config = search.getConfig();
-    boolean reset = config.getBoolean("nhandler.reset");
+    boolean reset = config.getBoolean("nhandler.reset.onthefly");
+    boolean resetClasses = config.getBoolean("nhandler.reset.classes");
     if(reset) {
       String path = config.getPath("jpf-nhandler") + "/onthefly";
       File onthefly = new File(path);
       String[] peers = onthefly.list();
+
       for(String name: peers) {
-    	if(name.startsWith("OTF") && name.endsWith(".class")) {
+    	if((reset && name.startsWith("OTF_JPF_") && (name.endsWith(".class") || name.endsWith(".java")))
+    	    || (resetClasses && name.startsWith("OTF_JPF_") && name.endsWith(".class"))) {
           File peer = new File(onthefly, name);
           peer.delete();
     	}

@@ -168,9 +168,13 @@ public class JVM2JPF {
    */
   public void updateJPFObj (Object JVMObj, int JPFObj) throws ConversionException {
     if (this.isValidJPFRef(JVMObj, JPFObj)) {
-      if (JVMObj.getClass().isArray())
+      // Both JVM and JPF objects are null, No need for updating
+      if(JVMObj == null) {
+        return;
+      }
+      if (JVMObj.getClass().isArray()) {
         this.updateArr(JVMObj, JPFObj);
-      else {
+      } else {
         this.updateObj(JVMObj, JPFObj);
       }
     } else {

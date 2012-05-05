@@ -1,5 +1,6 @@
 package gov.nasa.jpf.nhandler.peerGen;
 
+import gov.nasa.jpf.Config;
 import gov.nasa.jpf.jvm.ClassInfo;
 import gov.nasa.jpf.jvm.MJIEnv;
 import gov.nasa.jpf.jvm.NativeMethodInfo;
@@ -44,10 +45,13 @@ public class PeerClassGen implements Constants {
 
   protected ClassGen _cg;
 
+  protected PeerSourceGen sourceGen;
   /**
    * Directory that is used to keep native peers that are created on-the-fly
    */
   protected static String peersLocation = "/Users/Nastaran/workspaces/bitbucket/jpf-nhandler/onthefly/";
+
+  private static boolean initialized = false;
 
   /**
    * To distinguish the on-the-fly native peers from the rest, this prefixed is
@@ -67,13 +71,21 @@ public class PeerClassGen implements Constants {
 
   private MJIEnv env;
 
+  private static void init(Config config) {
+    if(!initialized) {
+      peersLocation = config.getPath("jpf-nhandler") + "/onthefly/";
+      PeerSourceGen.createSource =  config.getBoolean("nhandler.generate.source");
+    }
+  }
+
   /**
    * Creates a new instance of PeerClassCreator.
    * 
    * @param ci
    *          a class that its native peer is going to be created
+ * @throws IOException 
    */
-  private PeerClassGen (ClassInfo ci, MJIEnv env) {
+  private PeerClassGen (ClassInfo ci, MJIEnv env) throws IOException {
     String className = ci.getName();
     this.env = env;
     String peerName = PeerClassGen.getNativePeerClsName(className);
@@ -99,6 +111,10 @@ public class PeerClassGen implements Constants {
     // _cg.addEmptyConstructor(Constants.ACC_PUBLIC);
 
     PeerClassGen.Peers.put(className, this);
+    
+    if(PeerSourceGen.createSource) {
+      sourceGen = new PeerSourceGen(peerName);
+    }
   }
 
   /**
@@ -116,16 +132,18 @@ public class PeerClassGen implements Constants {
     PeerClassGen peerCreator = null;
 
     // find a better place to initialize this!
-    if (PeerClassGen.peersLocation == null) {
-      PeerClassGen.peersLocation = env.getConfig().getPath("jpf-nhandler") + "/onthefly/";
-    }
+    init(env.getConfig());
 
     if (PeerClassGen.Peers.containsKey(className)){
       peerCreator = PeerClassGen.Peers.get(className);
       System.out.println("   Already has a PeerClassCreator!");
     } else{
       System.out.println("   Does not have a PeerClassCreator!");
-      peerCreator = new PeerClassGen(ci, env);
+      try {
+		peerCreator = new PeerClassGen(ci, env);
+	  } catch (IOException e) {
+		e.printStackTrace();
+	  }
     }
     return peerCreator;
   }
@@ -170,7 +188,7 @@ public class PeerClassGen implements Constants {
       return method;
     }
 
-    PeerMethodGen nmthCreator = new PeerMethodGen(mi, env, this);
+    PeerMethodGen nmthCreator = new PeerMethodGen(mi, env, this, sourceGen);
     nmthCreator.create();
 
     OutputStream out;
@@ -214,7 +232,7 @@ public class PeerClassGen implements Constants {
       return method;
     }
 
-    PeerMethodGen nmthCreator = new PeerMethodGen(mi, env, this);
+    PeerMethodGen nmthCreator = new PeerMethodGen(mi, env, this, sourceGen);
     nmthCreator.createEmpty();
 
     OutputStream out;

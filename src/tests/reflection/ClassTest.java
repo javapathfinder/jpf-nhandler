@@ -261,10 +261,11 @@ public class ClassTest<E> extends TestJPF {
   // IMPROVE: extend this test to a class that returns true isSynthetic() is
   // invoked
   @Test
-  public void isSyntheticTest (){
+  public void isSyntheticTest () throws ClassNotFoundException, SecurityException, NoSuchMethodException{
     if (verifyNoPropertyViolation(JPF_ARGS)){
       // Class.class.isSynthetic();
       assertFalse(Class.class.isSynthetic());
+      //Class.forName("java.lang.Class", true, null);
     }
   }
 }
