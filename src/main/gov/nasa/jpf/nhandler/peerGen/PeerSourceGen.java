@@ -50,28 +50,30 @@ public class PeerSourceGen {
   }
 
   private void printImport() {
-    append("import gov.nasa.jpf.jvm.MJIEnv;\n");
-    append("import gov.nasa.jpf.nhandler.conversion.ConversionException;\n");
-    append("import gov.nasa.jpf.nhandler.conversion.Converter;\n");
+    append("import gov.nasa.jpf.jvm.MJIEnv;");
+    gotoNextLine();
+    append("import gov.nasa.jpf.nhandler.conversion.ConversionException;");
+    gotoNextLine();
+    append("import gov.nasa.jpf.nhandler.conversion.Converter;");
+    gotoNextLine();
+    append("import java.lang.reflect.InvocationTargetException;");
+    gotoNextLine();
     append("import java.lang.reflect.Method;");
-    nextLine();
-    nextLine();
+    addBlankLine();
   }
 
   private void printClassHeader() {
     append("public class " + this.name);
     append(" {");
-    nextLine();
-    nextLine();
+    addBlankLine();
   }
 
   private void printDefaultConstructor() {
     append("  public " + this.name + "()");
     append(" {");
-    nextLine();
+    gotoNextLine();
     append("  }");
-    nextLine();
-    nextLine();
+    addBlankLine();
   }
 
   protected void printClassFooter() {
@@ -111,8 +113,12 @@ public class PeerSourceGen {
     append("    ");
   }
     
-  private void nextLine() {
+  private void gotoNextLine() {
     append("\n");
+  }
+
+  private void addBlankLine() {
+    append("\n\n");
   }
 
   protected class MethodGen {
@@ -144,151 +150,229 @@ public class PeerSourceGen {
     }
 
     protected void printThrowsExceptions() {
-      //nextLine();
-      //addDoubleIndent();
-      // append("throws IllegalArgumentException, SecurityException, NoSuchMethodException, ");
-      // nextLine();
-      // addDoubleIndent();
-      // append("IllegalAccessException, ClassNotFoundException, ConversionException");
-      append(" throws Exception");
+      gotoNextLine();
+      addDoubleIndent();
+      addDoubleIndent();
+      append("throws java.lang.IllegalArgumentException,");
+      gotoNextLine();
+      addDoubleIndent();
+      addDoubleIndent();
+      addDoubleIndent();
+      append("SecurityException, NoSuchMethodException, IllegalAccessException,");
+      gotoNextLine();
+      addDoubleIndent();
+      addDoubleIndent();
+      addDoubleIndent();
+      addDoubleIndent();
+      append(" ClassNotFoundException, ConversionException, InvocationTargetException");
       completeHeader();
     }
 
     protected void completeHeader() {
       append(" {");
-      nextLine();
+      gotoNextLine();
     }
 
     protected void printConvertorPart() {
+      gotoNextLine();
+      addDoubleIndent();
+      append("// Creates the engine for converting objects/classes between JPF & JVM");
+      gotoNextLine();
+      
       addDoubleIndent();
       append("Converter converter = new Converter(env);");
-      nextLine();
+      addBlankLine();
     }
 
     protected void printCallerPart() {
       addDoubleIndent();
 
       if(mi.isStatic()) {
+        append("// Captures the class that invokes the static method to be handled in JVM");
+        gotoNextLine();
+        
+        addDoubleIndent();
         append("Class caller = converter.getJVMCls(rcls);");
       } else {
+        append("// Captures the object that invokes the method to be handled in JVM");
+        gotoNextLine();
+        
+        addDoubleIndent();
         append("Object caller = converter.getJVMObj(robj);");
       }
 
-      nextLine();
+      addBlankLine();
     }
 
+    
     protected void printCreateArgsVal(int nArgs) {
       addDoubleIndent();
+      append("// Captures the input parameters of the method to be handled in JVM");
+      gotoNextLine();
+
+      addDoubleIndent();
       append("Object argValue[] = new Object[" + nArgs + "];");
-      nextLine();
+      gotoNextLine();
     }
 
     protected void printSetObjArgVal(int index) {
       addDoubleIndent();
       append("argValue[" + index + "] = converter.getJVMObj(arg" + index + ");");
-      nextLine();
+      gotoNextLine();
     }
 
     protected void printSetPrimitiveArgVal(String wrapper, int index) {
         addDoubleIndent();
         append("argValue[" + index + "] = new " + wrapper + "(arg" + index + ");");
-        nextLine();
+        gotoNextLine();
     }
 
     protected void printCreateArgsType(int nArgs) {
+      gotoNextLine();
+
+      addDoubleIndent();
+      append("// Captures the input parameters types of the method to be hanlded in JVM");
+      gotoNextLine();
+
       addDoubleIndent();
       append("Class argType[] = new Class[" + nArgs + "];");
-      nextLine();
+      gotoNextLine();
     }
 
     protected void printSetObjArgType(String type, int index) {
       addDoubleIndent();
       append("argType[" + index + "] = Class.forName(\"" + type + "\");");
-      nextLine();
+      gotoNextLine();
     }
 
     protected void printSetArrArgType(int index) {
       addDoubleIndent();
       append("argType[" + index + "] = argValue[" + index + "].getClass();");
-      nextLine();
+      gotoNextLine();
     }    
 
     protected void printSetPrimitiveArgType(String wrapper, int index) { 
       addDoubleIndent();
       append("argType[" + index + "] = " + wrapper + ".TYPE;");
-      nextLine();
+      gotoNextLine();
     }
 
     protected void printGetCallerClass() {
+      gotoNextLine();
+
+      addDoubleIndent();
+      append("// Obtains the class of the object that invokes the method to be handled");
+      gotoNextLine();
+
       addDoubleIndent();
       append("Class callerClass = caller.getClass();");
-      nextLine();
+      gotoNextLine();
     }
 
     protected void printGetMethod(String mname, boolean isStatic) {
+      gotoNextLine();
+
+      addDoubleIndent();
+      append("// Obtains the Method instance of the method to be handled");
+      gotoNextLine();
+
       addDoubleIndent();
       if(isStatic) {
         append("Method method = caller.getDeclaredMethod(\"" + mname + "\", argType);");
       } else {
         append("Method method = callerClass.getDeclaredMethod(\"" + mname + "\", argType);");
       }
-      nextLine();
+      addBlankLine();
     }
 
     protected void printSetAccessible() {
       addDoubleIndent();
+      append("// Makes the method with any access modifier accessible");
+      gotoNextLine();
+      
+      addDoubleIndent();
       append("method.setAccessible(true);");
-      nextLine();
+      addBlankLine();
     }
 
     protected void printInvokeMethod(boolean isStatic) {
+      addDoubleIndent();
+      append("// Invokes the method to be handled in JVM");
+      gotoNextLine();
+
       addDoubleIndent();
       if(isStatic) {
         append("Object returnValue = method.invoke(null, argValue);");
       } else {
         append("Object returnValue = method.invoke(caller, argValue);");
       }
-      nextLine();
+      addBlankLine();
     }
 
-    protected void printConvertJVM2JPF() {
+    protected void printConvertReturnValue() {
+      addDoubleIndent();
+      append("// Converts the return value from JVM to JPF");
+      gotoNextLine();
+
       addDoubleIndent();
       append("int JPFObj = converter.getJPFObj(returnValue);");
-      nextLine();
+      addBlankLine();
     }
 
     protected void printUpdateCaller(boolean isStatic) {
       addDoubleIndent();
       if(isStatic) {
+        append("// Updates the class that invokes the method to be handle in JPF");
+        gotoNextLine();
+
+        addDoubleIndent();
         append("converter.getJPFCls(caller);");
       } else {
+        append("// Updates the object that invokes the method to be handle in JPF");
+        gotoNextLine();
+
+        addDoubleIndent();
         append("converter.updateJPFObj(caller, robj);");
       }
-      nextLine();
+      addBlankLine();
+
+      addUpdateArgsComment = true;
     }
 
+    private boolean addUpdateArgsComment = false;
     protected void printUpdateJPFArgs(int index) {
+      if(addUpdateArgsComment) {
+        addDoubleIndent();
+        append("// Updates the input parameters objects of the method to be handled");
+        gotoNextLine();
+        addUpdateArgsComment = false;
+      }
+ 
       addDoubleIndent();
       append("converter.updateJPFObj(argValue[" + index + "], arg" + index + ");");
-      nextLine();
+      addBlankLine();
     }
 
     protected void printReturn() {
       addDoubleIndent();
       append("return;");
-      nextLine();
+      gotoNextLine();
     }
 
     protected void printReturnObj() {
       addDoubleIndent();
+      append("// Returns the return value that is converted to a JPF object");
+      gotoNextLine();
+
+      addDoubleIndent();
       append("return JPFObj;");
-      nextLine();
+      gotoNextLine();
     }
 
     protected void printReturnPrimitive(String wrapper, String methodName) {
       addDoubleIndent();
       append("return ((" + wrapper + ")returnValue)." + methodName + "();");
-      nextLine();
+      gotoNextLine();
     }
 
     protected void printDummyReturnStatement() {
@@ -319,7 +403,7 @@ public class PeerSourceGen {
         }
       }
 
-      nextLine();
+      gotoNextLine();
     }
 
     protected void wrapUpSource() {
@@ -329,9 +413,9 @@ public class PeerSourceGen {
 
     private void printFooter() {
       append("  }");
-      nextLine();
+      gotoNextLine();
       append("}");
-      nextLine();
+      gotoNextLine();
     }
 
     private void writeToFile() {

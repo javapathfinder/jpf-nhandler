@@ -151,18 +151,15 @@ public class PeerMethodGen {
    * method.
    */
   private void addException (){
-//    this.nativeMth.addException("java.lang.IllegalArgumentException");
-//    this.nativeMth.addException("java.lang.SecurityException");
-//    this.nativeMth.addException("java.lang.NoSuchMethodException");
-//    this.nativeMth.addException("java.lang.IllegalAccessException");
-//    this.nativeMth.addException("java.lang.ClassNotFoundException");
-//    this.nativeMth.addException(conversionPkg + ".ConversionException");
-//    this.nativeMth.addException("java.lang.ClassNotFoundException");
-     this.nativeMth.addException("java.lang.Exception");
+    this.nativeMth.addException("java.lang.IllegalArgumentException");
+    this.nativeMth.addException("java.lang.SecurityException");
+    this.nativeMth.addException("java.lang.NoSuchMethodException");
+    this.nativeMth.addException("java.lang.IllegalAccessException");
+    this.nativeMth.addException("java.lang.ClassNotFoundException");
+    this.nativeMth.addException(conversionPkg + ".ConversionException");
+    this.nativeMth.addException("java.lang.ClassNotFoundException");
+    this.nativeMth.addException("java.lang.reflect.InvocationTargetException");
 
-    // It throws NoClassDefFoundError exception while loading OTF peers. I
-    // just exclude it for now! But it has to be fixed
-    // this.nativeMth.addException("java.lang.InvocationTargetException");
      if(genSource()) {
        sourceGen.printThrowsExceptions();
      }
@@ -368,7 +365,6 @@ public class PeerMethodGen {
       sourceGen.printCreateArgsType(nArgs);
     }
 
-    String wrapper = null;
     for (int i = 0; i < nArgs; i++){
       // loading the element argType[i]
       this.il.append(InstructionFactory.createLoad(Type.OBJECT, argType));
@@ -394,33 +390,42 @@ public class PeerMethodGen {
           }
         }
       } else{
-        if ("boolean".equals(argTypes[i]))
-          wrapper = "Boolean";
-        else if ("int".equals(argTypes[i]))
-          wrapper = "Integer";
-        else if ("long".equals(argTypes[i]))
-          wrapper = "Long";
-        else if ("byte".equals(argTypes[i]))
-          wrapper = "Byte";
-        else if ("char".equals(argTypes[i]))
-          wrapper = "Character";
-        else if ("short".equals(argTypes[i]))
-          wrapper = "Short";
-        else if ("float".equals(argTypes[i]))
-          wrapper = "Float";
-        else if ("double".equals(argTypes[i]))
-          wrapper = "Double";
+        String wrapperType = getWrapperType(argTypes[i]);
 
-        il.append(peerClassGen._factory.createFieldAccess( ("java.lang." + wrapper), "TYPE", new ObjectType("java.lang.Class"), Constants.GETSTATIC));
+        il.append(peerClassGen._factory.createFieldAccess( wrapperType, "TYPE", new ObjectType("java.lang.Class"), Constants.GETSTATIC));
 
         if(genSource()) {
-          sourceGen.printSetPrimitiveArgType(wrapper, i);
+          String wrapperName = wrapperType.substring(wrapperType.lastIndexOf('.') + 1);
+          sourceGen.printSetPrimitiveArgType(wrapperName, i);
         }
       }
 
       this.il.append(InstructionConstants.AASTORE);
     }
     return argType;
+  }
+
+  private String getWrapperType(String primitiveType) {
+    String wrapperType = null;
+
+    if ("boolean".equals(primitiveType))
+      wrapperType = "java.lang.Boolean";
+    else if ("int".equals(primitiveType))
+      wrapperType = "java.lang.Integer";
+    else if ("long".equals(primitiveType))
+      wrapperType = "java.lang.Long";
+    else if ("byte".equals(primitiveType))
+      wrapperType = "java.lang.Byte";
+    else if ("char".equals(primitiveType))
+      wrapperType = "java.lang.Character";
+    else if ("short".equals(primitiveType))
+      wrapperType = "java.lang.Short";
+    else if ("float".equals(primitiveType))
+      wrapperType = "java.lang.Float";
+    else if ("double".equals(primitiveType))
+      wrapperType = "java.lang.Double";
+
+    return wrapperType;
   }
 
   /**
@@ -575,7 +580,7 @@ public class PeerMethodGen {
     this.il.append(InstructionFactory.createStore(Type.INT, JPFObj));
 
     if(genSource()) {
-      sourceGen.printConvertJVM2JPF();
+      sourceGen.printConvertReturnValue();
     }
     return JPFObj;
   }
