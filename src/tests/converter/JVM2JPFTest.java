@@ -10,11 +10,11 @@ public class JVM2JPFTest extends TestJPF {
 
   private static MJIEnv env;
 
-  public static void main (String[] args) {
+  public static void main (String[] args){
     runTestsOfThisClass(args);
   }
 
-  public static void setEnv (MJIEnv env) {
+  public static void setEnv (MJIEnv env){
     JVM2JPFTest.env = env;
   }
 
@@ -24,8 +24,8 @@ public class JVM2JPFTest extends TestJPF {
   /**
    * Testing getJVMCls(int JPFRef, MJIEnv env)
    */
-  public void testNative1 () {
-    if (verifyNoPropertyViolation(JPF_ARGS)) {
+  public void testNative1 (){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       Integer i2 = new Integer(100);
       Integer i1 = (Integer) createJPFInt();
       assertEquals(i1, i2);
@@ -39,8 +39,8 @@ public class JVM2JPFTest extends TestJPF {
    * Testing getJVMCls(int JPFRef, MJIEnv env)
    */
   // should be used by the local peer. Cause jpf-core already handle
-  public void testNative2 () {
-    if (verifyNoPropertyViolation(JPF_ARGS)) {
+  public void testNative2 (){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       String s1 = "@JPF";
       String s2 = s1.concat("@JVM");
       assertTrue(s2.contains("JVM"));

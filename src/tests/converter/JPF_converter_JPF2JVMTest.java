@@ -7,25 +7,21 @@ import gov.nasa.jpf.util.test.TestJPF;
 
 public class JPF_converter_JPF2JVMTest extends TestJPF {
 
-  public static boolean nativeGetJVMClsTest__Ljava_lang_Object_2__Z (MJIEnv env, int objRef, int jpfRef) throws ConversionException {
-    System.out.println("peer4JPF2JVMTest");
+  public static void convertStringTest__Ljava_lang_String_2__V (MJIEnv env, int objRef, int jpfRef) throws ConversionException{
     String s1 = new String("Hello World");
     Converter converter = new Converter(env);
+
+    // converting JPF String to JVM string
     String s2 = (String) converter.getJVMObj(jpfRef);
     assertEquals(s1, s2);
-    return true;
   }
 
-  public static boolean nativeGetJVMClsTest2__Ljava_lang_Object_2__Z (MJIEnv env, int objRef, int jpfRef) throws ConversionException {
-    System.out.println("peer4JPF2JVMTest-2");
+  public static void convertIntegerTest__Ljava_lang_Integer_2__V (MJIEnv env, int objRef, int jpfRef) throws ConversionException{
     Integer i1 = new Integer(100);
     Converter converter = new Converter(env);
+
+    // converting JPF Integer to JVM Integer
     Integer i2 = (Integer) converter.getJVMObj(jpfRef);
-
     assertEquals(i1, i2);
-    System.out.println("i1: " + i1);
-    System.out.println("i2: " + i2);
-
-    return true;
   }
 }
