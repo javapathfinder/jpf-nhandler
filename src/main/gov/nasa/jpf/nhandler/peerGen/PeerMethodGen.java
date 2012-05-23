@@ -79,11 +79,23 @@ public class PeerMethodGen {
     return(PeerSourceGen.createSource);
   }
 
+  public void create() {
+    if(this.isClinit()) {
+      this.createClinit();
+    } else {
+      this.createMethod();
+    }
+  }
+
+  private boolean isClinit() {
+    return (this.name.equals("$clinit____V"));
+  }
+
   /**
    * Creates bytecode for the body of the method and adds it to the peer class
    * of this method.
    */
-  public void create (){
+  public void createMethod (){
     this.addException();
     int converter = this.createConverter();
     int caller = this.createCaller(converter);
@@ -111,6 +123,30 @@ public class PeerMethodGen {
       this.updateJPFObj(converter, caller, 1);
 
     this.updateJPFArguments(converter, argValue);
+    this.addReturnStatement(jpfReturnValue);
+
+    this.nativeMth.setMaxStack();
+    this.nativeMth.setMaxLocals();
+    peerClassGen._cg.addMethod(this.nativeMth.getMethod());
+    this.il.dispose();
+
+    if(genSource()) {
+      sourceGen.wrapUpSource();
+    }
+  }
+
+  /**
+   * Creates bytecode for the body of the method and adds it to the peer class
+   * of this method.
+   */
+  public void createClinit (){
+    this.addException();
+    int converter = this.createConverter();
+    int caller = this.createCaller(converter);
+    int callerClass = this.getCallerClass(caller);
+    this.updateJPFClass(converter, callerClass);
+    // just set it to some dummy value, since the method is of type of void
+    int jpfReturnValue = -1;
     this.addReturnStatement(jpfReturnValue);
 
     this.nativeMth.setMaxStack();
@@ -883,11 +919,11 @@ public class PeerMethodGen {
     return argName;
   }
   
-  private String getJNIName(MethodInfo mi) {
+  protected static String getJNIName(MethodInfo mi) {
     String mname = mi.getName();
 
 	if(mname.startsWith("<") && mname.endsWith(">")) {
-      mname = mname.substring(1, mname.lastIndexOf(">"));
+      mname = "$" + mname.substring(1, mname.lastIndexOf(">"));
 	}
 
 	return (Types.getJNIMangledMethodName(null, mname, mi.getSignature()));
