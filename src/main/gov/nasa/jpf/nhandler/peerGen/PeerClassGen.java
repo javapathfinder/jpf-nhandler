@@ -162,7 +162,7 @@ public class PeerClassGen implements Constants {
   private Method getExistingMethod (NativeMethodInfo mi){
     if (this.peer != null){
       for (Method nm : this.peer.getMethods()){
-        if (nm.getName().equals(mi.getJNIName())) {
+        if (nm.getName().equals(PeerMethodGen.getJNIName(mi))) {
           return nm;
         }
       }
