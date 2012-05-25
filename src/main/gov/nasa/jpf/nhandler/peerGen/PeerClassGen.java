@@ -270,16 +270,15 @@ public class PeerClassGen implements Constants {
    *           when no definition for the class with the given name could be
    *           found
    */
-  private Class loadClass (String className) throws ClassNotFoundException{
-    Class cls = null;
+  private Class<?> loadClass (String className) throws ClassNotFoundException{
+    Class<?> cls = null;
     URL[] urls = null;
 
     File otf_dir = new File(PeerClassGen.peersLocation);
 
     URL url = null;
-    URL jpf_url = null;
     try{
-      url = otf_dir.toURL();
+      url = otf_dir.toURI().toURL();
     } catch (MalformedURLException e){
       e.printStackTrace();
     }

@@ -3,7 +3,6 @@ package gov.nasa.jpf.nhandler.peerGen;
 import gov.nasa.jpf.jvm.MJIEnv;
 import gov.nasa.jpf.jvm.MethodInfo;
 import gov.nasa.jpf.jvm.NativeMethodInfo;
-import gov.nasa.jpf.jvm.ThreadInfo;
 import gov.nasa.jpf.jvm.Types;
 
 import org.apache.bcel.Constants;
@@ -34,10 +33,6 @@ public class PeerMethodGen {
 
   private String name;
 
-  private ThreadInfo ti;
-
-  private MJIEnv env;
-
   private PeerClassGen peerClassGen;
 
   private static final int methodAcc = Constants.ACC_PUBLIC | Constants.ACC_STATIC;
@@ -63,8 +58,6 @@ public class PeerMethodGen {
     this.il = new InstructionList();
     this.mi = mi;
     this.name = getJNIName(mi);
-    this.ti = env.getThreadInfo();
-    this.env = env;
     Type returnType = PeerMethodGen.getType(mi.getReturnTypeName());
     Type[] argsType = PeerMethodGen.getArgumentsType(mi);
     this.nativeMth = new MethodGen(methodAcc, (returnType.equals(Type.OBJECT)) ? Type.INT : returnType, argsType, PeerMethodGen.getArgumentsName(mi), name, PeerClassGen.getNativePeerClsName(mi.getClassName()), il, peerClassGen._cp);

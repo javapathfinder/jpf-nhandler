@@ -92,7 +92,7 @@ public class ClassTest<E> extends TestJPF {
   // @Test
   public void getDeclaredClassesTest (){
     if (verifyNoPropertyViolation(JPF_ARGS)){
-      Class[] cls = Class.class.getDeclaredClasses();
+      Class<?>[] cls = Class.class.getDeclaredClasses();
       assertTrue(cls.length == 2);
       assertEquals(cls[0].getName(), "java.lang.Class$MethodArray");
       assertEquals(cls[1].getName(), "java.lang.Class$EnclosingMethodInfo");
@@ -102,7 +102,7 @@ public class ClassTest<E> extends TestJPF {
   // @Test
   public void getDeclaringClassTest (){
     if (verifyNoPropertyViolation(JPF_ARGS)){
-      Class[] cls = Class.class.getDeclaredClasses();
+      Class<?>[] cls = Class.class.getDeclaredClasses();
       assertTrue(cls.length == 2);
       assertEquals(cls[0].getName(), "java.lang.Class$MethodArray");
       assertEquals(cls[1].getName(), "java.lang.Class$EnclosingMethodInfo");
@@ -116,7 +116,7 @@ public class ClassTest<E> extends TestJPF {
   @Test
   public void getEnclosingClassTest (){
     if (verifyNoPropertyViolation(JPF_ARGS)){
-      Class[] cls = Class.class.getDeclaredClasses();
+      Class<?>[] cls = Class.class.getDeclaredClasses();
       assertTrue(cls.length == 2);
       assertEquals(cls[0].getName(), "java.lang.Class$MethodArray");
       assertEquals(cls[1].getName(), "java.lang.Class$EnclosingMethodInfo");
@@ -131,7 +131,7 @@ public class ClassTest<E> extends TestJPF {
   // @Test
   public void getEnclosingConstructor () throws SecurityException, NoSuchMethodException{
     if (verifyNoPropertyViolation(JPF_ARGS)){
-      Class cls = (new ClassTest.TestEnclosedClass()).foo.getClass();
+      Class<?> cls = (new ClassTest.TestEnclosedClass()).foo.getClass();
       System.out.println("\ncls: " + cls);
       System.out.println("constructor: " + cls.getEnclosingConstructor());
       // assertTrue(cls.getEnclosingConstructor() == null);
@@ -146,7 +146,7 @@ public class ClassTest<E> extends TestJPF {
   public void getEnclosingMethod () throws SecurityException, NoSuchMethodException{
     if (verifyNoPropertyViolation(JPF_ARGS)){
       System.out.println(TestEnclosedClass.class.getMethods());
-      Class cls = (new ClassTest.TestEnclosedClass()).getLocalClassObj().getClass();
+      Class<?> cls = (new ClassTest.TestEnclosedClass()).getLocalClassObj().getClass();
       // assertTrue(cls.getEnclosingMethod().getDeclaringClass() ==
       // ClassTest.TestEnclosedClass.class);
       System.out.println("**" + cls.getEnclosingMethod().getDeclaringClass() + " == " + ClassTest.TestEnclosedClass.class);
@@ -222,7 +222,7 @@ public class ClassTest<E> extends TestJPF {
   @Test
   public void isAnonymousClassTest (){
     if (verifyNoPropertyViolation(JPF_ARGS)){
-      Class cls = (new ClassTest.TestEnclosedClass()).getAnonymousClassObj().getClass();
+      Class<?> cls = (new ClassTest.TestEnclosedClass()).getAnonymousClassObj().getClass();
       assertTrue(cls.isAnonymousClass());
       assertFalse(Class.class.isAnonymousClass());
     }

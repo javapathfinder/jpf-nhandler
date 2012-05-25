@@ -43,8 +43,8 @@ public class JPF2JVM {
    * @throws ConversionException
    *           if any incorrect input parameter is observed
    */
-  public Class getJVMCls (int JPFRef) throws ConversionException {
-    Class JVMCls = null;
+  public Class<?> getJVMCls (int JPFRef) throws ConversionException {
+    Class<?> JVMCls = null;
     if (JPFRef != MJIEnv.NULL) {
       // First check if the class object has been already created.
       JVMCls = Converter.classMapJPF2JVM.get(JPFRef);
@@ -67,7 +67,7 @@ public class JPF2JVM {
         }
 
         // Holds JVMCls and all of its ancestors
-        List<Class> clsList = new LinkedList<Class>();
+        List<Class<?>> clsList = new LinkedList<Class<?>>();
         List<ClassInfo> JPFClsList = new LinkedList<ClassInfo>();
         do {
           clsList.add(JVMCls);
@@ -199,7 +199,7 @@ public class JPF2JVM {
         ClassInfo JPFCl = dei.getClassInfo();
         int JPFClsRef = JPFCl.getStaticElementInfo().getClassObjectRef();
 
-        Class JVMCl = this.getJVMCls(JPFClsRef);
+        Class<?> JVMCl = this.getJVMCls(JPFClsRef);
 
         // There is only one instance of every class. There is no need to update
         // Class objects
@@ -221,7 +221,7 @@ public class JPF2JVM {
         Converter.objMapJPF2JVM.put(JPFRef, JVMObj);
 
         // Holds JVMCl and all of its ancestors
-        List<Class> JVMClsList = new LinkedList<Class>();
+        List<Class<?>> JVMClsList = new LinkedList<Class<?>>();
         List<ClassInfo> JPFClsList = new LinkedList<ClassInfo>();
 
         do {
@@ -312,7 +312,7 @@ public class JPF2JVM {
           int arrSize = JPFArr.length;
 
           // Object[] arrObj = new Object[arrSize];
-          Class compType = null;
+          Class<?> compType = null;
           try {
             compType = Class.forName(dei.getClassInfo().getComponentClassInfo().getName());
           } catch (ClassNotFoundException e) {
@@ -340,14 +340,14 @@ public class JPF2JVM {
    * 
    * @return a new JVM object instantiated from the given class, cl
    */
-  private static Object instantiateFrom (Class cl) {
+  private static Object instantiateFrom (Class<?> cl) {
     Object JVMObj = null;
 
     if (cl == Class.class) { 
       return cl; 
     }
 
-    Constructor ctor = getNoArgCtor(cl);
+    Constructor<?> ctor = getNoArgCtor(cl);
     try {
       ctor.setAccessible(true);
       JVMObj = ctor.newInstance();
@@ -365,12 +365,12 @@ public class JPF2JVM {
    * 
    * @return a constructor with no arguments
    */
-  private static Constructor getNoArgCtor (Class cl) {
-    Constructor[] ctors = cl.getDeclaredConstructors();
-    Constructor ctor = null;
+  private static Constructor<?> getNoArgCtor (Class<?> cl) {
+    Constructor<?>[] ctors = cl.getDeclaredConstructors();
+    Constructor<?> ctor = null;
 
     // Check if the given class has a constructor with no arguments
-    for (Constructor c : ctors) {
+    for (Constructor<?> c : ctors) {
       if (c.getParameterTypes().length == 0) {
         ctor = c;
       }
@@ -486,7 +486,7 @@ public class JPF2JVM {
     return (name.equals("boolean") || name.equals("byte") || name.equals("int") || name.equals("short") || name.equals("long") || name.equals("char") || name.equals("float") || name.equals("double"));
   }
 
-  private static Class getPrimitiveClass (String name) {
+  private static Class<?> getPrimitiveClass (String name) {
     if (name.equals("boolean")) {
       return boolean.class;
     } else if (name.equals("byte")) {

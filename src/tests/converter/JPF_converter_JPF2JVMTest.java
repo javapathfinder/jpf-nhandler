@@ -58,7 +58,8 @@ public class JPF_converter_JPF2JVMTest extends TestJPF {
     Converter converter = new Converter(env);
 
     // converting JPF HashMap to JVM HashMap
-    HashMap<Integer, String> map1 = (HashMap<Integer, String>) converter.getJVMObj(jpfMap);
+    @SuppressWarnings("unchecked")
+	HashMap<Integer, String> map1 = (HashMap<Integer, String>) converter.getJVMObj(jpfMap);
 
     HashMap<Integer, String> map2 = new HashMap<Integer, String>();
     map2.put(0, "zero");
@@ -75,9 +76,9 @@ public class JPF_converter_JPF2JVMTest extends TestJPF {
     Converter converter = new Converter(env);
 
     // converting JPF Class to JVM Class
-    Class cls1 = (Class) converter.getJVMCls(jpfCls);
+    Class<?> cls1 = (Class<?>) converter.getJVMCls(jpfCls);
 
-    Class cls2 = JPF2JVMTestConversion.class;
+    Class<?> cls2 = JPF2JVMTestConversion.class;
 
     assertEquals(cls1, cls2);
     assertEquals(JPF2JVMTestConversion.i, 10);
