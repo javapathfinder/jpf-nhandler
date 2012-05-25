@@ -2,7 +2,7 @@ package gov.nasa.jpf.nhandler.conversion;
 
 import gov.nasa.jpf.jvm.ClassInfo;
 import gov.nasa.jpf.jvm.MJIEnv;
-import gov.nasa.jpf.nhandler.CutomizedHashMap;
+import gov.nasa.jpf.nhandler.ValueIdentityHashMap;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,19 +26,19 @@ public class Converter {
    * Keeps track of the JVM objects that have been already created from their
    * corresponding JPF objects, while performing conversion from JPF to JVM
    */
-  static CutomizedHashMap<Integer, Object> JPF2JVM_ObjMap = new CutomizedHashMap<Integer, Object>();
+  static ValueIdentityHashMap<Integer, Object> JPF2JVM_ObjMap = new ValueIdentityHashMap<Integer, Object>();
 
   /**
    * Keeps track of the JVM classes that have been already created from their
    * corresponding JPF classes, while performing conversion from JPF to JVM
    */
-  static CutomizedHashMap<Integer, Class> JPF2JVM_ClassMap = new CutomizedHashMap<Integer, Class>();
+  static ValueIdentityHashMap<Integer, Class<?>> JPF2JVM_ClassMap = new ValueIdentityHashMap<Integer, Class<?>>();
 
   /**
    * Keeps track of the JPF objects that have been already updated from their
    * corresponding JVM objects, while performing conversion from JVM to JPF
    */
-  static HashMap<Integer, Object> updatedJPFObj = new CutomizedHashMap<Integer, Object>();
+  static HashMap<Integer, Object> updatedJPFObj = new ValueIdentityHashMap<Integer, Object>();
 
   /**
    * Keeps track of the JPF classes that have been already updated from their
@@ -73,7 +73,7 @@ public class Converter {
    *           if any incorrect input parameter is observed during the
    *           conversion
    */
-  public Class getJVMCls (int JPFRef) throws ConversionException {
+  public Class<?> getJVMCls (int JPFRef) throws ConversionException {
     return this.jpf2jvm.getJVMCls(JPFRef);
   }
 
@@ -110,7 +110,7 @@ public class Converter {
    *           if any incorrect input parameter is observed during the
    *           conversion
    */
-  public ClassInfo getJPFCls (Class JVMCls) throws ConversionException {
+  public ClassInfo getJPFCls (Class<?> JVMCls) throws ConversionException {
     return this.jvm2jpf.getJPFCls(JVMCls);
   }
 
