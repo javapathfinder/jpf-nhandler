@@ -3,8 +3,23 @@ package converter;
 import gov.nasa.jpf.jvm.MJIEnv;
 import gov.nasa.jpf.util.test.TestJPF;
 
+import java.util.HashMap;
+
 import org.junit.Test;
 
+/**
+ * This class tests the conversion form JVM to JPF, and it works along its
+ * corresponding native peer which is JPF_converter_JVM2JPFTest.
+ * 
+ * The methods of this class create JPF objects/classes, and in the native
+ * methods the similar objects/classes are first created in JVM, and then 
+ * they are converted to JPF. Finally these testers check if the JPF 
+ * objects/classes created directly in JPF are equal to (same as, for the 
+ * case of classes) the converted ones returned by the native methods.
+ * 
+ * @author Nastaran Shafiei
+ * @author Franck van Breugel
+ */
 public class JVM2JPFTest extends TestJPF {
   private final static String[] JPF_ARGS = {};
 
@@ -18,32 +33,85 @@ public class JVM2JPFTest extends TestJPF {
     JVM2JPFTest.env = env;
   }
 
-  private native Object createJPFInt ();
+  private native String createStringTest ();
 
   @Test
-  /**
-   * Testing getJVMCls(int JPFRef, MJIEnv env)
-   */
-  public void testNative1 (){
-    if (verifyNoPropertyViolation(JPF_ARGS)){
-      Integer i2 = new Integer(100);
-      Integer i1 = (Integer) createJPFInt();
+  public void convertStringTest (){
+    if (verifyNoPropertyViolation()){
+      String s1 = new String("Hello World");
+      String s2 = createStringTest();
+
+      assertEquals(s1, s2);
+    }
+  }
+
+  private native Integer createIntegerTest ();
+
+  @Test
+  public void convertIntegerTest (){
+    if (verifyNoPropertyViolation()){
+      Integer i1 = new Integer(100);
+      Integer i2 = createIntegerTest();
+
       assertEquals(i1, i2);
     }
   }
 
-  private native Object concatString ();
+  private native String[] createArrayTest ();
 
   @Test
-  /**
-   * Testing getJVMCls(int JPFRef, MJIEnv env)
-   */
-  // should be used by the local peer. Cause jpf-core already handle
-  public void testNative2 (){
-    if (verifyNoPropertyViolation(JPF_ARGS)){
-      String s1 = "@JPF";
-      String s2 = s1.concat("@JVM");
-      assertTrue(s2.contains("JVM"));
+  public void convertArrayTest (){
+    if (verifyNoPropertyViolation()){
+      String[] arr1 = { "e1", "e2", "e3" };
+      String[] arr2 = createArrayTest();
+
+      assertEquals(arr1.length, arr2.length);
+      assertEquals(arr1[0], arr2[0]);
+      assertEquals(arr1[1], arr2[1]);
+      assertEquals(arr1[2], arr2[2]);
+    }
+  }
+
+  private native HashMap<Integer, String> createHashMapTest ();
+
+  @Test
+  public void convertHashMapTest (){
+    if (verifyNoPropertyViolation()){
+      HashMap<Integer, String> map1 = new HashMap<Integer, String>();
+      map1.put(0, "zero");
+      map1.put(1, "one");
+      map1.put(2, "two");
+      HashMap<Integer, String> map2 = createHashMapTest();
+
+      assertEquals(map1, map2);
+      assertEquals(map1.get(0), map2.get(0));
+      assertEquals(map1.get(1), map2.get(1));
+      assertEquals(map1.get(2), map2.get(2));
+    }
+  }
+
+  public static class JVM2JPFTestConversion {
+    protected static int i = 0;
+
+    protected static void inc (int amount){
+      i += amount;
+    }
+
+    protected static void set (int amount){
+      i = amount;
+    }
+  }
+
+  private native Class<?> createClassTest ();
+
+  @Test
+  public void convertClassTest () throws IllegalArgumentException, SecurityException, IllegalAccessException{
+    if (verifyNoPropertyViolation()){
+      Class<?> cls1 = createClassTest();
+      Class<?> cls2 = JVM2JPFTestConversion.class;
+      assertTrue(cls1 == cls2);
+      assertEquals(JVM2JPFTestConversion.i, 10);
+      assertEquals(cls1.getDeclaredFields()[0].getInt(cls1), 10);
     }
   }
 }

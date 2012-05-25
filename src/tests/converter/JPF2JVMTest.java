@@ -74,7 +74,7 @@ public class JPF2JVMTest extends TestJPF {
     }
   }
 
-  public static class TestConversion {
+  public static class JPF2JVMTestConversion {
     protected static int i = 0;
 
     protected static void inc (int amount){
@@ -87,8 +87,8 @@ public class JPF2JVMTest extends TestJPF {
   @Test
   public void convertClassTest (){
     if (verifyNoPropertyViolation()){
-      TestConversion.inc(10);
-      convertClassTest(TestConversion.class);
+      JPF2JVMTestConversion.inc(10);
+      convertClassTest(JPF2JVMTestConversion.class);
     }
   }
 }

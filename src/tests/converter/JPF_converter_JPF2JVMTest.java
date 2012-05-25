@@ -7,7 +7,7 @@ import gov.nasa.jpf.util.test.TestJPF;
 
 import java.util.HashMap;
 
-import converter.JPF2JVMTest.TestConversion;
+import converter.JPF2JVMTest.JPF2JVMTestConversion;
 
 /**
  * This is a native peer class which is used to test the conversion from JPF to
@@ -77,10 +77,10 @@ public class JPF_converter_JPF2JVMTest extends TestJPF {
     // converting JPF Class to JVM Class
     Class cls1 = (Class) converter.getJVMCls(jpfCls);
 
-    Class cls2 = TestConversion.class;
+    Class cls2 = JPF2JVMTestConversion.class;
 
     assertEquals(cls1, cls2);
-    assertEquals(TestConversion.i, 10);
+    assertEquals(JPF2JVMTestConversion.i, 10);
     assertEquals(cls1.getDeclaredFields()[0].getInt(cls1), 10);
   }
 }
