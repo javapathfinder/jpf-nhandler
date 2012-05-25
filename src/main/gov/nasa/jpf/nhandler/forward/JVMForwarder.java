@@ -40,11 +40,11 @@ public class JVMForwarder extends PropertyListenerAdapter {
 
   private void init (Config conf){
     if (!initialized){
-      delegate_spec = conf.getStringArray("nhandler.delegate.spec");
-      skip_spec = conf.getStringArray("nhandler.skip.spec");
-      filter_spec = conf.getStringArray("nhandler.filter.spec");
-      delegateNatives = conf.getBoolean("nhandler.delegate.natives");
-      skipNatives = conf.getBoolean("nhandler.skip.natives");
+      delegate_spec = conf.getStringArray("nhandler.spec.delegate");
+      skip_spec = conf.getStringArray("nhandler.spec.skip");
+      filter_spec = conf.getStringArray("nhandler.spec.filter");
+      delegateNatives = conf.getBoolean("nhandler.delegateNative");
+      skipNatives = conf.getBoolean("nhandler.skipNative");
       initialized = true;
     }
   }
@@ -183,16 +183,14 @@ public class JVMForwarder extends PropertyListenerAdapter {
    */
   public void searchStarted(Search search){
     Config config = search.getConfig();
-    boolean reset = config.getBoolean("nhandler.reset.onthefly");
-    boolean resetClasses = config.getBoolean("nhandler.reset.classes");
+    boolean reset = config.getBoolean("nhandler.clean");
     if(reset) {
       String path = config.getPath("jpf-nhandler") + "/onthefly";
       File onthefly = new File(path);
       String[] peers = onthefly.list();
 
       for(String name: peers) {
-    	if((reset && name.startsWith("OTF_JPF_") && (name.endsWith(".class") || name.endsWith(".java")))
-    	    || (resetClasses && name.startsWith("OTF_JPF_") && name.endsWith(".class"))) {
+    	if((reset && name.startsWith("OTF_JPF_") && (name.endsWith(".class") || name.endsWith(".java")))) {
           File peer = new File(onthefly, name);
           peer.delete();
     	}

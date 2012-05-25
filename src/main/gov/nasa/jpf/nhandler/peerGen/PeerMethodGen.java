@@ -76,7 +76,7 @@ public class PeerMethodGen {
   }
 
   private boolean genSource() {
-    return(PeerSourceGen.createSource);
+    return(PeerSourceGen.genSource);
   }
 
   public void create() {
@@ -700,7 +700,7 @@ public class PeerMethodGen {
         j++;
 
         if(genSource()) {
-          sourceGen.printUpdateJPFArgs(i);
+          sourceGen.printUpdateJPFArgs(i, nArgs);
         }
       }
     }

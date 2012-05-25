@@ -17,7 +17,7 @@ import java.util.HashMap;
 import org.junit.Test;
 
 public class ClassTest<E> extends TestJPF {
-  private final static String[] JPF_ARGS = { "+nhandler.delegate.spec=java.lang.Class.*" };
+  private final static String[] JPF_ARGS = { "+nhandler.spec.delegate=java.lang.Class.*" };
 
   public static void main (String[] args){
     runTestsOfThisClass(args);

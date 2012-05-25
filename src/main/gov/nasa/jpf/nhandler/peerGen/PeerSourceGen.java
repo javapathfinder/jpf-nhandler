@@ -11,6 +11,14 @@ import java.io.PrintWriter;
 
 import org.apache.bcel.generic.Type;
 
+/**
+ * Creates the source code for the clases that are created on the fly. To
+ * make this feature work, the property nhandler.genSource has to be set 
+ * to true.
+ * 
+ * @author Nastaran Shafiei
+ * @author Franck van Breugel
+ */
 public class PeerSourceGen {
 
   private File file;
@@ -21,12 +29,13 @@ public class PeerSourceGen {
 
   private StringBuilder content;
 
-  protected static boolean createSource = false;
+  protected static boolean addComment = false;
+
+  protected static boolean genSource = false;
 
   protected PeerSourceGen (String name) throws IOException {
     this.name = name;
     this.path = PeerClassGen.peersLocation + name + ".java";
-    System.out.println("path: " + path);
     this.file = new File(this.path);
 
     setContent();
@@ -125,9 +134,11 @@ public class PeerSourceGen {
   }
 
   private void addComment (String comment){
-    addDoubleIndent();
-    append("// " + comment);
-    gotoNextLine();
+    if(addComment) {
+      addDoubleIndent();
+      append("// " + comment);
+      gotoNextLine();
+    }
   }
 
   protected class MethodGen {
@@ -326,7 +337,7 @@ public class PeerSourceGen {
 
     private boolean addUpdateArgsComment = false;
 
-    protected void printUpdateJPFArgs (int index){
+    protected void printUpdateJPFArgs (int index, int nArgs){
       if (addUpdateArgsComment){
         addComment("Updates the input parameters objects of the method to be handled");
         addUpdateArgsComment = false;
@@ -334,7 +345,11 @@ public class PeerSourceGen {
 
       addDoubleIndent();
       append("converter.updateJPFObj(argValue[" + index + "], arg" + index + ");");
-      addBlankLine();
+      if(index == nArgs-1) {
+        addBlankLine();
+      } else {
+        gotoNextLine();
+      }
     }
 
     protected void printReturn (){

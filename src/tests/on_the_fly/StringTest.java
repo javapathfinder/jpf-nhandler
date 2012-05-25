@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public class StringTest extends TestJPF {
 
-  private final static String[] JPF_ARGS = { "+nhandler.delegate.spec=java.lang.String.*" };
+  private final static String[] JPF_ARGS = { "+nhandler.spec.delegate=java.lang.String.*" };
 
   public static void main (String[] args){
     runTestsOfThisClass(args);

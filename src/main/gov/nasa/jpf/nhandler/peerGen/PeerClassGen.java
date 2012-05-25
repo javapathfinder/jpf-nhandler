@@ -74,7 +74,8 @@ public class PeerClassGen implements Constants {
   private static void init(Config config) {
     if(!initialized) {
       peersLocation = config.getPath("jpf-nhandler") + "/onthefly/";
-      PeerSourceGen.createSource =  config.getBoolean("nhandler.generate.source");
+      PeerSourceGen.genSource = config.getBoolean("nhandler.genSource");
+      PeerSourceGen.addComment = config.getBoolean("nhandler.addComment");
     }
   }
 
@@ -112,7 +113,7 @@ public class PeerClassGen implements Constants {
 
     PeerClassGen.Peers.put(className, this);
     
-    if(PeerSourceGen.createSource) {
+    if(PeerSourceGen.genSource) {
       sourceGen = new PeerSourceGen(peerName);
     }
   }
