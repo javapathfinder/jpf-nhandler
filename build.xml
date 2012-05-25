@@ -142,8 +142,7 @@
   <target name="-compile-tests" if="have_tests" depends="-compile-annotations,-compile-main">
     <mkdir dir="build/tests"/>
     <javac srcdir="src/tests" destdir="build/tests" includeantruntime="false"
-           debug="${debug}" source="${src_level}" deprecation="${deprecation}"
-           includes="*,gov/nasa/jpf/test/**">
+           debug="${debug}" source="${src_level}" deprecation="${deprecation}">
       <classpath>
         <path refid="lib.path"/>
         <pathelement location="build/annotations"/>
