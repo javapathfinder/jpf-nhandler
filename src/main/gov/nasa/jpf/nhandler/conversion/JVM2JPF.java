@@ -103,9 +103,9 @@ public class JVM2JPF {
 
                 if (JVMfldValue == null){
                   JPFfldValue = MJIEnv.NULL;
-                } else if (JPFfldValue == MJIEnv.NULL || Converter.JPF2JVM_ObjMap.get(JPFfldValue) != JVMfldValue){
+                } else if (JPFfldValue == MJIEnv.NULL || Converter.objMapJPF2JVM.get(JPFfldValue) != JVMfldValue){
                   JPFfldValue = this.getJPFObj(JVMfldValue);
-                } else if (Converter.JPF2JVM_ObjMap.get(JPFfldValue) == JVMfldValue){
+                } else if (Converter.objMapJPF2JVM.get(JPFfldValue) == JVMfldValue){
                   this.updateJPFObj(JVMfldValue, JPFfldValue);
                 } else{
                   throw new ConversionException("Unconsidered case observed! - JVM2JPF.getJPFCls()");
@@ -294,9 +294,9 @@ public class JVM2JPF {
 
                 if (JVMfldValue == null){
                   JPFfldValue = MJIEnv.NULL;
-                } else if (JPFfldValue == MJIEnv.NULL || Converter.JPF2JVM_ObjMap.get(JPFfldValue) != JVMfldValue){
+                } else if (JPFfldValue == MJIEnv.NULL || Converter.objMapJPF2JVM.get(JPFfldValue) != JVMfldValue){
                   JPFfldValue = this.getJPFObj(JVMfldValue);
-                } else if (Converter.JPF2JVM_ObjMap.get(JPFfldValue) == JVMfldValue){
+                } else if (Converter.objMapJPF2JVM.get(JPFfldValue) == JVMfldValue){
                   this.updateJPFObj(JVMfldValue, JPFfldValue);
                 } else{
                   throw new ConversionException("Unconsidered case observed! - JVM2JPF.updateObj()");
@@ -353,9 +353,9 @@ public class JVM2JPF {
 
             if (arrObj[i] == null){
               elementValueRef = MJIEnv.NULL;
-            } else if (elementValueRef == MJIEnv.NULL || Converter.JPF2JVM_ObjMap.get(elementValueRef) != arrObj[i]){
+            } else if (elementValueRef == MJIEnv.NULL || Converter.objMapJPF2JVM.get(elementValueRef) != arrObj[i]){
               elementValueRef = this.getJPFObj(arrObj[i]);
-            } else if (Converter.JPF2JVM_ObjMap.get(elementValueRef) == arrObj[i]){
+            } else if (Converter.objMapJPF2JVM.get(elementValueRef) == arrObj[i]){
               this.updateJPFObj(arrObj[i], elementValueRef);
             } else{
               throw new ConversionException("Unconsidered case observed! - JVM2JPF.updateArr()");
@@ -397,12 +397,12 @@ public class JVM2JPF {
       }
     }
 
-    if (!found && Converter.JPF2JVM_ObjMap.containsValue(JVMObj)){
-      Iterator<Integer> iterator = (Converter.JPF2JVM_ObjMap.keySet()).iterator();
+    if (!found && Converter.objMapJPF2JVM.containsValue(JVMObj)){
+      Iterator<Integer> iterator = (Converter.objMapJPF2JVM.keySet()).iterator();
       Integer key;
       while (!found && iterator.hasNext()){
         key = iterator.next();
-        Object value = Converter.JPF2JVM_ObjMap.get(key);
+        Object value = Converter.objMapJPF2JVM.get(key);
         if (value == JVMObj){
           found = true;
           JPFRef = key;

@@ -26,13 +26,13 @@ public class Converter {
    * Keeps track of the JVM objects that have been already created from their
    * corresponding JPF objects, while performing conversion from JPF to JVM
    */
-  static ValueIdentityHashMap<Integer, Object> JPF2JVM_ObjMap = new ValueIdentityHashMap<Integer, Object>();
+  static ValueIdentityHashMap<Integer, Object> objMapJPF2JVM = new ValueIdentityHashMap<Integer, Object>();
 
   /**
    * Keeps track of the JVM classes that have been already created from their
    * corresponding JPF classes, while performing conversion from JPF to JVM
    */
-  static ValueIdentityHashMap<Integer, Class<?>> JPF2JVM_ClassMap = new ValueIdentityHashMap<Integer, Class<?>>();
+  static ValueIdentityHashMap<Integer, Class<?>> classMapJPF2JVM = new ValueIdentityHashMap<Integer, Class<?>>();
 
   /**
    * Keeps track of the JPF objects that have been already updated from their
@@ -49,8 +49,8 @@ public class Converter {
   public Converter (MJIEnv env) {
     this.env = env;
 
-    JPF2JVM_ObjMap.clear();
-    JPF2JVM_ClassMap.clear();
+    objMapJPF2JVM.clear();
+    classMapJPF2JVM.clear();
     updatedJPFObj.clear();
     updatedJPFCls.clear();
 

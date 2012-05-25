@@ -47,7 +47,7 @@ public class JPF2JVM {
     Class JVMCls = null;
     if (JPFRef != MJIEnv.NULL) {
       // First check if the class object has been already created.
-      JVMCls = Converter.JPF2JVM_ClassMap.get(JPFRef);
+      JVMCls = Converter.classMapJPF2JVM.get(JPFRef);
 
       /**
        * If the Class object has not been created & the given JPF class is not
@@ -61,7 +61,7 @@ public class JPF2JVM {
 
         try {
           JVMCls = Class.forName(sei.getClassInfo().getName());
-          Converter.JPF2JVM_ClassMap.put(JPFRef, JVMCls);
+          Converter.classMapJPF2JVM.put(JPFRef, JVMCls);
         } catch (ClassNotFoundException e) {
           e.printStackTrace();
         }
@@ -187,7 +187,7 @@ public class JPF2JVM {
     Object JVMObj = null;
     if (JPFRef != MJIEnv.NULL) {
       // First check if the object has been already created
-      JVMObj = Converter.JPF2JVM_ObjMap.get(JPFRef);
+      JVMObj = Converter.objMapJPF2JVM.get(JPFRef);
       /**
        * If the object has not been created & the given JPF object is not NULL,
        * the corresponding JVM object is created from JPFRef
@@ -218,7 +218,7 @@ public class JPF2JVM {
           // Creates a new instance of JVMCl
           JVMObj = instantiateFrom(JVMCl);
 
-        Converter.JPF2JVM_ObjMap.put(JPFRef, JVMObj);
+        Converter.objMapJPF2JVM.put(JPFRef, JVMObj);
 
         // Holds JVMCl and all of its ancestors
         List<Class> JVMClsList = new LinkedList<Class>();
@@ -292,7 +292,7 @@ public class JPF2JVM {
     Object JVMArr = null;
     if (JPFRef != MJIEnv.NULL) {
       // First check if the array has been already created
-      JVMArr = Converter.JPF2JVM_ObjMap.get(JPFRef);
+      JVMArr = Converter.objMapJPF2JVM.get(JPFRef);
 
       /**
        * If the array has not been created & the given JPF array is not NULL,
@@ -326,7 +326,7 @@ public class JPF2JVM {
           }
           JVMArr = arrObj;
         }
-        Converter.JPF2JVM_ObjMap.put(JPFRef, JVMArr);
+        Converter.objMapJPF2JVM.put(JPFRef, JVMArr);
       }
     }
     return JVMArr;
