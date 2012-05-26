@@ -88,8 +88,7 @@ public class ClassTest<E> extends TestJPF {
     }
   }
 
-  // handled by jpf-core
-  // @Test
+  @Test
   public void getDeclaredClassesTest (){
     if (verifyNoPropertyViolation(JPF_ARGS)){
       Class<?>[] cls = Class.class.getDeclaredClasses();
@@ -99,7 +98,7 @@ public class ClassTest<E> extends TestJPF {
     }
   }
 
-  // @Test
+  @Test
   public void getDeclaringClassTest (){
     if (verifyNoPropertyViolation(JPF_ARGS)){
       Class<?>[] cls = Class.class.getDeclaredClasses();
@@ -112,7 +111,6 @@ public class ClassTest<E> extends TestJPF {
     }
   }
 
-  // handled by jpf-core
   @Test
   public void getEnclosingClassTest (){
     if (verifyNoPropertyViolation(JPF_ARGS)){
@@ -126,40 +124,6 @@ public class ClassTest<E> extends TestJPF {
     }
   }
 
-  // INVESTIGATE: doesn't work without print statement! Investigate it when
-  // testing Constructor
-  // @Test
-  public void getEnclosingConstructor () throws SecurityException, NoSuchMethodException{
-    if (verifyNoPropertyViolation(JPF_ARGS)){
-      Class<?> cls = (new ClassTest.TestEnclosedClass()).foo.getClass();
-      System.out.println("\ncls: " + cls);
-      System.out.println("constructor: " + cls.getEnclosingConstructor());
-      // assertTrue(cls.getEnclosingConstructor() == null);
-      assertTrue(cls.getEnclosingConstructor().getDeclaringClass() == ClassTest.TestEnclosedClass.class);
-      // assertEquals(cls.getEnclosingConstructor().getName(), "<init>");
-      // Class.class.getEnclosingClass();
-    }
-  }
-
-  // INVESTIGATE: doesn't work! Investigate it when testing Method
-  // @Test
-  public void getEnclosingMethod () throws SecurityException, NoSuchMethodException{
-    if (verifyNoPropertyViolation(JPF_ARGS)){
-      System.out.println(TestEnclosedClass.class.getMethods());
-      Class<?> cls = (new ClassTest.TestEnclosedClass()).getLocalClassObj().getClass();
-      // assertTrue(cls.getEnclosingMethod().getDeclaringClass() ==
-      // ClassTest.TestEnclosedClass.class);
-      System.out.println("**" + cls.getEnclosingMethod().getDeclaringClass() + " == " + ClassTest.TestEnclosedClass.class);
-      System.out.println(cls);
-      System.out.println(cls.getEnclosingMethod().getDeclaringClass() + " == " + ClassTest.TestEnclosedClass.class);
-      // assertTrue(cls.getEnclosingMethod() ==
-      // ClassTest.TestEnclosedClass.class.getMethod("getLocalClassObj", new
-      // Class[0]));
-      // assertEquals(cls.getEnclosingConstructor().getName(), "<init>");
-    }
-  }
-
-  // handled by jpf-core
   @Test
   public void getFieldsTest (){
     if (verifyNoPropertyViolation(JPF_ARGS)){
@@ -206,7 +170,6 @@ public class ClassTest<E> extends TestJPF {
     }
   }
 
-  // handled by jpf-core
   @Test
   public void getTypeParametersTest (){
     if (verifyNoPropertyViolation(JPF_ARGS)){
@@ -255,14 +218,12 @@ public class ClassTest<E> extends TestJPF {
     }
   }
 
-  // IMPROVE: extend this test to a class that returns true isSynthetic() is
+  // Note: extend this test to a class that returns true isSynthetic() is
   // invoked
   @Test
   public void isSyntheticTest () throws ClassNotFoundException, SecurityException, NoSuchMethodException{
     if (verifyNoPropertyViolation(JPF_ARGS)){
-      // Class.class.isSynthetic();
       assertFalse(Class.class.isSynthetic());
-      // Class.forName("java.lang.Class", true, null);
     }
   }
 }
