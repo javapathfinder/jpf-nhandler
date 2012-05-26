@@ -46,12 +46,12 @@ public class PeerMethodGen {
    * 
    * @param mi
    *          an object that represents a native method in JPF
-   * @param env
-   *          an interface between JPF and the underlying JVM
    * 
-   * @param pc
-   *          a PeerClassCreator object that corresponds to the class of the
-   *          given method
+   * @param pcg
+   *          a bytecode generator for to the class of the given method
+   * 
+   * @param psg
+   *          a source code generator for the class of the given method
    */
   public PeerMethodGen (NativeMethodInfo mi, MJIEnv env, PeerClassGen pcg, PeerSourceGen psg) {
     this.peerClassGen = pcg;
@@ -72,6 +72,10 @@ public class PeerMethodGen {
     return(PeerSourceGen.genSource);
   }
 
+  /**
+   * Creates bytecode for the body of the method, and adds it to the peer class
+   * of this method.
+   */
   public void create() {
     if(this.isClinit()) {
       this.createClinit();
@@ -84,11 +88,7 @@ public class PeerMethodGen {
     return (this.name.equals("$clinit____V"));
   }
 
-  /**
-   * Creates bytecode for the body of the method and adds it to the peer class
-   * of this method.
-   */
-  public void createMethod (){
+  private void createMethod (){
     this.addException();
     int converter = this.createConverter();
     int caller = this.createCaller(converter);
@@ -128,11 +128,7 @@ public class PeerMethodGen {
     }
   }
 
-  /**
-   * Creates bytecode for the body of the method and adds it to the peer class
-   * of this method.
-   */
-  public void createClinit (){
+  private void createClinit (){
     this.addException();
     int converter = this.createConverter();
     int caller = this.createCaller(converter);
@@ -153,7 +149,7 @@ public class PeerMethodGen {
   }
 
   /**
-   * Creates bytecode for the empty method and adds it to the peer class
+   * Creates bytecode for the empty method, and adds it to the peer class
    * of this method.
    */
   public void createEmpty (){

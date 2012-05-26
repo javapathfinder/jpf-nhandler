@@ -26,6 +26,7 @@ import gov.nasa.jpf.util.MethodSpec;
  * @author Franck van Breugel
  */
 public class JVMForwarder extends PropertyListenerAdapter {
+
   private static String[] delegate_spec = null;
 
   private static String[] skip_spec = null;

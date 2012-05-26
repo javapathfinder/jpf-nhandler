@@ -22,7 +22,7 @@ public class SkippedMethodInfo extends NativeMethodInfo {
 
   protected boolean isUnsatisfiedLinkError (MJIEnv env){
     if(mth == null){
-      System.out.println("*** SKIPPING - Native method " + this.ci.getName() + "." + this.name + " is NULL");
+      System.out.println("* SKIPPING -> " + this.ci.getName() + "." + this.name + " is NULL");
       PeerClassGen peerCreator = PeerClassGen.getPeerCreator(this.getClassInfo(), env);
       mth = peerCreator.createEmptyMethod(this);
       this.peer = new NativePeer(peerCreator.getPeer(), this.ci);

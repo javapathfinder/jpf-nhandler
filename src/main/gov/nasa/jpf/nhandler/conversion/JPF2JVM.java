@@ -486,6 +486,14 @@ public class JPF2JVM {
     return (name.equals("boolean") || name.equals("byte") || name.equals("int") || name.equals("short") || name.equals("long") || name.equals("char") || name.equals("float") || name.equals("double"));
   }
 
+  /**
+   * Returns a class corresponding to the given primitive type
+   * 
+   * @param name
+   *          primitive type name
+   *          
+   * @return class corresponding to the given primitive type
+   */
   private static Class<?> getPrimitiveClass (String name) {
     if (name.equals("boolean")) {
       return boolean.class;

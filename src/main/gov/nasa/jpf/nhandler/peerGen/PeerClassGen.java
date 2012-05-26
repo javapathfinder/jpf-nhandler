@@ -95,7 +95,7 @@ public class PeerClassGen implements Constants {
     try{
       this.peer = this.loadClass(peerName);
       _cg = new ClassGen(Repository.lookupClass(this.loadClass(peerName)));
-      System.out.println("   Already has a OTF peer class!");
+      // System.out.println("   Already has a OTF peer class!");
     } catch (ClassNotFoundException e){
       // do nothing!
     }
@@ -137,9 +137,7 @@ public class PeerClassGen implements Constants {
 
     if (PeerClassGen.Peers.containsKey(className)){
       peerCreator = PeerClassGen.Peers.get(className);
-      System.out.println("   Already has a PeerClassCreator!");
-    } else{
-      System.out.println("   Does not have a PeerClassCreator!");
+    } else {
       try {
 		peerCreator = new PeerClassGen(ci, env);
 	  } catch (IOException e) {
@@ -177,9 +175,6 @@ public class PeerClassGen implements Constants {
    * 
    * @param mi
    *          an object that represents a native method in JPF
-   * 
-   * @param env
-   *          an interface between JPF and the underlying JVM
    * 
    * @return a Method object corresponding to the given NativeMethodInfo object
    */
@@ -221,9 +216,6 @@ public class PeerClassGen implements Constants {
    * 
    * @param mi
    *          an object that represents a native method in JPF
-   * 
-   * @param env
-   *          an interface between JPF and the underlying JVM
    * 
    * @return a Method object corresponding to the given NativeMethodInfo object
    */

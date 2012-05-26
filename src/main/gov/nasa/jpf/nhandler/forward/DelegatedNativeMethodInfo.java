@@ -21,7 +21,7 @@ public class DelegatedNativeMethodInfo extends NativeMethodInfo {
 
   protected boolean isUnsatisfiedLinkError (MJIEnv env){
     if (mth == null){
-      System.out.println("*** DELEGATING - Unhandled Native method " + this.ci.getName() + "." + this.name + " is NULL");
+      System.out.println("* DELEGATING Unhandled Native -> " + this.ci.getName() + "." + this.name);
       PeerClassGen peerCreator = PeerClassGen.getPeerCreator(this.getClassInfo(), env);
       mth = peerCreator.createMethod(this);
       this.peer = new NativePeer(peerCreator.getPeer(), this.ci);
