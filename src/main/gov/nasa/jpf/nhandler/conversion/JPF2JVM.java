@@ -25,9 +25,19 @@ import java.util.List;
 public class JPF2JVM {
 
   private MJIEnv env;
+  private ClassLoader cl;
 
   public JPF2JVM (MJIEnv env) {
     this.env = env;
+    this.cl = env.getConfig().getClassLoader();
+  }
+
+  public Class<?> loadClass(String cname) throws ClassNotFoundException {
+    if(isArray(cname)) {
+      return Class.forName(cname);
+    } else {
+      return cl.loadClass(cname);
+    }
   }
 
   /**
@@ -60,10 +70,10 @@ public class JPF2JVM {
         StaticElementInfo sei = ci.getStaticElementInfo();
 
         try {
-          JVMCls = Class.forName(sei.getClassInfo().getName());
+          JVMCls = loadClass(sei.getClassInfo().getName());
           Converter.classMapJPF2JVM.put(JPFRef, JVMCls);
         } catch (ClassNotFoundException e) {
-          e.printStackTrace();
+		  throw new NoClassDefFoundError(sei.getClassInfo().getName());
         }
 
         // Holds JVMCls and all of its ancestors
@@ -206,10 +216,11 @@ public class JPF2JVM {
         if (JVMCl == Class.class) {
           try {
             String name = env.getReferredClassInfo(JPFRef).getName();
-            if (JPF2JVM.isPrimitiveClass(name))
+            if (JPF2JVM.isPrimitiveClass(name)) {
               JVMObj = JPF2JVM.getPrimitiveClass(name);
-            else
-              JVMObj = Class.forName(name);
+            } else {
+              JVMObj = loadClass(name);
+            }
           } catch (ClassNotFoundException e) {
             e.printStackTrace();
           }
@@ -311,10 +322,9 @@ public class JPF2JVM {
           int[] JPFArr = ((ReferenceArrayFields) dei.getFields()).asReferenceArray();
           int arrSize = JPFArr.length;
 
-          // Object[] arrObj = new Object[arrSize];
           Class<?> compType = null;
           try {
-            compType = Class.forName(dei.getClassInfo().getComponentClassInfo().getName());
+            compType = loadClass(dei.getClassInfo().getComponentClassInfo().getName());
           } catch (ClassNotFoundException e) {
             e.printStackTrace();
           }
@@ -513,5 +523,9 @@ public class JPF2JVM {
       return double.class; 
     }
     return null;
+  }
+
+  protected static boolean isArray(String cname) {
+    return cname.startsWith("[");
   }
 }
