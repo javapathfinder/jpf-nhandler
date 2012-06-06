@@ -266,13 +266,13 @@ public class PeerSourceGen {
       gotoNextLine();
     }
 
-    protected void printGetCallerClass (){
+    protected void printGetCallerClass (String type){
       gotoNextLine();
 
       addComment("Obtains the class of the object that invokes the method to be handled");
 
       addDoubleIndent();
-      append("Class<?> callerClass = caller.getClass();");
+      append("Class<?> callerClass = Class.forName(\"" + type + "\");");
       gotoNextLine();
     }
 

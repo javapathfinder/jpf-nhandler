@@ -41,6 +41,8 @@ public class PeerMethodGen {
 
   private PeerSourceGen.MethodGen sourceGen; 
 
+  MJIEnv env;
+
   /**
    * Creates a new instance of the PeerMethodCreator class.
    * 
@@ -58,6 +60,7 @@ public class PeerMethodGen {
     this.il = new InstructionList();
     this.mi = mi;
     this.name = getJNIName(mi);
+    this.env = env;
     Type returnType = PeerMethodGen.getType(mi.getReturnTypeName());
     Type[] argsType = PeerMethodGen.getArgumentsType(mi);
     this.nativeMth = new MethodGen(methodAcc, (returnType.equals(Type.OBJECT)) ? Type.INT : returnType, argsType, PeerMethodGen.getArgumentsName(mi), name, PeerClassGen.getNativePeerClsName(mi.getClassName()), il, peerClassGen._cp);
@@ -473,14 +476,16 @@ public class PeerMethodGen {
     if (this.mi.isStatic())
       callerClass = caller;
     else{
-      this.il.append(InstructionFactory.createLoad(Type.OBJECT, caller));
-      this.il.append(peerClassGen._factory.createInvoke("java.lang.Object", "getClass", new ObjectType("java.lang.Class"), Type.NO_ARGS, Constants.INVOKEVIRTUAL));
+      // the class of the last invoked method
+      String className = env.getVM().getCurrentThread().getMethod().getClassName();
+      this.il.append(new PUSH(peerClassGen._cp, className));
+      this.il.append(peerClassGen._factory.createInvoke("java.lang.Class", "forName", new ObjectType("java.lang.Class"), new Type[] { Type.STRING }, Constants.INVOKESTATIC));
       LocalVariableGen lg = this.nativeMth.addLocalVariable("callerClass", new ObjectType("java.lang.Class"), null, null);
       callerClass = lg.getIndex();
       this.il.append(InstructionFactory.createStore(Type.OBJECT, callerClass));
 
       if(genSource()) {
-        sourceGen.printGetCallerClass();
+        sourceGen.printGetCallerClass(className);
       }
     }
     return callerClass;
@@ -913,6 +918,7 @@ public class PeerMethodGen {
 
 	if(mname.startsWith("<") && mname.endsWith(">")) {
       mname = "$" + mname.substring(1, mname.lastIndexOf(">"));
+      System.out.println("init mathod: " + Types.getJNIMangledMethodName(null, mname, mi.getSignature()));
 	}
 
 	return (Types.getJNIMangledMethodName(null, mname, mi.getSignature()));
