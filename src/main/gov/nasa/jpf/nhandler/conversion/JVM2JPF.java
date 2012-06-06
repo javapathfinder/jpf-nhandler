@@ -430,14 +430,16 @@ public class JVM2JPF {
    */
   private int getNewJPFRef (Object JVMObj) throws ConversionException{
     int JPFRef = MJIEnv.NULL;
-    if (!JVMObj.getClass().isArray()){
+    Class<?> JVMCls = JVMObj.getClass();
+    if (!JVMCls.isArray()){
       ClassInfo fci = null;
       try{
-        fci = ClassInfo.getResolvedClassInfo(JVMObj.getClass().getName());
+        fci = this.getJPFCls(JVMCls);
       } catch (NoClassInfoException e){
-        System.out.println("WARNING: the class " + JVMObj.getClass() + " is ignored!");
-        return -1;
+        System.out.println("WARNING: the class " + JVMCls + " is ignored!");
+        return MJIEnv.NULL;
       }
+
       JPFRef = env.newObject(fci);
       this.updateObj(JVMObj, JPFRef);
     } else{
