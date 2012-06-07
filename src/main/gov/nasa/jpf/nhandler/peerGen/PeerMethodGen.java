@@ -80,15 +80,22 @@ public class PeerMethodGen {
    * of this method.
    */
   public void create() {
-    if(this.isClinit()) {
+    if(mi.isClinit()) {
       this.createClinit();
+    } else if(mi.isCtor()) {
+      this.createCtor();
     } else {
       this.createMethod();
     }
-  }
 
-  private boolean isClinit() {
-    return (this.name.equals("$clinit____V"));
+    if(genSource()) {
+      sourceGen.wrapUpSource();
+    }
+
+    this.nativeMth.setMaxStack();
+    this.nativeMth.setMaxLocals();
+    peerClassGen._cg.addMethod(this.nativeMth.getMethod());
+    this.il.dispose();
   }
 
   private void createMethod (){
@@ -120,15 +127,21 @@ public class PeerMethodGen {
 
     this.updateJPFArguments(converter, argValue);
     this.addReturnStatement(jpfReturnValue);
+  }
 
-    this.nativeMth.setMaxStack();
-    this.nativeMth.setMaxLocals();
-    peerClassGen._cg.addMethod(this.nativeMth.getMethod());
-    this.il.dispose();
-
-    if(genSource()) {
-      sourceGen.wrapUpSource();
-    }
+  private void createCtor (){
+    this.addException();
+    int converter = this.createConverter();
+    int caller = this.createCaller(converter);
+    int argValue = this.createArgValue(converter);
+    int argType = this.createArgType(argValue);
+    int callerClass = this.getCallerClass(caller);
+    int ctor = this.getConstructor(callerClass, argType);
+    this.setAccessible(ctor);
+    int returnValue = this.createNewInstance(caller, ctor, argValue);
+    int jpfReturnValue = this.convertJVM2JPF(converter, returnValue);
+    this.updateJPFArguments(converter, argValue);
+    this.addReturnStatement(jpfReturnValue);
   }
 
   private void createClinit (){
@@ -138,17 +151,7 @@ public class PeerMethodGen {
     int callerClass = this.getCallerClass(caller);
     this.updateJPFClass(converter, callerClass);
     // just set it to some dummy value, since the method is of type of void
-    int jpfReturnValue = -1;
-    this.addReturnStatement(jpfReturnValue);
-
-    this.nativeMth.setMaxStack();
-    this.nativeMth.setMaxLocals();
-    peerClassGen._cg.addMethod(this.nativeMth.getMethod());
-    this.il.dispose();
-
-    if(genSource()) {
-      sourceGen.wrapUpSource();
-    }
+    this.addReturnStatement(MJIEnv.NULL);
   }
 
   /**
@@ -188,8 +191,12 @@ public class PeerMethodGen {
     this.nativeMth.addException("java.lang.ClassNotFoundException");
     this.nativeMth.addException("java.lang.reflect.InvocationTargetException");
 
+    if(mi.isCtor()) {
+      this.nativeMth.addException("java.lang.InstantiationException");
+    }
+
      if(genSource()) {
-       sourceGen.printThrowsExceptions();
+       sourceGen.printThrowsExceptions(mi.isCtor());
      }
   }
 
@@ -524,6 +531,23 @@ public class PeerMethodGen {
     return method;
   }
 
+  private int getConstructor (int callerClass, int argType){
+    String name = this.mi.getName();
+    this.il.append(InstructionFactory.createLoad(Type.OBJECT, callerClass));
+    this.il.append(InstructionFactory.createLoad(Type.OBJECT, argType));
+
+    this.il.append(peerClassGen._factory.createInvoke("java.lang.Class", "getDeclaredConstructor", new ObjectType("java.lang.reflect.Constructor"), new Type[] { new ArrayType(new ObjectType("java.lang.Class"), 1) }, Constants.INVOKEVIRTUAL));
+
+    LocalVariableGen lg = this.nativeMth.addLocalVariable("ctor", new ObjectType("java.lang.reflect.Constructor"), null, null);
+    int method = lg.getIndex();
+    this.il.append(InstructionFactory.createStore(Type.OBJECT, method));
+
+    if(genSource()) {
+      sourceGen.printGetCtor(name);
+    }
+    return method;
+  }
+
   /**
    * Adds bytecode to the body of the method that provides access to a private
    * method.
@@ -538,7 +562,7 @@ public class PeerMethodGen {
     this.il.append(peerClassGen._factory.createInvoke("java.lang.reflect.Method", "setAccessible", Type.VOID, new Type[] { Type.BOOLEAN }, Constants.INVOKEVIRTUAL));
     
     if(genSource()) {
-      sourceGen.printSetAccessible();
+      sourceGen.printSetAccessible(mi.isCtor());
     }
   }
 
@@ -584,6 +608,22 @@ public class PeerMethodGen {
     if(genSource()) {
       sourceGen.printInvokeMethod(mi.isStatic());
     }
+    return returnValue;
+  }
+
+  private int createNewInstance (int caller, int method, int argValue){
+    int returnValue = -1;
+    this.il.append(InstructionFactory.createLoad(Type.OBJECT, method));
+    this.il.append(InstructionFactory.createLoad(Type.OBJECT, argValue));
+    this.il.append(peerClassGen._factory.createInvoke("java.lang.reflect.Constructor", "newInstance", Type.OBJECT, new Type[] { new ArrayType(Type.OBJECT, 1) }, Constants.INVOKEVIRTUAL));
+    LocalVariableGen lg = this.nativeMth.addLocalVariable("returnValue", Type.OBJECT, null, null);
+    returnValue = lg.getIndex();
+    this.il.append(InstructionFactory.createStore(Type.OBJECT, returnValue));
+
+    if(genSource()) {
+      sourceGen.creatNewInstance();
+    }
+
     return returnValue;
   }
 
@@ -918,7 +958,6 @@ public class PeerMethodGen {
 
 	if(mname.startsWith("<") && mname.endsWith(">")) {
       mname = "$" + mname.substring(1, mname.lastIndexOf(">"));
-      System.out.println("init mathod: " + Types.getJNIMangledMethodName(null, mname, mi.getSignature()));
 	}
 
 	return (Types.getJNIMangledMethodName(null, mname, mi.getSignature()));

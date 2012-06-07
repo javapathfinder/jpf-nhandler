@@ -125,6 +125,13 @@ public class PeerSourceGen {
     append("    ");
   }
 
+  private void addMultipleDoubleIndent (int n){
+    while(n>0) {
+      append("    ");
+      n--;
+    }
+  }
+
   private void gotoNextLine (){
     append("\n");
   }
@@ -169,22 +176,21 @@ public class PeerSourceGen {
       append(")");
     }
 
-    protected void printThrowsExceptions (){
+    protected void printThrowsExceptions (boolean isCtor){
       gotoNextLine();
-      addDoubleIndent();
-      addDoubleIndent();
+      addMultipleDoubleIndent(2);
       append("throws java.lang.IllegalArgumentException,");
       gotoNextLine();
-      addDoubleIndent();
-      addDoubleIndent();
-      addDoubleIndent();
+      addMultipleDoubleIndent(3);
       append("SecurityException, NoSuchMethodException, IllegalAccessException,");
       gotoNextLine();
-      addDoubleIndent();
-      addDoubleIndent();
-      addDoubleIndent();
-      addDoubleIndent();
+      addMultipleDoubleIndent(4);
       append(" ClassNotFoundException, ConversionException, InvocationTargetException");
+      if(isCtor) {
+        gotoNextLine();
+        addMultipleDoubleIndent(5);
+        append(" InstantiationException");
+      }
       completeHeader();
     }
 
@@ -290,11 +296,22 @@ public class PeerSourceGen {
       addBlankLine();
     }
 
-    protected void printSetAccessible (){
+    protected void printGetCtor (String mname){
+      gotoNextLine();
+
+      addComment("Obtains the instance of the constructor to be handled");
+
+      addDoubleIndent();
+      append("Constructor ctor = callerClass.getDeclaredConstructor(argType);");
+      addBlankLine();
+    }
+
+    protected void printSetAccessible (boolean isCtor){
       addComment("Makes the method with any access modifier accessible");
 
       addDoubleIndent();
-      append("method.setAccessible(true);");
+      String mname = isCtor? "ctor" : "method";
+      append(mname + ".setAccessible(true);");
       addBlankLine();
     }
 
@@ -307,6 +324,15 @@ public class PeerSourceGen {
       } else{
         append("Object returnValue = method.invoke(caller, argValue);");
       }
+      addBlankLine();
+    }
+
+    protected void creatNewInstance (){
+      addComment("Creates an instance by invoking the constructor to be handled in JVM");
+
+      addDoubleIndent();
+
+      append("Object returnValue = ctor.newInstance(argValue);");
       addBlankLine();
     }
 
