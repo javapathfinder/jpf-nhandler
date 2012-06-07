@@ -559,7 +559,8 @@ public class PeerMethodGen {
   private void setAccessible (int method){
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, method));
     this.il.append(new PUSH(peerClassGen._cp, 1));
-    this.il.append(peerClassGen._factory.createInvoke("java.lang.reflect.Method", "setAccessible", Type.VOID, new Type[] { Type.BOOLEAN }, Constants.INVOKEVIRTUAL));
+    String type = mi.isCtor() ? "java.lang.reflect.Constructor": "java.lang.reflect.Method";
+    this.il.append(peerClassGen._factory.createInvoke(type, "setAccessible", Type.VOID, new Type[] { Type.BOOLEAN }, Constants.INVOKEVIRTUAL));
     
     if(genSource()) {
       sourceGen.printSetAccessible(mi.isCtor());
