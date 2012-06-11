@@ -138,10 +138,10 @@ public class PeerMethodGen {
     int callerClass = this.getCallerClass(caller);
     int ctor = this.getConstructor(callerClass, argType);
     this.setAccessible(ctor);
-    int returnValue = this.createNewInstance(caller, ctor, argValue);
-    int jpfReturnValue = this.convertJVM2JPF(converter, returnValue);
+    this.createNewInstance(caller, ctor, argValue);
+    this.updateJPFObj(converter, caller, 1);
     this.updateJPFArguments(converter, argValue);
-    this.addReturnStatement(jpfReturnValue);
+    this.addReturnStatement(MJIEnv.NULL);
   }
 
   private void createClinit (){
