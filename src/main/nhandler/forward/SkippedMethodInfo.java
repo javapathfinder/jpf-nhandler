@@ -1,10 +1,10 @@
-package gov.nasa.jpf.nhandler.forward;
+package nhandler.forward;
 
-import gov.nasa.jpf.jvm.MJIEnv;
-import gov.nasa.jpf.jvm.MethodInfo;
-import gov.nasa.jpf.jvm.NativeMethodInfo;
-import gov.nasa.jpf.jvm.NativePeer;
-import gov.nasa.jpf.nhandler.peerGen.PeerClassGen;
+import nhandler.peerGen.PeerClassGen;
+import gov.nasa.jpf.vm.MJIEnv;
+import gov.nasa.jpf.vm.MethodInfo;
+import gov.nasa.jpf.vm.NativeMethodInfo;
+import gov.nasa.jpf.vm.NativePeer;
 
 /** 
  * This is a subclass of NativeMethodInfo which makes executeNative() skip the
@@ -25,7 +25,12 @@ public class SkippedMethodInfo extends NativeMethodInfo {
       System.out.println("* SKIPPING -> " + this.ci.getName() + "." + this.name + " is NULL");
       PeerClassGen peerCreator = PeerClassGen.getPeerCreator(this.getClassInfo(), env);
       mth = peerCreator.createEmptyMethod(this);
-      this.peer = new NativePeer(peerCreator.getPeer(), this.ci);
+
+      Class<?> peerClass = peerCreator.getPeer();
+      this.peer = NativePeer.getInstance(peerClass, NativePeer.class);
+      this.peer.initialize(peerClass, this.ci, true);
+
+      //this.peer = new NativePeer(peerCreator.getPeer(), this.ci);
       assert (this.peer != null && mth != null);
     }
 

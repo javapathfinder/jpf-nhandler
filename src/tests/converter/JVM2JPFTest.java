@@ -1,6 +1,6 @@
 package converter;
 
-import gov.nasa.jpf.jvm.MJIEnv;
+import gov.nasa.jpf.vm.MJIEnv;
 import gov.nasa.jpf.util.test.TestJPF;
 
 import java.util.HashMap;

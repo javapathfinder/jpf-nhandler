@@ -53,7 +53,7 @@ public class StringTest extends TestJPF {
 
   @Test
   public void testIndexOf (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       String haystack = "abcdefghi";
       assertEquals(haystack.indexOf("q"), -1);
       assertEquals(haystack.indexOf('q'), -1);
@@ -67,7 +67,7 @@ public class StringTest extends TestJPF {
 
   @Test
   public void testLastIndexOf (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       String x = "abcdeabcdef";
       assertEquals(9, x.lastIndexOf("e"));
       assertEquals(10, x.lastIndexOf("f"));
@@ -77,7 +77,7 @@ public class StringTest extends TestJPF {
 
   @Test
   public void testHashCode (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       String[] testStrings = { "watch", "unwatch", "toString", "toSource", "eval", "valueOf", "constructor", "__proto__", "polygenelubricants", "xy", "x", "" };
       int[] javaHashes = { 112903375, -274141738, -1776922004, -1781441930, 3125404, 231605032, -1588406278, 2139739112, Integer.MIN_VALUE, 3841, 120, 0 };
 
@@ -107,7 +107,7 @@ public class StringTest extends TestJPF {
 
   @Test
   public void testMatches (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       assertFalse("1f", "abbbbcd".matches("b*"));
       assertFalse("2f", "abbbbcd".matches("b+"));
       assertTrue("3t", "abbbbcd".matches("ab*bcd"));
@@ -121,7 +121,7 @@ public class StringTest extends TestJPF {
 
   @Test
   public void testGetBytes (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       String str = "This is a simple ASCII string";
       byte[] bytes = str.getBytes();
       assertEquals(str.length(), bytes.length);
@@ -133,7 +133,7 @@ public class StringTest extends TestJPF {
 
   @Test
   public void testToUpperCase (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       assertEquals("ABC", "AbC".toUpperCase());
       assertEquals("ABC", "abc".toUpperCase());
       assertEquals("", "".toUpperCase());
@@ -142,7 +142,7 @@ public class StringTest extends TestJPF {
 
   @Test
   public void testToLowerCase (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       assertEquals("abc", "AbC".toLowerCase());
       assertEquals("abc", "abc".toLowerCase());
       assertEquals("", "".toLowerCase());
@@ -166,7 +166,7 @@ public class StringTest extends TestJPF {
 
   @Test
   public void testSplit (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       compareList("fullSplit", new String[] { "abc", "", "", "de", "f" }, hideFromCompiler("abcxxxdexfxx").split("x"));
       compareList("emptyRegexSplit", new String[] { "", "a", "b", "c", "x", "x", "d", "e", "x", "f", "x" }, hideFromCompiler("abcxxdexfx").split(""));
       String booAndFoo = hideFromCompiler("boo:and:foo");
@@ -196,7 +196,7 @@ public class StringTest extends TestJPF {
 
   @Test
   public void testTrim (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       assertEquals("abc", "   \t abc \n  ".trim());
       assertEquals("abc", "abc".trim());
       assertEquals("abc", " abc".trim());
@@ -208,7 +208,7 @@ public class StringTest extends TestJPF {
 
   @Test
   public void testConcat (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       String abc = String.valueOf(new char[] { 'a', 'b', 'c' });
       String def = String.valueOf(new char[] { 'd', 'e', 'f' });
       String empty = String.valueOf(new char[] {});
@@ -232,7 +232,7 @@ public class StringTest extends TestJPF {
 
   @Test
   public void testReplace (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       String axax = String.valueOf(new char[] { 'a', 'x', 'a', 'x' });
       String aaaa = String.valueOf(new char[] { 'a', 'a', 'a', 'a' });
       assertEquals("aaaa", axax.replace('x', 'a'));
@@ -257,7 +257,7 @@ public class StringTest extends TestJPF {
 
   @Test
   public void testReplaceAll (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       String regex = hideFromCompiler("*[").replaceAll("([/\\\\\\.\\*\\+\\?\\|\\(\\)\\[\\]\\{\\}])", "\\\\$1");
       assertEquals("\\*\\[", regex);
       String replacement = hideFromCompiler("\\").replaceAll("\\\\", "\\\\\\\\").replaceAll("\\$", "\\\\$");
@@ -279,7 +279,7 @@ public class StringTest extends TestJPF {
 
   @Test
   public void testReplaceString (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       assertEquals("foobar", hideFromCompiler("bazbar").replace("baz", "foo"));
       assertEquals("$0bar", hideFromCompiler("foobar").replace("foo", "$0"));
       assertEquals("$1bar", hideFromCompiler("foobar").replace("foo", "$1"));
@@ -300,7 +300,7 @@ public class StringTest extends TestJPF {
 
   @Test
   public void testIntern (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       String s1 = String.valueOf(new char[] { 'a', 'b', 'c', 'd', 'e', 'f' });
       String s2 = String.valueOf(new char[] { 'a', 'b', 'c', 'd', 'e', 'f' });
       assertTrue("strings not equal", s1.equals(s2));

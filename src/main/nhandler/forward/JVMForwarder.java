@@ -1,15 +1,15 @@
-package gov.nasa.jpf.nhandler.forward;
+package nhandler.forward;
 
 import java.io.File;
 import java.lang.reflect.Method;
 
 import gov.nasa.jpf.Config;
 import gov.nasa.jpf.PropertyListenerAdapter;
-import gov.nasa.jpf.jvm.ClassInfo;
-import gov.nasa.jpf.jvm.JVM;
-import gov.nasa.jpf.jvm.MethodInfo;
-import gov.nasa.jpf.jvm.NativeMethodInfo;
-import gov.nasa.jpf.jvm.NativePeer;
+import gov.nasa.jpf.vm.ClassInfo;
+import gov.nasa.jpf.vm.VM;
+import gov.nasa.jpf.vm.MethodInfo;
+import gov.nasa.jpf.vm.NativeMethodInfo;
+import gov.nasa.jpf.vm.NativePeer;
 import gov.nasa.jpf.search.Search;
 import gov.nasa.jpf.util.MethodSpec;
 
@@ -50,9 +50,9 @@ public class JVMForwarder extends PropertyListenerAdapter {
     }
   }
 
-  public void classLoaded (JVM vm){
+  @Override
+  public void classLoaded (VM vm, ClassInfo ci){
     init(vm.getConfig());
-    ClassInfo ci = vm.getLastClassInfo();
 
     processNatives(ci);
     processDelegated(ci);
@@ -182,6 +182,7 @@ public class JVMForwarder extends PropertyListenerAdapter {
    * at the searchStarted event, if the option nhandler.reset is set to true,
    * all the peer classes created on the fly are removed. 
    */
+  @Override
   public void searchStarted(Search search){
     Config config = search.getConfig();
     boolean reset = config.getBoolean("nhandler.clean");

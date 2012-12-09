@@ -1,14 +1,14 @@
-package gov.nasa.jpf.nhandler.conversion;
+package nhandler.conversion;
 
-import gov.nasa.jpf.jvm.ArrayFields;
-import gov.nasa.jpf.jvm.ClassInfo;
-import gov.nasa.jpf.jvm.DynamicElementInfo;
-import gov.nasa.jpf.jvm.ElementInfo;
-import gov.nasa.jpf.jvm.FieldInfo;
-import gov.nasa.jpf.jvm.Fields;
-import gov.nasa.jpf.jvm.MJIEnv;
-import gov.nasa.jpf.jvm.NoClassInfoException;
-import gov.nasa.jpf.jvm.StaticElementInfo;
+import gov.nasa.jpf.vm.ArrayFields;
+import gov.nasa.jpf.vm.ClassInfo;
+import gov.nasa.jpf.vm.ClassInfoException;
+import gov.nasa.jpf.vm.DynamicElementInfo;
+import gov.nasa.jpf.vm.ElementInfo;
+import gov.nasa.jpf.vm.FieldInfo;
+import gov.nasa.jpf.vm.Fields;
+import gov.nasa.jpf.vm.MJIEnv;
+import gov.nasa.jpf.vm.StaticElementInfo;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -51,7 +51,7 @@ public class JVM2JPF {
     if (JVMCls != null){
       // retrieving the integer representing the Class in JPF
       JPFCls = ClassInfo.getResolvedClassInfo(JVMCls.getName());
-      StaticElementInfo sei = JPFCls.getStaticElementInfo();
+      StaticElementInfo sei = JPFCls.getModifiableStaticElementInfo();
 
       if (sei != null){
         JPFClsRef = sei.getObjectRef();
@@ -65,7 +65,7 @@ public class JVM2JPF {
          */
         if (!JPFCls.isRegistered()){
           JPFCls.registerClass(env.getThreadInfo());
-          sei = JPFCls.getStaticElementInfo();
+          sei = JPFCls.getModifiableStaticElementInfo();
           JPFClsRef = sei.getObjectRef();
         }
 
@@ -246,7 +246,7 @@ public class JVM2JPF {
           }
         }
         ClassInfo ci = this.getJPFCls(JVMObj.getClass());
-        DynamicElementInfo dei = (DynamicElementInfo) env.getHeap().get(JPFObj);
+        DynamicElementInfo dei = (DynamicElementInfo) env.getHeap().getModifiable(JPFObj);
 
         List<Class<?>> JVMClsList = new LinkedList<Class<?>>();
         List<ClassInfo> JPFClsList = new LinkedList<ClassInfo>();
@@ -335,7 +335,7 @@ public class JVM2JPF {
       if (!Converter.updatedJPFObj.containsKey(JPFArr)){
         Converter.updatedJPFObj.put(JPFArr, JVMArr);
 
-        DynamicElementInfo dei = (DynamicElementInfo) env.getHeap().get(JPFArr);
+        DynamicElementInfo dei = (DynamicElementInfo) env.getHeap().getModifiable(JPFArr);
 
         ArrayFields fields = (ArrayFields) dei.getFields();
 
@@ -432,16 +432,21 @@ public class JVM2JPF {
     int JPFRef = MJIEnv.NULL;
     Class<?> JVMCls = JVMObj.getClass();
     if (!JVMCls.isArray()){
-      ClassInfo fci = null;
-      try{
-        fci = this.getJPFCls(JVMCls);
-      } catch (NoClassInfoException e){
-        System.out.println("WARNING: the class " + JVMCls + " is ignored!");
-        return MJIEnv.NULL;
-      }
+      // we treat Strings differently, untill we immigrate to JDK7
+      if(JVMObj.getClass()==String.class) {
+        JPFRef = env.newString(JVMObj.toString());
+      } else {
+        ClassInfo fci = null;
+        try{
+          fci = this.getJPFCls(JVMCls);
+        } catch (ClassInfoException e){
+          System.out.println("WARNING: the class " + JVMCls + " is ignored!");
+          return MJIEnv.NULL;
+        }
 
-      JPFRef = env.newObject(fci);
-      this.updateObj(JVMObj, JPFRef);
+        JPFRef = env.newObject(fci);
+        this.updateObj(JVMObj, JPFRef);
+      }
     } else{
       JPFRef = this.createNewJPFArray(JVMObj);
       this.updateArr(JVMObj, JPFRef);

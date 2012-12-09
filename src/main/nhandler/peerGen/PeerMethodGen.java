@@ -1,9 +1,9 @@
-package gov.nasa.jpf.nhandler.peerGen;
+package nhandler.peerGen;
 
-import gov.nasa.jpf.jvm.MJIEnv;
-import gov.nasa.jpf.jvm.MethodInfo;
-import gov.nasa.jpf.jvm.NativeMethodInfo;
-import gov.nasa.jpf.jvm.Types;
+import gov.nasa.jpf.vm.MJIEnv;
+import gov.nasa.jpf.vm.MethodInfo;
+import gov.nasa.jpf.vm.NativeMethodInfo;
+import gov.nasa.jpf.vm.Types;
 
 import org.apache.bcel.Constants;
 import org.apache.bcel.generic.ArrayType;
@@ -37,7 +37,7 @@ public class PeerMethodGen {
 
   private static final int methodAcc = Constants.ACC_PUBLIC | Constants.ACC_STATIC;
 
-  private static final String conversionPkg = "gov.nasa.jpf.nhandler.conversion";
+  private static final String conversionPkg = "nhandler.conversion";
 
   private PeerSourceGen.MethodGen sourceGen; 
 
@@ -213,7 +213,7 @@ public class PeerMethodGen {
     this.il.append(InstructionConstants.DUP);
     // Load from local variable
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
-    this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "<init>", Type.VOID, new Type[] { new ObjectType("gov.nasa.jpf.jvm.MJIEnv") }, Constants.INVOKESPECIAL));
+    this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "<init>", Type.VOID, new Type[] { new ObjectType(PeerClassGen.MJIEnvCls) }, Constants.INVOKESPECIAL));
     // Store into local variable
     LocalVariableGen lg = this.nativeMth.addLocalVariable("converter", new ObjectType(conversionPkg + ".Converter"), null, null);
     int converter = lg.getIndex();
@@ -484,7 +484,7 @@ public class PeerMethodGen {
       callerClass = caller;
     else{
       // the class of the last invoked method
-      String className = env.getVM().getCurrentThread().getMethod().getClassName();
+      String className = env.getVM().getCurrentThread().getTopFrameMethodInfo().getClassName();
       this.il.append(new PUSH(peerClassGen._cp, className));
       this.il.append(peerClassGen._factory.createInvoke("java.lang.Class", "forName", new ObjectType("java.lang.Class"), new Type[] { Type.STRING }, Constants.INVOKESTATIC));
       LocalVariableGen lg = this.nativeMth.addLocalVariable("callerClass", new ObjectType("java.lang.Class"), null, null);
@@ -695,7 +695,7 @@ public class PeerMethodGen {
   private void updateJPFClass (int converter, int JVMCls){
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, converter));
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, JVMCls));
-    this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "getJPFCls", new ObjectType("gov.nasa.jpf.jvm.ClassInfo"), new Type[] { new ObjectType("java.lang.Class") }, Constants.INVOKEVIRTUAL));
+    this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "getJPFCls", new ObjectType("gov.nasa.jpf.vm.ClassInfo"), new Type[] { new ObjectType("java.lang.Class") }, Constants.INVOKEVIRTUAL));
     this.il.append(InstructionConstants.POP);
 
     if(genSource()) {
@@ -920,7 +920,7 @@ public class PeerMethodGen {
    */
   private static Type[] getArgumentsType (NativeMethodInfo mi){
     Type[] argTypes = new Type[mi.getNumberOfArguments() + 2];
-    argTypes[0] = new ObjectType("gov.nasa.jpf.jvm.MJIEnv");
+    argTypes[0] = new ObjectType(PeerClassGen.MJIEnvCls);
     argTypes[1] = Type.INT;
     String[] argTypesName = mi.getArgumentTypeNames();
     for (int i = 2; i < mi.getNumberOfArguments() + 2; i++){

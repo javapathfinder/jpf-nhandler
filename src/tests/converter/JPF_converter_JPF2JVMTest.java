@@ -1,11 +1,14 @@
 package converter;
 
-import gov.nasa.jpf.jvm.MJIEnv;
-import gov.nasa.jpf.nhandler.conversion.ConversionException;
-import gov.nasa.jpf.nhandler.conversion.Converter;
+import gov.nasa.jpf.vm.MJIEnv;
+import gov.nasa.jpf.vm.NativePeer;
+import gov.nasa.jpf.annotation.MJI;
 import gov.nasa.jpf.util.test.TestJPF;
 
 import java.util.HashMap;
+
+import nhandler.conversion.ConversionException;
+import nhandler.conversion.Converter;
 
 import converter.JPF2JVMTest.JPF2JVMTestConversion;
 
@@ -16,19 +19,20 @@ import converter.JPF2JVMTest.JPF2JVMTestConversion;
  * @author Nastaran Shafiei
  * @author Franck van Breugel
  */
-public class JPF_converter_JPF2JVMTest extends TestJPF {
+public class JPF_converter_JPF2JVMTest extends NativePeer {
 
+  @MJI
   public static void convertStringTest__Ljava_lang_String_2__V (MJIEnv env, int objRef, int jpfRef) throws ConversionException{
     Converter converter = new Converter(env);
 
     // converting JPF String to JVM string
     String s1 = (String) converter.getJVMObj(jpfRef);
-
     String s2 = new String("Hello World");
 
-    assertEquals(s1, s2);
+    TestJPF.assertEquals(s1, s2);
   }
 
+  @MJI
   public static void convertIntegerTest__Ljava_lang_Integer_2__V (MJIEnv env, int objRef, int jpfRef) throws ConversionException{
     Converter converter = new Converter(env);
 
@@ -37,23 +41,24 @@ public class JPF_converter_JPF2JVMTest extends TestJPF {
 
     Integer i2 = new Integer(100);
 
-    assertEquals(i1, i2);
+    TestJPF.assertEquals(i1, i2);
   }
 
+  @MJI
   public static void convertArrayTest___3Ljava_lang_String_2__V (MJIEnv env, int objRef, int jpfArr) throws ConversionException{
     Converter converter = new Converter(env);
 
     // converting JPF String array to JVM String array
     String[] arr1 = (String[]) converter.getJVMObj(jpfArr);
-
     String[] arr2 = { "e1", "e2", "e3" };
 
-    assertEquals(arr1.length, arr2.length);
-    assertEquals(arr1[0], arr2[0]);
-    assertEquals(arr1[1], arr2[1]);
-    assertEquals(arr1[2], arr2[2]);
+    TestJPF.assertEquals(arr1.length, arr2.length);
+    TestJPF.assertEquals(arr1[0], arr2[0]);
+    TestJPF.assertEquals(arr1[1], arr2[1]);
+    TestJPF.assertEquals(arr1[2], arr2[2]);
   }
 
+  @MJI
   public static void convertHashMapTest__Ljava_util_HashMap_2__V (MJIEnv env, int objRef, int jpfMap) throws ConversionException{
     Converter converter = new Converter(env);
 
@@ -66,12 +71,13 @@ public class JPF_converter_JPF2JVMTest extends TestJPF {
     map2.put(1, "one");
     map2.put(2, "two");
 
-    assertEquals(map1, map2);
-    assertEquals(map1.get(0), map2.get(0));
-    assertEquals(map1.get(1), map2.get(1));
-    assertEquals(map1.get(2), map2.get(2));
+    TestJPF.assertEquals(map1, map2);
+    TestJPF.assertEquals(map1.get(0), map2.get(0));
+    TestJPF.assertEquals(map1.get(1), map2.get(1));
+    TestJPF.assertEquals(map1.get(2), map2.get(2));
   }
 
+  @MJI
   public static void convertClassTest__Ljava_lang_Class_2__V (MJIEnv env, int objRef, int jpfCls) throws ConversionException, IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException{
     Converter converter = new Converter(env);
 
@@ -80,8 +86,8 @@ public class JPF_converter_JPF2JVMTest extends TestJPF {
 
     Class<?> cls2 = JPF2JVMTestConversion.class;
 
-    assertEquals(cls1, cls2);
-    assertEquals(JPF2JVMTestConversion.i, 10);
-    assertEquals(cls1.getDeclaredFields()[0].getInt(cls1), 10);
+    TestJPF.assertEquals(cls1, cls2);
+    TestJPF.assertEquals(JPF2JVMTestConversion.i, 10);
+    TestJPF.assertEquals(cls1.getDeclaredFields()[0].getInt(cls1), 10);
   }
 }

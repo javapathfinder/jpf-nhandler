@@ -1,9 +1,9 @@
-package gov.nasa.jpf.nhandler.peerGen;
+package nhandler.peerGen;
 
 import gov.nasa.jpf.Config;
-import gov.nasa.jpf.jvm.ClassInfo;
-import gov.nasa.jpf.jvm.MJIEnv;
-import gov.nasa.jpf.jvm.NativeMethodInfo;
+import gov.nasa.jpf.vm.ClassInfo;
+import gov.nasa.jpf.vm.MJIEnv;
+import gov.nasa.jpf.vm.NativeMethodInfo;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -46,10 +46,13 @@ public class PeerClassGen implements Constants {
   protected ClassGen _cg;
 
   protected PeerSourceGen sourceGen;
+
+  public static String MJIEnvCls = "gov.nasa.jpf.vm.MJIEnv";
+
   /**
    * Directory that is used to keep native peers that are created on-the-fly
    */
-  protected static String peersLocation = "/Users/Nastaran/workspaces/bitbucket/jpf-nhandler/onthefly/";
+  protected static String peersLocation = "";
 
   private static boolean initialized = false;
 
@@ -95,13 +98,12 @@ public class PeerClassGen implements Constants {
     try{
       this.peer = this.loadClass(peerName);
       _cg = new ClassGen(Repository.lookupClass(this.loadClass(peerName)));
-      // System.out.println("   Already has a OTF peer class!");
     } catch (ClassNotFoundException e){
       // do nothing!
     }
 
     if (this.peer == null){
-      _cg = new ClassGen(peerName, "java.lang.Object", peerName + ".class", Constants.ACC_PUBLIC, new String[] {});
+      _cg = new ClassGen(peerName, "gov.nasa.jpf.vm.NativePeer", peerName + ".class", Constants.ACC_PUBLIC, new String[] {});
       _cg.addEmptyConstructor(Constants.ACC_PUBLIC);
     }
 
@@ -307,7 +309,7 @@ public class PeerClassGen implements Constants {
     JavaClass clazz = null;
 
     try{
-      clazz = Repository.lookupClass("gov.nasa.jpf.nhandler.peerGen.Test");
+      clazz = Repository.lookupClass("nhandler.peerGen.Test");
     } catch (ClassNotFoundException e){
       e.printStackTrace();
     }

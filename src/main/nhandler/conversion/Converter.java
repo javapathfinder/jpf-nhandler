@@ -1,12 +1,13 @@
-package gov.nasa.jpf.nhandler.conversion;
+package nhandler.conversion;
 
-import gov.nasa.jpf.jvm.ClassInfo;
-import gov.nasa.jpf.jvm.MJIEnv;
-import gov.nasa.jpf.nhandler.ValueIdentityHashMap;
+import gov.nasa.jpf.vm.ClassInfo;
+import gov.nasa.jpf.vm.MJIEnv;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+
+import nhandler.util.ValueIdentityHashMap;
 
 /**
  * Converts objects and classes from JPF to JVM, and from JVM to JPF.

@@ -1,13 +1,13 @@
-package gov.nasa.jpf.nhandler.conversion;
+package nhandler.conversion;
 
-import gov.nasa.jpf.jvm.ArrayFields;
-import gov.nasa.jpf.jvm.ClassInfo;
-import gov.nasa.jpf.jvm.DynamicElementInfo;
-import gov.nasa.jpf.jvm.ElementInfo;
-import gov.nasa.jpf.jvm.FieldInfo;
-import gov.nasa.jpf.jvm.MJIEnv;
-import gov.nasa.jpf.jvm.ReferenceArrayFields;
-import gov.nasa.jpf.jvm.StaticElementInfo;
+import gov.nasa.jpf.vm.ArrayFields;
+import gov.nasa.jpf.vm.ClassInfo;
+import gov.nasa.jpf.vm.DynamicElementInfo;
+import gov.nasa.jpf.vm.ElementInfo;
+import gov.nasa.jpf.vm.FieldInfo;
+import gov.nasa.jpf.vm.MJIEnv;
+import gov.nasa.jpf.vm.ReferenceArrayFields;
+import gov.nasa.jpf.vm.StaticElementInfo;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -205,78 +205,84 @@ public class JPF2JVM {
       if (JVMObj == null) {
         // Used to store instance fields
         DynamicElementInfo dei = (DynamicElementInfo) env.getHeap().get(JPFRef);
-
         ClassInfo JPFCl = dei.getClassInfo();
-        int JPFClsRef = JPFCl.getStaticElementInfo().getClassObjectRef();
 
-        Class<?> JVMCl = this.getJVMCls(JPFClsRef);
+        // we treat Strings differently
+        if(JPFCl.isStringClassInfo()) {
+          JVMObj = createStringObject(JPFRef);
+        } else {
+          int JPFClsRef = JPFCl.getStaticElementInfo().getClassObjectRef();
+          Class<?> JVMCl = this.getJVMCls(JPFClsRef);
 
-        // There is only one instance of every class. There is no need to update
-        // Class objects
-        if (JVMCl == Class.class) {
-          try {
-            String name = env.getReferredClassInfo(JPFRef).getName();
-            if (JPF2JVM.isPrimitiveClass(name)) {
-              JVMObj = JPF2JVM.getPrimitiveClass(name);
-            } else {
-              JVMObj = loadClass(name);
-            }
-          } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-          }
-          return JVMObj;
-        } else
-          // Creates a new instance of JVMCl
-          JVMObj = instantiateFrom(JVMCl);
-
-        Converter.objMapJPF2JVM.put(JPFRef, JVMObj);
-
-        // Holds JVMCl and all of its ancestors
-        List<Class<?>> JVMClsList = new LinkedList<Class<?>>();
-        List<ClassInfo> JPFClsList = new LinkedList<ClassInfo>();
-
-        do {
-          JVMClsList.add(JVMCl);
-          JVMCl = JVMCl.getSuperclass();
-          JPFClsList.add(JPFCl);
-          JPFCl = JPFCl.getSuperClass();
-        } while (JVMCl != null);
-
-        while (!JVMClsList.isEmpty()) {
-          int index = JVMClsList.size() - 1;
-          JVMCl = JVMClsList.remove(index);
-          JPFCl = JPFClsList.remove(index);
-
-          Field fld[] = JVMCl.getDeclaredFields();
-
-          for (int i = 0; i < fld.length; i++) {
-
-            // It is true if the field is declared as static.
-            boolean isNonStaticField = ((Modifier.toString(fld[i].getModifiers())).indexOf("static") == -1);
-
-            // Provide access to private and final fields
-            fld[i].setAccessible(true);
-            FieldInfo fi = JPFCl.getInstanceField(fld[i].getName());
-
-            if (fi != null && isNonStaticField) {
-              // Field is of reference type
-              if (fi.isReference()) {
-                int fieldValueRef = dei.getFields().getReferenceValue(fi.getStorageOffset());
-                Object JVMField = this.getJVMObj(fieldValueRef);
-                try {
-                  fld[i].set(JVMObj, JVMField);
-                } catch (IllegalArgumentException e) {
-                  e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                  e.printStackTrace();
-                }
+          // There is only one instance of every class. There is no need to update
+          // Class objects
+          if (JVMCl == Class.class) {
+            try {
+              String name = env.getReferredClassInfo(JPFRef).getName();
+              if (JPF2JVM.isPrimitiveClass(name)) {
+                JVMObj = JPF2JVM.getPrimitiveClass(name);
+              } else {
+                JVMObj = loadClass(name);
               }
-              // Field is of primitive type
-              else {
-                try {
-                  setJVMPrimitiveField(fld[i], JVMObj, dei, fi);
-                } catch (IllegalAccessException e) {
-                  e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+              e.printStackTrace();
+            }
+            return JVMObj;
+          } else {
+            // Creates a new instance of JVMCl
+            JVMObj = instantiateFrom(JVMCl);
+          }
+
+          Converter.objMapJPF2JVM.put(JPFRef, JVMObj);
+
+          // Holds JVMCl and all of its ancestors
+          List<Class<?>> JVMClsList = new LinkedList<Class<?>>();
+          List<ClassInfo> JPFClsList = new LinkedList<ClassInfo>();
+
+          do {
+            JVMClsList.add(JVMCl);
+            JVMCl = JVMCl.getSuperclass();
+            JPFClsList.add(JPFCl);
+            JPFCl = JPFCl.getSuperClass();
+          } while (JVMCl != null);
+
+          while (!JVMClsList.isEmpty()) {
+            int index = JVMClsList.size() - 1;
+            JVMCl = JVMClsList.remove(index);
+            JPFCl = JPFClsList.remove(index);
+
+            Field fld[] = JVMCl.getDeclaredFields();
+
+            for (int i = 0; i < fld.length; i++) {
+
+              // It is true if the field is declared as static.
+              boolean isNonStaticField = ((Modifier.toString(fld[i].getModifiers())).indexOf("static") == -1);
+
+              // Provide access to private and final fields
+              fld[i].setAccessible(true);
+              FieldInfo fi = JPFCl.getInstanceField(fld[i].getName());
+
+              if (fi != null && isNonStaticField) {
+                // Field is of reference type
+                if (fi.isReference()) {
+                  int fieldValueRef = dei.getFields().getReferenceValue(fi.getStorageOffset());
+                  Object JVMField = this.getJVMObj(fieldValueRef);
+
+                  try {
+                    fld[i].set(JVMObj, JVMField);
+                  } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                  } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                  }
+                }
+                // Field is of primitive type
+                else {
+                  try {
+                    setJVMPrimitiveField(fld[i], JVMObj, dei, fi);
+                  } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                  }
                 }
               }
             }
@@ -494,6 +500,22 @@ public class JPF2JVM {
 
   private static boolean isPrimitiveClass (String name) {
     return (name.equals("boolean") || name.equals("byte") || name.equals("int") || name.equals("short") || name.equals("long") || name.equals("char") || name.equals("float") || name.equals("double"));
+  }
+
+  public Object createStringObject(int JPFRef) throws ConversionException {
+    DynamicElementInfo str = (DynamicElementInfo) env.getHeap().get(JPFRef);
+    if(!str.getClassInfo().isStringClassInfo()) {
+      throw new ConversionException();
+    }
+
+    FieldInfo fi = str.getFieldInfo("value");
+    int fieldValueRef = str.getFields().getReferenceValue(fi.getStorageOffset());
+
+    // this is String.value which is of type of char[]
+    Object value = this.getJVMObj(fieldValueRef);
+    Object JVMObj = new String((char[])value);
+    Converter.objMapJPF2JVM.put(JPFRef, JVMObj);
+    return JVMObj;
   }
 
   /**

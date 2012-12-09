@@ -1,6 +1,6 @@
-package gov.nasa.jpf.nhandler.peerGen;
+package nhandler.peerGen;
 
-import gov.nasa.jpf.jvm.MethodInfo;
+import gov.nasa.jpf.vm.MethodInfo;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -62,11 +62,11 @@ public class PeerSourceGen {
   }
 
   private void printImport (){
-    append("import gov.nasa.jpf.jvm.MJIEnv;");
+    append("import gov.nasa.jpf.vm.MJIEnv;");
     gotoNextLine();
-    append("import gov.nasa.jpf.nhandler.conversion.ConversionException;");
+    append("import nhandler.conversion.ConversionException;");
     gotoNextLine();
-    append("import gov.nasa.jpf.nhandler.conversion.Converter;");
+    append("import nhandler.conversion.Converter;");
     gotoNextLine();
     append("import java.lang.reflect.InvocationTargetException;");
     gotoNextLine();
