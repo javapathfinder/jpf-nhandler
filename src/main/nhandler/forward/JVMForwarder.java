@@ -88,6 +88,13 @@ public class JVMForwarder extends PropertyListenerAdapter {
   private boolean isHandled(MethodInfo mi) {
     NativeMethodInfo nmi = (NativeMethodInfo) mi;
     NativePeer nativePeer = nmi.getNativePeer();
+
+    // check if there is any native peer class associated to the class of this
+    // method at all
+    if(nativePeer == null) {
+      return false;
+    }
+
     Method[] mth = nativePeer.getPeerClass().getMethods();
     for(Method m: mth) {
       if(m.getName().equals(nmi.getJNIName())) {
