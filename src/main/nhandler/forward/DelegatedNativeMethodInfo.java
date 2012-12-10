@@ -1,10 +1,6 @@
 package nhandler.forward;
 
-import nhandler.peerGen.PeerClassGen;
-import gov.nasa.jpf.vm.MJIEnv;
 import gov.nasa.jpf.vm.MethodInfo;
-import gov.nasa.jpf.vm.NativeMethodInfo;
-import gov.nasa.jpf.vm.NativePeer;
 
 /** 
  * This is a subclass of NativeMethodInfo which makes executeNative() delegate
@@ -13,26 +9,14 @@ import gov.nasa.jpf.vm.NativePeer;
  * @author Nastaran Shafiei
  * @author Franck van Breugel
  */
-public class DelegatedNativeMethodInfo extends NativeMethodInfo {
+public class DelegatedNativeMethodInfo extends DelegatedMethodInfo {
 
   public DelegatedNativeMethodInfo (MethodInfo mi) {
-    super(mi, null, null);
+    super(mi);
   }
 
-  protected boolean isUnsatisfiedLinkError (MJIEnv env){
-    if (mth == null){
-      System.out.println("* DELEGATING Unhandled Native -> " + this.ci.getName() + "." + this.name);
-      PeerClassGen peerCreator = PeerClassGen.getPeerCreator(this.getClassInfo(), env);
-      mth = peerCreator.createMethod(this);
-
-      Class<?> peerClass = peerCreator.getPeer();
-      this.peer = NativePeer.getInstance(peerClass, NativePeer.class);
-      this.peer.initialize(peerClass, this.ci, true);
-
-      //this.peer = new NativePeer(peerCreator.getPeer(), this.ci);
-      assert (this.peer != null && mth != null);
-    }
-
-    return false;
+  @Override
+  protected String printInfo() {
+    return("* DELEGATING Unhandled Native -> " + this.ci.getName() + "." + this.name);
   }
 }

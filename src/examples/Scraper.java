@@ -4,6 +4,11 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+/**
+ * Scrapes the results of the World Championships from www.swimrankings.net.
+ *
+ * @author Franck van Breugel
+ */
 public class Scraper {
     public static void main(String[] args) throws MalformedURLException, IOException {
         URL url = new URL("http://www.swimrankings.net/index.php?page=meetDetail&meetId=516878&gender=1&styleId=2");

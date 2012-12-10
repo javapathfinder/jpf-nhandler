@@ -3,7 +3,6 @@ package nhandler.forward;
 import nhandler.peerGen.PeerClassGen;
 import gov.nasa.jpf.vm.MJIEnv;
 import gov.nasa.jpf.vm.MethodInfo;
-import gov.nasa.jpf.vm.NativeMethodInfo;
 import gov.nasa.jpf.vm.NativePeer;
 
 /** 
@@ -14,15 +13,16 @@ import gov.nasa.jpf.vm.NativePeer;
  * @author Nastaran Shafiei
  * @author Franck van Breugel
  */
-public class SkippedMethodInfo extends NativeMethodInfo {
+public class SkippedMethodInfo extends HandledMethodInfo {
 
   public SkippedMethodInfo (MethodInfo mi) {
-    super(mi, null, null);
+    super(mi);
   }
 
   protected boolean isUnsatisfiedLinkError (MJIEnv env){
     if(mth == null){
-      System.out.println("* SKIPPING -> " + this.ci.getName() + "." + this.name + " is NULL");
+      System.out.println(printInfo());
+
       PeerClassGen peerCreator = PeerClassGen.getPeerCreator(this.getClassInfo(), env);
       mth = peerCreator.createEmptyMethod(this);
 
@@ -35,5 +35,10 @@ public class SkippedMethodInfo extends NativeMethodInfo {
     }
 
     return false;
+  }
+
+  @Override
+  protected String printInfo() {
+    return("* SKIPPING -> " + this.ci.getName() + "." + this.name);
   }
 }

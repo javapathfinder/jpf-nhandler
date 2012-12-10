@@ -3,7 +3,6 @@ package nhandler.forward;
 import nhandler.peerGen.PeerClassGen;
 import gov.nasa.jpf.vm.MJIEnv;
 import gov.nasa.jpf.vm.MethodInfo;
-import gov.nasa.jpf.vm.NativeMethodInfo;
 import gov.nasa.jpf.vm.NativePeer;
 
 /** 
@@ -13,15 +12,17 @@ import gov.nasa.jpf.vm.NativePeer;
  * @author Nastaran Shafiei
  * @author Franck van Breugel
  */
-public class DelegatedMethodInfo extends NativeMethodInfo {
+public class DelegatedMethodInfo extends HandledMethodInfo {
 
   public DelegatedMethodInfo (MethodInfo mi) {
-    super(mi, null, null);
+    super(mi);
   }
 
+  @Override
   protected boolean isUnsatisfiedLinkError (MJIEnv env){
     if(mth == null){
-      System.out.println("* DELEGATING -> " + this.ci.getName() + "." + this.name);
+      System.out.println(printInfo());
+
       PeerClassGen peerCreator = PeerClassGen.getPeerCreator(this.getClassInfo(), env);
       mth = peerCreator.createMethod(this);
 
@@ -34,5 +35,10 @@ public class DelegatedMethodInfo extends NativeMethodInfo {
     }
 
     return false;
+  }
+
+  @Override
+  protected String printInfo() {
+    return("* DELEGATING -> " + this.ci.getName() + "." + this.name);
   }
 }

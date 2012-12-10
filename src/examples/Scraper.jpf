@@ -2,8 +2,4 @@
 
 target = Scraper
 
-nhandler.delegateNative = true
-
-nhandler.spec.delegate = java.net.URL.openStream
-
-nhandler.spec.filter = java.io.FileDescriptor.*, java.io.File.*
+nhandler.delegateUnhandledNative = true

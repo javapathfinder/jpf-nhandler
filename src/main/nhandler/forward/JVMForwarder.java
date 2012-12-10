@@ -6,10 +6,13 @@ import java.lang.reflect.Method;
 import gov.nasa.jpf.Config;
 import gov.nasa.jpf.PropertyListenerAdapter;
 import gov.nasa.jpf.vm.ClassInfo;
+import gov.nasa.jpf.vm.Instruction;
+import gov.nasa.jpf.vm.ThreadInfo;
 import gov.nasa.jpf.vm.VM;
 import gov.nasa.jpf.vm.MethodInfo;
 import gov.nasa.jpf.vm.NativeMethodInfo;
 import gov.nasa.jpf.vm.NativePeer;
+import gov.nasa.jpf.jvm.bytecode.EXECUTENATIVE;
 import gov.nasa.jpf.search.Search;
 import gov.nasa.jpf.util.MethodSpec;
 
@@ -29,11 +32,13 @@ public class JVMForwarder extends PropertyListenerAdapter {
 
   private static String[] delegate_spec = null;
 
+  private static String[] delegateNative_spec = null;
+
   private static String[] skip_spec = null;
 
   private static String[] filter_spec = null;
 
-  private static boolean delegateNatives = false;
+  private static boolean delegateUnhandledNatives = false;
 
   private static boolean skipNatives = false;
 
@@ -42,9 +47,10 @@ public class JVMForwarder extends PropertyListenerAdapter {
   private void init (Config conf){
     if (!initialized){
       delegate_spec = conf.getStringArray("nhandler.spec.delegate");
+      delegateNative_spec = conf.getStringArray("nhandler.spec.delegateNative");
       skip_spec = conf.getStringArray("nhandler.spec.skip");
       filter_spec = conf.getStringArray("nhandler.spec.filter");
-      delegateNatives = conf.getBoolean("nhandler.delegateNative");
+      delegateUnhandledNatives = conf.getBoolean("nhandler.delegateUnhandledNative");
       skipNatives = conf.getBoolean("nhandler.skipNative");
       initialized = true;
     }
@@ -56,18 +62,19 @@ public class JVMForwarder extends PropertyListenerAdapter {
 
     processNatives(ci);
     processDelegated(ci);
+    processNativeDelegated(ci);
     processSkipped(ci);
   }
 
   private void processNatives (ClassInfo ci){
-    if (delegateNatives){
-      delegateNatives(ci);
+    if (delegateUnhandledNatives){
+      delegateUnhandledNatives(ci);
     } else if (skipNatives){
       skipNatives(ci);
     }
   }
 
-  private void delegateNatives (ClassInfo ci){
+  private void delegateUnhandledNatives (ClassInfo ci){
     MethodInfo[] mth = ci.getDeclaredMethodInfos();
     for (MethodInfo mi : mth){
       if (mi.isNative() && !isHandled(mi) && isAllowed(mi) && !isFiltered(mi)){
@@ -147,6 +154,20 @@ public class JVMForwarder extends PropertyListenerAdapter {
     }
   }
 
+  private void processNativeDelegated (ClassInfo ci){
+    if (delegateNative_spec != null){
+      MethodInfo[] mth = ci.getDeclaredMethodInfos();
+      for (MethodInfo mi : mth){
+        for (String spec : delegateNative_spec){
+          MethodSpec ms = MethodSpec.createMethodSpec(spec);
+          if (mi.isNative() && !isFiltered(mi) && ms.matches(mi)){
+            delegateMethod(mi);
+          }
+        }
+      }
+    }
+  }
+
   private void processSkipped (ClassInfo ci){
     if (skip_spec != null){
       MethodInfo[] mth = ci.getDeclaredMethodInfos();
@@ -203,6 +224,15 @@ public class JVMForwarder extends PropertyListenerAdapter {
           File peer = new File(onthefly, name);
           peer.delete();
     	}
+      }
+    }
+  }
+
+  public void executeInstruction (VM vm, ThreadInfo currentThread, Instruction instructionToExecute) {
+    if(instructionToExecute instanceof EXECUTENATIVE) {
+      MethodInfo mi = ((EXECUTENATIVE)instructionToExecute).getMethodInfo();
+      if(mi.isNative() && (mi instanceof HandledMethodInfo)) {
+        // --- any method handled by nhandler is caught here ---
       }
     }
   }
