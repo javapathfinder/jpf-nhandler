@@ -5,6 +5,7 @@ nbproject/private/*
 build/*
 dist/*
 tmp/*
+onthefly/*
 .settings
 activity*.png
 *.class
