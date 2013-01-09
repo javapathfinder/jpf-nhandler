@@ -8,5 +8,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/bcel-5.2.jar" sourcepath="/Users/Nastaran/Java/bcel-5.2/src"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jpf-core"/>
+	<classpathentry kind="lib" path="lib/examples-lib/google-api-translate-java-0.97.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
