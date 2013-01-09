@@ -737,6 +737,10 @@ public class PeerMethodGen {
         if(genSource()) {
           sourceGen.printUpdateJPFArgs(i, nArgs);
         }
+      } else if (type[i].equals("long") || type[i].equals("double")) {
+        j += 2;
+      } else {
+        j++;
       }
     }
   }
