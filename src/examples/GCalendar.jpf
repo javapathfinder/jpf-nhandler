@@ -1,0 +1,17 @@
+@using=jpf-nhandler
+
+target=GCalendar
+
+nhandler.delegateUnhandledNative=true
+
+nhandler.spec.delegate=java.util.TimeZone.*
+
+nhandler.spec.filter=java.util.TimeZone.<init>
+
+# Note1: to make this work, we needed to get rid of TimeZone model class
+# and its native peer.
+# Note2: we need to filter out <init> method, OW nhandler attempts to
+# instantiate from the ABSTRACT class TimeZone - (todo fix abstract class
+# handling in nhandler) 
+# Note3: this requires the fix close0(..) -> close0____V(...)" inside
+# the native peer JPF_java_io_FileDescriptor
