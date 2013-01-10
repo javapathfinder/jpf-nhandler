@@ -47,6 +47,7 @@
     -->
     <fileset dir=".">
         <include name="lib/*.jar"/>
+    	<include name="lib/examples-lib/*.jar"/>
     </fileset>
 
     <!-- add projects we depend on -->
