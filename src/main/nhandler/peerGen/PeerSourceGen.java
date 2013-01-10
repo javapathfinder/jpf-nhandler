@@ -71,6 +71,8 @@ public class PeerSourceGen {
     append("import java.lang.reflect.InvocationTargetException;");
     gotoNextLine();
     append("import java.lang.reflect.Method;");
+    gotoNextLine();
+    append("import java.lang.reflect.Constructor;");
     addBlankLine();
   }
 
@@ -187,6 +189,7 @@ public class PeerSourceGen {
       addMultipleDoubleIndent(4);
       append(" ClassNotFoundException, ConversionException, InvocationTargetException");
       if(isCtor) {
+        append(",");
         gotoNextLine();
         addMultipleDoubleIndent(5);
         append(" InstantiationException");
