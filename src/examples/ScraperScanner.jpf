@@ -1,6 +1,6 @@
 @using = jpf-nhandler
 
-target = SimpleScanner
+target = ScraperScanner
 
 nhandler.delegateUnhandledNative = true
 
