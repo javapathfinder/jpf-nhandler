@@ -132,14 +132,13 @@ public class PeerMethodGen {
   private void createCtor (){
     this.addException();
     int converter = this.createConverter();
-    int caller = this.createCaller(converter);
     int argValue = this.createArgValue(converter);
     int argType = this.createArgType(argValue);
-    int callerClass = this.getCallerClass(caller);
+    int callerClass = this.getCallerClass(MJIEnv.NULL);
     int ctor = this.getConstructor(callerClass, argType);
     this.setAccessible(ctor);
-    this.createNewInstance(caller, ctor, argValue);
-    this.updateJPFObj(converter, caller, 1);
+    int returnValue = this.createNewInstance(ctor, argValue);
+    this.updateJPFObj(converter, returnValue, 1);
     this.updateJPFArguments(converter, argValue);
     this.addReturnStatement(MJIEnv.NULL);
   }
@@ -612,7 +611,7 @@ public class PeerMethodGen {
     return returnValue;
   }
 
-  private int createNewInstance (int caller, int method, int argValue){
+  private int createNewInstance (int method, int argValue){
     int returnValue = -1;
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, method));
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, argValue));
@@ -677,7 +676,11 @@ public class PeerMethodGen {
     this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "updateJPFObj", Type.VOID, new Type[] { Type.OBJECT, Type.INT }, Constants.INVOKEVIRTUAL));
 
     if(genSource()) {
-      sourceGen.printUpdateCaller(mi.isStatic());
+      if(!mi.isCtor()) {
+        sourceGen.printUpdateCaller(mi.isStatic());
+      } else {
+        sourceGen.printUpdateCtorCaller();
+      }
     }
   }
 

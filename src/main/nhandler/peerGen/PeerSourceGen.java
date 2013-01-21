@@ -354,11 +354,21 @@ public class PeerSourceGen {
         addDoubleIndent();
         append("converter.getJPFCls(caller);");
       } else{
-        addComment("Updates the object that invokes the method to be handle in JPF");
+        addComment("Updates the object that invokes the method to be handled in JPF");
 
         addDoubleIndent();
         append("converter.updateJPFObj(caller, robj);");
       }
+      addBlankLine();
+
+      addUpdateArgsComment = true;
+    }
+
+    protected void printUpdateCtorCaller (){
+      addComment("Updates the object that invokes the method to be handled in JPF");
+
+      addDoubleIndent();
+      append("converter.updateJPFObj(returnValue, robj);");
       addBlankLine();
 
       addUpdateArgsComment = true;
