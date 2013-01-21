@@ -202,6 +202,11 @@ public class JVM2JPF {
    */
   private boolean isValidJPFRef (Object JVMObj, int JPFObj) throws ConversionException{
     boolean isValid;
+
+    if(!Converter.resetState) {
+      return true;
+    }
+
     if (JPFObj == MJIEnv.NULL || JVMObj == null){
       isValid = (JPFObj == MJIEnv.NULL && JVMObj == null);
     } else if (JVMObj.getClass() == Class.class){
@@ -231,6 +236,7 @@ public class JVM2JPF {
       // First check if the JPF object has been already updated
       if (!Converter.updatedJPFObj.containsKey(JPFObj)){
         Converter.updatedJPFObj.put(JPFObj, JVMObj);
+        Converter.objMapJPF2JVM.put(JPFObj, JVMObj);
 
         // Why do we need that? Because JPF might have not leaded the class
         // before! JPF classloader does not recognize them!
@@ -334,6 +340,7 @@ public class JVM2JPF {
       // First check if the JPF array has been already updated
       if (!Converter.updatedJPFObj.containsKey(JPFArr)){
         Converter.updatedJPFObj.put(JPFArr, JVMArr);
+        Converter.objMapJPF2JVM.put(JPFArr, JVMArr);
 
         DynamicElementInfo dei = (DynamicElementInfo) env.getHeap().getModifiable(JPFArr);
 

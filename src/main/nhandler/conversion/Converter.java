@@ -47,11 +47,21 @@ public class Converter {
    */
   static Set<Integer> updatedJPFCls = new HashSet<Integer>();
 
+  static boolean resetState;
+
   public Converter (MJIEnv env) {
     this.env = env;
 
-    objMapJPF2JVM.clear();
-    classMapJPF2JVM.clear();
+    resetState = env.getConfig().getBoolean("nhandler.resetVMState");
+
+    if (resetState) {
+      // these are reset on-demond by setting the nhandler.resetVMState
+      // property in the properties file
+      objMapJPF2JVM.clear();
+      classMapJPF2JVM.clear();
+    }
+
+    // these always need to be reset
     updatedJPFObj.clear();
     updatedJPFCls.clear();
 
