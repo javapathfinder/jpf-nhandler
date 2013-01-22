@@ -1,3 +1,6 @@
+# How to run - as JPF model checks Client, Server runs on top of the
+# host JVM, on a remote server
+
 @using = jpf-nhandler
 
 target = Client

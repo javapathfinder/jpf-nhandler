@@ -1,3 +1,6 @@
+# How to run - as JPF model checks SimpleSender, SimpleReciever runs on the
+# host JVM
+
 @using = jpf-nhandler
 
 target = SimpleSender
@@ -21,9 +24,8 @@ classpath =\
 
 native_classpath =\
  ${jpf-nhandler}/lib/examples-lib/jgroups-3.2.5.jar;\
- ${jpf-nhandler}/build/examples
- 
- 
+ ${jpf-nhandler}/build/examples 
+
 # Note: the Random model class in JPF is not consistent with Random from 
 # Java Standard Library. To make this work, the type of the fields "seed"
 # in model class should change from "long" to "AtomicLong"
