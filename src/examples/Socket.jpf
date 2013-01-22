@@ -1,0 +1,7 @@
+@using = jpf-nhandler
+
+target = Client
+
+nhandler.delegateUnhandledNative = true
+
+nhandler.spec.filter = java.io.FileDescriptor.*
