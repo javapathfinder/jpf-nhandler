@@ -60,6 +60,8 @@ public class PeerMethodGen {
 
   MJIEnv env;
 
+  public static boolean updateJPFState;
+
   /**
    * Creates a new instance of the PeerMethodCreator class.
    * 
@@ -137,12 +139,15 @@ public class PeerMethodGen {
       }
     }
 
-    if (mi.isStatic())
-      this.updateJPFClass(converter, callerClass);
-    else
-      this.updateJPFObj(converter, caller, 1);
+    if(updateJPFState) {
+      if (mi.isStatic())
+        this.updateJPFClass(converter, callerClass);
+      else
+        this.updateJPFObj(converter, caller, 1);
 
-    this.updateJPFArguments(converter, argValue);
+      this.updateJPFArguments(converter, argValue);
+    }
+
     this.addReturnStatement(jpfReturnValue);
   }
 

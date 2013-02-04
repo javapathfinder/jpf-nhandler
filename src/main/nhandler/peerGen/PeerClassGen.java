@@ -96,6 +96,7 @@ public class PeerClassGen implements Constants {
       peersLocation = config.getPath("jpf-nhandler") + "/onthefly/";
       PeerSourceGen.genSource = config.getBoolean("nhandler.genSource");
       PeerSourceGen.addComment = config.getBoolean("nhandler.addComment");
+      PeerMethodGen.updateJPFState = config.getBoolean("nhandler.updateJPFState", true);
     }
   }
 
