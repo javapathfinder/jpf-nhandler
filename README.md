@@ -130,11 +130,15 @@ Running JPF with jpf-nhandler
 
 To run JPF on the class Example the *.jpf file includes
 
-@using = jpf-nhandler
-target = Example
-nhandler.delegateUnhandledNative = true
-classpath = path-to-application-classes
-native_classpath = path-to-application-classes
+    @using = jpf-nhandler
+
+    target = Example
+
+    nhandler.delegateUnhandledNative = true
+
+    classpath = path-to-application-classes
+
+    native_classpath = path-to-application-classes
 
 Note that to use jpf-nhandler, the classes used in the system under test 
 should be specified both in classpath and native_classpath. Because The 
