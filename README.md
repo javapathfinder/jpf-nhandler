@@ -4,6 +4,7 @@ JPF-NHANDLER
 jpf-nhandler is an extension of Java PathFinder (JPF). It automatically 
 delegates the execution of SUT methods from JPF to the host JVM. Execution 
 of a call o.m(a) delegated by jpf-nhandler follows three main steps:
+
   1. It transforms the JPF representation of o and a to the host JVM 
      level.
 
@@ -20,6 +21,7 @@ the host JVM, jpf-nhandler adds a method in the corresponding OTF native
 peer which implements the three steps described above.
 
 The main applications of jpf-nhandler:
+
   1. The key application of jpf-nhandler is to automatically intercept
      and handle native calls within JPF. This extends the JPF functionality 
      considerably, since it allows JPF to verify numerous SUTs on which 
@@ -37,16 +39,22 @@ The main applications of jpf-nhandler:
   4. Delegating a method may also speed up JPF.
 
 jpf-nhandler can be configured in variety of ways. Here are some examples:
+
   - It can be used to skip calls instead of delegating them. In this case 
     methods are executed as if they are empty and they just return some 
     dummy value.
 
   - It also provides a way to specify which methods are delegated or skipped.
     To force JPF to delegate the constructor of the class a.b.C, use
+
         nhandler.spec.delegate = a.b.C.<init>
+
     To force JPF to delegate all method in the String class, use
+
         nhandler.spec.delegate = java.lang.String.*
+
     To force JPF to skip java.io.FileDescriptor.write(), use
+
         nhandler.spec.skip = java.io.FileDescriptor.write
 
   - jpf-nhandler can also be configured to only delegate native calls which 
@@ -61,6 +69,8 @@ jpf-nhandler can be configured in variety of ways. Here are some examples:
     body may be extended as jpf-nhandler delegates more calls in the future.
 
 Limitations of jpf-nhandler
+---------------------------
+
   1. The implementation of some classes is platform-specific, for instance 
      java.lang.System. jpf-nhandler cannot be used for such classes due to 
      inconsistencies between JPF and the host JVM.
