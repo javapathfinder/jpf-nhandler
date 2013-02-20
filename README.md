@@ -1,4 +1,4 @@
-JPF-NHANDLER
+jpf-nhandler
 ============
 
 jpf-nhandler is an extension of Java PathFinder (JPF). It automatically 
@@ -123,6 +123,19 @@ To install jpf-nhandler, follow the steps below.
 
 4. Add jpf-nhandler to the file site.properties.
    See http://babelfish.arc.nasa.gov/trac/jpf/wiki/install/site-properties
+
+
+**    Note that jpf-nhandler is compatible with the jpf-core v7-dev    **
+
+Steps to obtain jpf-core v7-dev:
+    
+    1. hg clone http://babelfish.arc.nasa.gov/hg/jpf/jpf-core
+    
+    from jpf-core directory 
+
+       2. hg update v7-dev
+
+       3. bin/ant test
 
 
 Running JPF with jpf-nhandler
