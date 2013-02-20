@@ -15,9 +15,9 @@ of a call o.m(a) delegated by jpf-nhandler follows three main steps:
      JPF representation.
 
 The implementation of jpf-nhandler mostly relies on MJI. jpf-nhandler 
-creates bytecode for native peers on-the-fly (they are OTF peer from 
-now on) using the BCEL library. To delegate the execution of a method to 
-the host JVM, jpf-nhandler adds a method in the corresponding OTF native 
+creates bytecode for native peers on-the-fly (they are called OTF peers 
+from now on) using the BCEL library. To delegate the execution of a method
+to the host JVM, jpf-nhandler adds a method in the corresponding OTF native 
 peer which implements the three steps described above.
 
 The main applications of jpf-nhandler:
@@ -62,11 +62,27 @@ jpf-nhandler can be configured in variety of ways. Here are some examples:
 
   - jpf-nhandler can be also configured to generate source code for OTF 
     peers on-the-fly, which allows the user to subsequently refine its 
-    implementation.
+    implementation. Note that you can find bytecode and sources of
+    OTF peers in the following directory.
+
+        /jpf-nhandler/onthefly/
+
+    To generate sources, use
+
+        nhandler.genSource = true
+
+    If you refined and edited OTF sources and wish to compile them, run the 
+    following command from jpf-nhandler.
+
+         /bin/compileOTF
 
   - Since on-the-fly bytecode generation is expensive, one can also configure 
     jpf-nhandler to retain and reuse OTF peers for future runs, i.e. their 
     body may be extended as jpf-nhandler delegates more calls in the future.
+
+    To reuse sources, use
+
+        nhandler.clean = false
 
 Limitations of jpf-nhandler
 ---------------------------
@@ -125,7 +141,7 @@ To install jpf-nhandler, follow the steps below.
    See http://babelfish.arc.nasa.gov/trac/jpf/wiki/install/site-properties
 
 
-**    Note that jpf-nhandler is compatible with the jpf-core v7-dev    **
+** Note that jpf-nhandler is compatible with the jpf-core v7-dev **
 
 Steps to obtain jpf-core v7-dev:
     
