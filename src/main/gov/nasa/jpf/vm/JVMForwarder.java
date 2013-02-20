@@ -15,7 +15,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-package nhandler.forward;
+package gov.nasa.jpf.vm;
 
 import java.io.File;
 import java.lang.reflect.Method;

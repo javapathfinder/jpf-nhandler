@@ -15,25 +15,20 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-package nhandler.forward;
+package gov.nasa.jpf.vm;
 
+import gov.nasa.jpf.vm.MJIEnv;
 import gov.nasa.jpf.vm.MethodInfo;
+import gov.nasa.jpf.vm.NativeMethodInfo;
 
-/** 
- * This is a subclass of NativeMethodInfo which makes executeNative() delegate
- * the execution of the unhandled native method to the JVM level.
- * 
- * @author Nastaran Shafiei
- * @author Franck van Breugel
- */
-public class DelegatedNativeMethodInfo extends DelegatedMethodInfo {
+public abstract class HandledMethodInfo extends NativeMethodInfo {
 
-  public DelegatedNativeMethodInfo (MethodInfo mi) {
-    super(mi);
+  public HandledMethodInfo (MethodInfo mi) {
+    super(mi, null, null);
   }
 
   @Override
-  protected String printInfo() {
-    return("* DELEGATING Unhandled Native -> " + this.ci.getName() + "." + this.name);
-  }
+  protected abstract boolean isUnsatisfiedLinkError (MJIEnv env);
+
+  protected abstract String printInfo();
 }

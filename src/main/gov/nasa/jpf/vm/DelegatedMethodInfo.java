@@ -15,7 +15,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-package nhandler.forward;
+package gov.nasa.jpf.vm;
 
 import nhandler.peerGen.PeerClassGen;
 import gov.nasa.jpf.vm.MJIEnv;
