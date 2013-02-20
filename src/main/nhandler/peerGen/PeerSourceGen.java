@@ -79,6 +79,8 @@ public class PeerSourceGen {
   }
 
   private void printImport (){
+    append("import gov.nasa.jpf.vm.NativePeer;");
+    gotoNextLine();
     append("import gov.nasa.jpf.vm.MJIEnv;");
     gotoNextLine();
     append("import nhandler.conversion.ConversionException;");
@@ -95,6 +97,7 @@ public class PeerSourceGen {
 
   private void printClassHeader (){
     append("public class " + this.name);
+    append(" extends NativePeer");
     append(" {");
     addBlankLine();
   }
