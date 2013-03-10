@@ -1,6 +1,11 @@
 # How to run - as JPF model checks Client, Server runs on top of the
 # host JVM, on a remote server
 
+# NOTE: our Client/Server example requires Server to run on the private host 
+# "indigo.cse.yorku.ca", otherwise Client is not able to locate the server. 
+# To make this run, you need to change the host name and the port according 
+# to your server.
+
 @using = jpf-nhandler
 
 target = Client
