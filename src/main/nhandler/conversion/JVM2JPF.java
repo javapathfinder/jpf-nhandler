@@ -188,7 +188,7 @@ public class JVM2JPF {
    *           if any incorrect input parameter is observed
    */
   public void updateJPFObj (Object JVMObj, int JPFObj) throws ConversionException{
-    if (this.isValidJPFRef(JVMObj, JPFObj)){
+    //if (this.isValidJPFRef(JVMObj, JPFObj)){
       // Both JVM and JPF objects are null, No need for updating
       if (JVMObj == null){ return; }
       if (JVMObj.getClass().isArray()){
@@ -196,9 +196,9 @@ public class JVM2JPF {
       } else{
         this.updateObj(JVMObj, JPFObj);
       }
-    } else{
-      throw new ConversionException("The given JPFObj is not valid!");
-    }
+   // } else{
+   //   throw new ConversionException("The given JPFObj is not valid!");
+   // }
   }
 
   /**
@@ -217,6 +217,7 @@ public class JVM2JPF {
    * @throws ConversionException
    *           if any incorrect input parameter is observed
    */
+  // todo - investigate this using Socket.jpf example
   private boolean isValidJPFRef (Object JVMObj, int JPFObj) throws ConversionException{
     boolean isValid;
 

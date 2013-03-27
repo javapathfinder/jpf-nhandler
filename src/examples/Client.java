@@ -24,7 +24,7 @@ import java.io.IOException;
 public class Client {
     public static void main(String[] arguments) {
         try {
-            final String HOST = "indigo.cse.yorku.ca";
+        	final String HOST = java.net.InetAddress.getLocalHost().getHostName();
             final int PORT = 1024;
 
             Socket socket = new Socket(HOST, PORT);
