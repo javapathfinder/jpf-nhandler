@@ -20,6 +20,7 @@ package nhandler.conversion;
 import gov.nasa.jpf.vm.ArrayFields;
 import gov.nasa.jpf.vm.ClassInfo;
 import gov.nasa.jpf.vm.ClassInfoException;
+import gov.nasa.jpf.vm.ClassLoaderInfo;
 import gov.nasa.jpf.vm.DynamicElementInfo;
 import gov.nasa.jpf.vm.ElementInfo;
 import gov.nasa.jpf.vm.FieldInfo;
@@ -67,7 +68,7 @@ public class JVM2JPF {
 
     if (JVMCls != null){
       // retrieving the integer representing the Class in JPF
-      JPFCls = ClassInfo.getResolvedClassInfo(JVMCls.getName());
+      JPFCls = ClassLoaderInfo.getCurrentResolvedClassInfo(JVMCls.getName());
       StaticElementInfo sei = JPFCls.getModifiableStaticElementInfo();
 
       if (sei != null){
