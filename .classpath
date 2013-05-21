@@ -12,5 +12,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/jpf-core"/>
 	<classpathentry kind="lib" path="lib/examples-lib/jgroups-3.2.5.jar"/>
 	<classpathentry kind="lib" path="lib/examples-lib/json-20090211.jar"/>
+	<classpathentry kind="lib" path="lib/examples-lib/db-derby-10.9.1.0/lib/derby.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

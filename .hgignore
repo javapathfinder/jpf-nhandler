@@ -11,3 +11,5 @@ activity*.png
 *.class
 *~
 *.DS_Store
+memory/MemDB/*
+derby.log

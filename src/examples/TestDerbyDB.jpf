@@ -1,0 +1,7 @@
+@using=jpf-nhandler
+target=TestDB
+
+native_classpath=${jpf-nhandler}/lib/examples-lib/db-derby-10.9.1.0/lib/*.jar;\
+
+nhandler.resetVMState=false
+nhandler.spec.delegate=MyDB.createConnection,MyDB.createTable,MyDB.insertAddress,MyDB.shutdown
