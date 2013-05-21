@@ -38,7 +38,13 @@ public class MyDB {
       // We create a table...
       stmt.execute("create table " + table + "(num int, addr varchar(40))");
     } catch (SQLException e) {
-      // TODO Auto-generated catch block
+
+      try {
+        stmt.execute("create table " + table + "(num int, addr varchar(40))");
+        return;
+      } catch (SQLException e1) {
+        e1.printStackTrace();
+      }
       e.printStackTrace();
     }
   }
