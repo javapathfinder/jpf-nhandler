@@ -121,7 +121,8 @@ public class JVMForwarder extends PropertyListenerAdapter {
 
     Method[] mth = nativePeer.getPeerClass().getMethods();
     for(Method m: mth) {
-      if(m.getName().equals(nmi.getJNIName())) {
+      String jniName = nmi.getJNIName();
+      if(m.getName().equals(jniName) || jniName.contains(m.getName())) {
         return true;
       }
     }
