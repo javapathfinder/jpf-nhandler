@@ -93,25 +93,12 @@ public class JPF2JVM {
 		  throw new NoClassDefFoundError(sei.getClassInfo().getName());
         }
 
-        // Holds JVMCls and all of its ancestors
-        List<Class<?>> clsList = new LinkedList<Class<?>>();
-        List<ClassInfo> JPFClsList = new LinkedList<ClassInfo>();
-        do {
-          clsList.add(JVMCls);
-          JVMCls = JVMCls.getSuperclass();
-          JPFClsList.add(ci);
-          ci = ci.getSuperClass();
-        } while (JVMCls != null);
-
-        while (!clsList.isEmpty()) {
-          int index = clsList.size() - 1;
-          JVMCls = clsList.remove(index);
-          ci = JPFClsList.remove(index);
-
-          Field fld[] = JVMCls.getDeclaredFields();
+        Class<?> cls = JVMCls;
+        while (cls!=null) {
+          Field fld[] = cls.getDeclaredFields();
           sei = ci.getStaticElementInfo();
 
-          assert (JVMCls.getName() != ci.getName());
+          assert (cls.getName() != ci.getName());
           for (int i = 0; i < fld.length; i++) {
             boolean isStatic = ((Modifier.toString(fld[i].getModifiers())).indexOf("static") != -1);
             boolean isFinal = ((Modifier.toString(fld[i].getModifiers())).indexOf("final") != -1);
@@ -161,7 +148,7 @@ public class JPF2JVM {
                 // If the current field is of primitive type
                 else {
                   try {
-                    setJVMPrimitiveField(fld[i], JVMCls, sei, fi);
+                    setJVMPrimitiveField(fld[i], cls, sei, fi);
                   } catch (IllegalAccessException e) {
                     e.printStackTrace();
                   }
@@ -169,6 +156,9 @@ public class JPF2JVM {
               }
             }
           }
+
+          cls = cls.getSuperclass();
+          ci = ci.getSuperClass();
         }
       }
     }
@@ -252,23 +242,9 @@ public class JPF2JVM {
 
           Converter.objMapJPF2JVM.put(JPFRef, JVMObj);
 
-          // Holds JVMCl and all of its ancestors
-          List<Class<?>> JVMClsList = new LinkedList<Class<?>>();
-          List<ClassInfo> JPFClsList = new LinkedList<ClassInfo>();
-
-          do {
-            JVMClsList.add(JVMCl);
-            JVMCl = JVMCl.getSuperclass();
-            JPFClsList.add(JPFCl);
-            JPFCl = JPFCl.getSuperClass();
-          } while (JVMCl != null);
-
-          while (!JVMClsList.isEmpty()) {
-            int index = JVMClsList.size() - 1;
-            JVMCl = JVMClsList.remove(index);
-            JPFCl = JPFClsList.remove(index);
-
-            Field fld[] = JVMCl.getDeclaredFields();
+          Class<?> cls = JVMCl;
+          while (cls!=null) {
+            Field fld[] = cls.getDeclaredFields();
 
             for (int i = 0; i < fld.length; i++) {
 
@@ -303,6 +279,8 @@ public class JPF2JVM {
                 }
               }
             }
+            cls = cls.getSuperclass();
+            JPFCl = JPFCl.getSuperClass();
           }
         }
       }
