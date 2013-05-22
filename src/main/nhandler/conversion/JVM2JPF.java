@@ -92,60 +92,69 @@ public class JVM2JPF {
 
         Converter.updatedJPFCls.add(JPFClsRef);
 
-        Field fld[] = JVMCls.getDeclaredFields();
-
-        for (int i = 0; i < fld.length; i++){
-          boolean isStatic = ((Modifier.toString(fld[i].getModifiers())).indexOf("static") != -1);
-          boolean isFinal = ((Modifier.toString(fld[i].getModifiers())).indexOf("final") != -1);
-
-          // Provide access to private and final fields
-          fld[i].setAccessible(true);
-          FieldInfo fi = sei.getFieldInfo(fld[i].getName());
-
-          // Provide access to private and final fields
-          if (fi != null){
-            if (isStatic && !isFinal){
-              // If the current field is of reference type
-              if (fi.isReference()){
-                int JPFfldValue = MJIEnv.NULL;
-                Object JVMfldValue = null;
-
-                try{
-                  // retrieving the value of the field in JVM
-                  JVMfldValue = fld[i].get(JVMCls);
-                } catch (IllegalAccessException e2){
-                  e2.printStackTrace();
-                }
-
-                JPFfldValue = sei.getReferenceField(fi);
-
-                if (JVMfldValue == null){
-                  JPFfldValue = MJIEnv.NULL;
-                } else if (JPFfldValue == MJIEnv.NULL || Converter.objMapJPF2JVM.get(JPFfldValue) != JVMfldValue){
-                  JPFfldValue = this.getJPFObj(JVMfldValue);
-                } else if (Converter.objMapJPF2JVM.get(JPFfldValue) == JVMfldValue){
-                  this.updateJPFObj(JVMfldValue, JPFfldValue);
-                } else{
-                  throw new ConversionException("Unconsidered case observed! - JVM2JPF.getJPFCls()");
-                }
-                sei.setReferenceField(fi, JPFfldValue);
-              }
-              // If the current field is of primitive type
-              else{
-                try{
-                  setJPFPrimitiveField(sei, fi.getStorageOffset(), fld[i], JVMCls);
-                } catch (IllegalAccessException e){
-                  e.printStackTrace();
-                }
-              }
-            }
-          }
-        }
+        setJPFClassFields(JVMCls, sei);
       }
     }
     return JPFCls;
   }
 
+  /**
+   * Sets the static fields of a JPF class corresponding to the given JVM class
+   * @param JVMCls a class object in JVM
+   * @param sei captures the value of static fields
+   * @throws ConversionException
+   */
+  public void setJPFClassFields(Class<?> JVMCls, StaticElementInfo sei) throws ConversionException {
+    Field fld[] = JVMCls.getDeclaredFields();
+
+    for (int i = 0; i < fld.length; i++){
+      boolean isStatic = ((Modifier.toString(fld[i].getModifiers())).indexOf("static") != -1);
+      boolean isFinal = ((Modifier.toString(fld[i].getModifiers())).indexOf("final") != -1);
+
+      // Provide access to private and final fields
+      fld[i].setAccessible(true);
+      FieldInfo fi = sei.getFieldInfo(fld[i].getName());
+
+      // Provide access to private and final fields
+      if (fi != null){
+        if (isStatic && !isFinal){
+          // If the current field is of reference type
+          if (fi.isReference()){
+            int JPFfldValue = MJIEnv.NULL;
+            Object JVMfldValue = null;
+
+            try{
+              // retrieving the value of the field in JVM
+              JVMfldValue = fld[i].get(JVMCls);
+            } catch (IllegalAccessException e2){
+              e2.printStackTrace();
+            }
+
+            JPFfldValue = sei.getReferenceField(fi);
+
+            if (JVMfldValue == null){
+              JPFfldValue = MJIEnv.NULL;
+            } else if (JPFfldValue == MJIEnv.NULL || Converter.objMapJPF2JVM.get(JPFfldValue) != JVMfldValue){
+              JPFfldValue = this.getJPFObj(JVMfldValue);
+            } else if (Converter.objMapJPF2JVM.get(JPFfldValue) == JVMfldValue){
+              this.updateJPFObj(JVMfldValue, JPFfldValue);
+            } else{
+              throw new ConversionException("Unconsidered case observed! - JVM2JPF.getJPFCls()");
+            }
+            sei.setReferenceField(fi, JPFfldValue);
+          }
+          // If the current field is of primitive type
+          else{
+            try{
+              setJPFPrimitiveField(sei, fi.getStorageOffset(), fld[i], JVMCls);
+            } catch (IllegalAccessException e){
+              e.printStackTrace();
+            }
+          }
+        }
+      }
+    }
+  }
   /**
    * Returns a JPF object corresponding to the given JVM object. If such an
    * object exists, it is updated (if it has not been updated) corresponding to
@@ -270,79 +279,67 @@ public class JVM2JPF {
             e1.printStackTrace();
           }
         }
-        ClassInfo ci = this.getJPFCls(JVMObj.getClass());
+        
         DynamicElementInfo dei = (DynamicElementInfo) env.getHeap().getModifiable(JPFObj);
 
-        List<Class<?>> JVMClsList = new LinkedList<Class<?>>();
-        List<ClassInfo> JPFClsList = new LinkedList<ClassInfo>();
-
-        Class<?> JVMCl = JVMObj.getClass();
-        ClassInfo JPFCl = ci;
-
-        // Include declared fields along with all the fields inherited from
-        // ancestors
-        do{
-          JVMClsList.add(JVMCl);
-          JVMCl = JVMCl.getSuperclass();
-
-          JPFClsList.add(JPFCl);
-          JPFCl = JPFCl.getSuperClass();
-        } while (JVMCl != null && JPFCl != null);
-
-        while (!JVMClsList.isEmpty()){
-          int index = JVMClsList.size() - 1;
-          JVMCl = JVMClsList.remove(index);
-          JPFCl = JPFClsList.remove(index);
-
-          Field fld[] = JVMCl.getDeclaredFields();
-
-          for (int i = 0; i < fld.length; i++){
-            // Check if the field is declared as non-static
-            boolean isNonStaticField = ((Modifier.toString(fld[i].getModifiers())).indexOf("static") == -1);
-            FieldInfo fi = JPFCl.getInstanceField(fld[i].getName());
-            fld[i].setAccessible(true);
-
-            if (fi != null && isNonStaticField){
-              // If the current field is of reference type
-              if (fi.isReference()){
-                int JPFfldValue = MJIEnv.NULL;
-                Object JVMfldValue = null;
-
-                try{
-                  // retrieving the value of the field in JVM
-                  JVMfldValue = fld[i].get(JVMObj);
-                } catch (IllegalAccessException e2){
-                  e2.printStackTrace();
-                }
-
-                JPFfldValue = dei.getReferenceField(fi);
-
-                if (JVMfldValue == null){
-                  JPFfldValue = MJIEnv.NULL;
-                } else if (JPFfldValue == MJIEnv.NULL || Converter.objMapJPF2JVM.get(JPFfldValue) != JVMfldValue){
-                  JPFfldValue = this.getJPFObj(JVMfldValue);
-                } else if (Converter.objMapJPF2JVM.get(JPFfldValue) == JVMfldValue){
-                  this.updateJPFObj(JVMfldValue, JPFfldValue);
-                } else{
-                  throw new ConversionException("Unconsidered case observed! - JVM2JPF.updateObj()");
-                }
-                dei.setReferenceField(fi, JPFfldValue);
-              }
-              // If the current field is of primitive type
-              else{
-                try{
-                  setJPFPrimitiveField(dei, fi.getStorageOffset(), fld[i], JVMObj);
-                } catch (IllegalAccessException e){
-                  e.printStackTrace();
-                }
-              }
-            }
-          }
-        }
+        setJPFObjFields(JVMObj, dei);
       }
     }
   }
 
+  public void setJPFObjFields(Object JVMObj, DynamicElementInfo dei) throws ConversionException {
+    Class<?> JVMCl = JVMObj.getClass();
+    ClassInfo JPFCl = this.getJPFCls(JVMObj.getClass());
+
+    while (JVMCl!=null){
+      Field fld[] = JVMCl.getDeclaredFields();
+
+      for (int i = 0; i < fld.length; i++){
+        // Check if the field is declared as non-static
+        boolean isNonStaticField = ((Modifier.toString(fld[i].getModifiers())).indexOf("static") == -1);
+        FieldInfo fi = JPFCl.getInstanceField(fld[i].getName());
+        fld[i].setAccessible(true);
+
+        if (fi != null && isNonStaticField){
+          // If the current field is of reference type
+          if (fi.isReference()){
+            int JPFfldValue = MJIEnv.NULL;
+            Object JVMfldValue = null;
+
+            try{
+              // retrieving the value of the field in JVM
+              JVMfldValue = fld[i].get(JVMObj);
+            } catch (IllegalAccessException e2){
+              e2.printStackTrace();
+            }
+
+            JPFfldValue = dei.getReferenceField(fi);
+
+            if (JVMfldValue == null){
+              JPFfldValue = MJIEnv.NULL;
+            } else if (JPFfldValue == MJIEnv.NULL || Converter.objMapJPF2JVM.get(JPFfldValue) != JVMfldValue){
+              JPFfldValue = this.getJPFObj(JVMfldValue);
+            } else if (Converter.objMapJPF2JVM.get(JPFfldValue) == JVMfldValue){
+              this.updateJPFObj(JVMfldValue, JPFfldValue);
+            } else{
+              throw new ConversionException("Unconsidered case observed! - JVM2JPF.updateObj()");
+            }
+            dei.setReferenceField(fi, JPFfldValue);
+          }
+          // If the current field is of primitive type
+          else{
+            try{
+              setJPFPrimitiveField(dei, fi.getStorageOffset(), fld[i], JVMObj);
+            } catch (IllegalAccessException e){
+              e.printStackTrace();
+            }
+          }
+        }
+      }
+      JVMCl = JVMCl.getSuperclass();
+      JPFCl = JPFCl.getSuperClass();
+    }
+  }
   /**
    * Updates the given JPF array according to the given JVM array.
    * 
@@ -535,7 +532,7 @@ public class JVM2JPF {
   }
 
   /**
-   * Sets an element of the given JPF array to the same value as the given JVM
+   * Sets an element of the given JPF primitive array to the same value as the given JVM
    * object.
    * 
    * @param ei
