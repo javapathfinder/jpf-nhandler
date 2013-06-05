@@ -20,6 +20,8 @@ package gov.nasa.jpf.vm;
 import java.io.File;
 import java.lang.reflect.Method;
 
+import nhandler.conversion.ConverterBase;
+
 import gov.nasa.jpf.Config;
 import gov.nasa.jpf.PropertyListenerAdapter;
 import gov.nasa.jpf.vm.ClassInfo;
@@ -244,6 +246,9 @@ public class JVMForwarder extends PropertyListenerAdapter {
     	}
       }
     }
+
+    // this creates a converter factory which is used to create type specific Converter objects
+    ConverterBase.init();
   }
 
   public void executeInstruction (VM vm, ThreadInfo currentThread, Instruction instructionToExecute) {

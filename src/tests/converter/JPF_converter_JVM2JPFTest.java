@@ -26,7 +26,8 @@ import gov.nasa.jpf.util.test.TestJPF;
 import java.util.HashMap;
 
 import nhandler.conversion.ConversionException;
-import nhandler.conversion.Converter;
+import nhandler.conversion.ConverterBase;
+import nhandler.conversion.jvm2jpf.JVM2JPFConverter;
 
 import converter.JVM2JPFTest.JVM2JPFTestConversion;
 
@@ -36,10 +37,10 @@ public class JPF_converter_JVM2JPFTest extends NativePeer {
   public static int createStringTest____Ljava_lang_String_2 (MJIEnv env, int objRef) throws ConversionException{
     String s = new String("Hello World");
 
-    Converter converter = new Converter(env);
+    ConverterBase.reset(env);
 
     // converting JVM String to JPF string
-    int jpfObj = converter.getJPFObj(s);
+    int jpfObj = JVM2JPFConverter.obtainJPFObj(s, env);
 
     return jpfObj;
   }
@@ -48,10 +49,10 @@ public class JPF_converter_JVM2JPFTest extends NativePeer {
   public static int createIntegerTest____Ljava_lang_Integer_2 (MJIEnv env, int objRef) throws ConversionException{
     Integer i = new Integer(100);
 
-    Converter converter = new Converter(env);
+    ConverterBase.reset(env);
 
     // converting JVM Integer to JPF Integer
-    int jpfObj = converter.getJPFObj(i);
+    int jpfObj = JVM2JPFConverter.obtainJPFObj(i, env);
 
     return jpfObj;
   }
@@ -60,10 +61,10 @@ public class JPF_converter_JVM2JPFTest extends NativePeer {
   public static int createArrayTest_____3Ljava_lang_String_2 (MJIEnv env, int objRef) throws ConversionException{
     String[] arr = { "e1", "e2", "e3" };
 
-    Converter converter = new Converter(env);
+    ConverterBase.reset(env);
 
     // converting JVM String array to JPF String array
-    int jpfObj = converter.getJPFObj(arr);
+    int jpfObj = JVM2JPFConverter.obtainJPFObj(arr, env);
 
     return jpfObj;
   }
@@ -75,10 +76,10 @@ public class JPF_converter_JVM2JPFTest extends NativePeer {
     map.put(1, "one");
     map.put(2, "two");
 
-    Converter converter = new Converter(env);
+    ConverterBase.reset(env);
 
     // converting JVM map to JPF map
-    int jpfObj = converter.getJPFObj(map);
+    int jpfObj = JVM2JPFConverter.obtainJPFObj(map, env);
 
     return jpfObj;
   }
@@ -89,10 +90,11 @@ public class JPF_converter_JVM2JPFTest extends NativePeer {
     Class<?> cls = JVM2JPFTestConversion.class;
 
     TestJPF.assertEquals(JVM2JPFTestConversion.i, 10);
-    Converter converter = new Converter(env);
 
+    ConverterBase.reset(env);
+    
     // converting JVM class to JPF class
-    ClassInfo ci = converter.getJPFCls(cls);
+    ClassInfo ci = JVM2JPFConverter.obtainJPFCls(cls, env);
 
     return ci.getClassObjectRef();
   }

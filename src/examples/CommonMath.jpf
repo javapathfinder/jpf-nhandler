@@ -12,7 +12,6 @@ nhandler.delegateUnhandledNative = true
 
 # We need to delegate the following method to the host JVM, OW we get the following
 # error (note that getInstance is invoked by getDefaultNumberFormat, but the method
-# getInstance(Ljava/util/Locale;) is missing in the JPF model class NumberFormat does 
-# not declate ):
+# getInstance(Ljava/util/Locale;) is missing from the JPF model class
 # java.lang.NoSuchMethodException: java.text.NumberFormat.getInstance(Ljava/util/Locale;)Ljava/text/NumberFormat;
 nhandler.spec.delegate = org.apache.commons.math3.util.CompositeFormat.getDefaultNumberFormat

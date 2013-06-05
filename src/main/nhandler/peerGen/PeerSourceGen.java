@@ -221,13 +221,13 @@ public class PeerSourceGen {
       append(" {");
       gotoNextLine();
     }
-
+ 
     protected void printConvertorPart (){
       gotoNextLine();
-      addComment("Creates the engine for converting objects/classes between JPF & JVM");
+      addComment("Resest the Converter class used to converting objects/classes between JPF & JVM");
 
       addDoubleIndent();
-      append("Converter converter = new Converter(env);");
+      append("ConverterBase.reset(env);");
       addBlankLine();
     }
 
@@ -236,12 +236,12 @@ public class PeerSourceGen {
         addComment("Captures the class that invokes the static method to be handled in JVM");
 
         addDoubleIndent();
-        append("Class<?> caller = converter.getJVMCls(rcls);");
+        append("Class<?> caller = JPF2JVMConverter.obtainJVMCls(rcls, env);");
       } else{
         addComment("Captures the object that invokes the method to be handled in JVM");
 
         addDoubleIndent();
-        append("Object caller = converter.getJVMObj(robj);");
+        append("Object caller = JPF2JVMConverter.obtainJVMObj(robj, env);");
       }
 
       addBlankLine();
@@ -257,7 +257,7 @@ public class PeerSourceGen {
 
     protected void printSetObjArgVal (int index){
       addDoubleIndent();
-      append("argValue[" + index + "] = converter.getJVMObj(arg" + index + ");");
+      append("argValue[" + index + "] = Converter.obtainJVMObj(arg" + index + ");");
       gotoNextLine();
     }
 
@@ -363,7 +363,7 @@ public class PeerSourceGen {
       addComment("Converts the return value from JVM to JPF");
 
       addDoubleIndent();
-      append("int JPFObj = converter.getJPFObj(returnValue);");
+      append("int JPFObj = JVM2JPFConverter.obtainJPFObj(returnValue, env);");
       addBlankLine();
     }
 
@@ -372,12 +372,12 @@ public class PeerSourceGen {
         addComment("Updates the class that invokes the method to be handle in JPF");
 
         addDoubleIndent();
-        append("converter.getJPFCls(caller);");
+        append("JVM2JPFConverter.obtainJPFCls(caller, env);");
       } else{
         addComment("Updates the object that invokes the method to be handled in JPF");
 
         addDoubleIndent();
-        append("converter.updateJPFObj(caller, robj);");
+        append("JVM2JPFConverter.updateJPFObj(caller, robj, env);");
       }
       addBlankLine();
 
@@ -403,7 +403,7 @@ public class PeerSourceGen {
       }
 
       addDoubleIndent();
-      append("converter.updateJPFObj(argValue[" + index + "], arg" + index + ");");
+      append("converter.updateJPFObj(argValue[" + index + "], arg" + index + ", env);");
       if(index == nArgs-1) {
         addBlankLine();
       } else {

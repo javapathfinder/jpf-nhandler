@@ -327,7 +327,7 @@ public class PeerClassGen implements Constants {
     JavaClass clazz = null;
 
     try{
-      clazz = Repository.lookupClass("nhandler.peerGen.Test");
+      clazz = Repository.lookupClass("nhandler.peerGen.Test1");
     } catch (ClassNotFoundException e){
       e.printStackTrace();
     }

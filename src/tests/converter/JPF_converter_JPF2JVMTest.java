@@ -25,7 +25,8 @@ import gov.nasa.jpf.util.test.TestJPF;
 import java.util.HashMap;
 
 import nhandler.conversion.ConversionException;
-import nhandler.conversion.Converter;
+import nhandler.conversion.ConverterBase;
+import nhandler.conversion.jpf2jvm.JPF2JVMConverter;
 
 import converter.JPF2JVMTest.JPF2JVMTestConversion;
 
@@ -39,22 +40,22 @@ import converter.JPF2JVMTest.JPF2JVMTestConversion;
 public class JPF_converter_JPF2JVMTest extends NativePeer {
 
   @MJI
-  public static void convertStringTest__Ljava_lang_String_2__V (MJIEnv env, int objRef, int jpfRef) throws ConversionException{
-    Converter converter = new Converter(env);
+  public static void convertStringTest__Ljava_lang_String_2__V (MJIEnv env, int objRef, int jpfRef) throws ConversionException, ClassNotFoundException{
+    ConverterBase.reset(env);
 
     // converting JPF String to JVM string
-    String s1 = (String) converter.getJVMObj(jpfRef);
+    String s1 = (String) JPF2JVMConverter.obtainJVMObj(jpfRef, env);
     String s2 = new String("Hello World");
 
     TestJPF.assertEquals(s1, s2);
   }
 
   @MJI
-  public static void convertIntegerTest__Ljava_lang_Integer_2__V (MJIEnv env, int objRef, int jpfRef) throws ConversionException{
-    Converter converter = new Converter(env);
+  public static void convertIntegerTest__Ljava_lang_Integer_2__V (MJIEnv env, int objRef, int jpfRef) throws ConversionException, ClassNotFoundException{
+    ConverterBase.reset(env);
 
     // converting JPF Integer to JVM Integer
-    Integer i1 = (Integer) converter.getJVMObj(jpfRef);
+    Integer i1 = (Integer) JPF2JVMConverter.obtainJVMObj(jpfRef, env);
 
     Integer i2 = new Integer(100);
 
@@ -62,11 +63,11 @@ public class JPF_converter_JPF2JVMTest extends NativePeer {
   }
 
   @MJI
-  public static void convertArrayTest___3Ljava_lang_String_2__V (MJIEnv env, int objRef, int jpfArr) throws ConversionException{
-    Converter converter = new Converter(env);
+  public static void convertArrayTest___3Ljava_lang_String_2__V (MJIEnv env, int objRef, int jpfArr) throws ConversionException, ClassNotFoundException{
+    ConverterBase.reset(env);
 
     // converting JPF String array to JVM String array
-    String[] arr1 = (String[]) converter.getJVMObj(jpfArr);
+    String[] arr1 = (String[]) JPF2JVMConverter.obtainJVMObj(jpfArr, env);
     String[] arr2 = { "e1", "e2", "e3" };
 
     TestJPF.assertEquals(arr1.length, arr2.length);
@@ -76,12 +77,12 @@ public class JPF_converter_JPF2JVMTest extends NativePeer {
   }
 
   @MJI
-  public static void convertHashMapTest__Ljava_util_HashMap_2__V (MJIEnv env, int objRef, int jpfMap) throws ConversionException{
-    Converter converter = new Converter(env);
+  public static void convertHashMapTest__Ljava_util_HashMap_2__V (MJIEnv env, int objRef, int jpfMap) throws ConversionException, ClassNotFoundException{
+    ConverterBase.reset(env);
 
     // converting JPF HashMap to JVM HashMap
     @SuppressWarnings("unchecked")
-	HashMap<Integer, String> map1 = (HashMap<Integer, String>) converter.getJVMObj(jpfMap);
+	HashMap<Integer, String> map1 = (HashMap<Integer, String>) JPF2JVMConverter.obtainJVMObj(jpfMap, env);
 
     HashMap<Integer, String> map2 = new HashMap<Integer, String>();
     map2.put(0, "zero");
@@ -95,11 +96,14 @@ public class JPF_converter_JPF2JVMTest extends NativePeer {
   }
 
   @MJI
-  public static void convertClassTest__Ljava_lang_Class_2__V (MJIEnv env, int objRef, int jpfCls) throws ConversionException, IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException{
-    Converter converter = new Converter(env);
+  public static void convertClassTest__Ljava_lang_Class_2__V (MJIEnv env, int objRef, int jpfCls) throws 
+         ConversionException, IllegalArgumentException, SecurityException, 
+           IllegalAccessException, NoSuchFieldException, ClassNotFoundException {
+ 
+    ConverterBase.reset(env);
 
     // converting JPF Class to JVM Class
-    Class<?> cls1 = (Class<?>) converter.getJVMCls(jpfCls);
+    Class<?> cls1 = (Class<?>) JPF2JVMConverter.obtainJVMCls(jpfCls, env);
 
     Class<?> cls2 = JPF2JVMTestConversion.class;
 

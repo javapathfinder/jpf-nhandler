@@ -56,6 +56,14 @@ public class PeerMethodGen {
 
   private static final String conversionPkg = "nhandler.conversion";
 
+  private static final String jpf2jvmConverter = conversionPkg + ".jpf2jvm.JPF2JVMConverter";
+
+  private static final String jvm2jpfConverter = conversionPkg + ".jvm2jpf.JVM2JPFConverter";
+
+  private static final String mjiEnvCls = "gov.nasa.jpf.vm.MJIEnv";
+
+  private static final Type mjiEnvType = new ObjectType(mjiEnvCls);
+  
   private PeerSourceGen.MethodGen sourceGen; 
 
   MJIEnv env;
@@ -119,9 +127,9 @@ public class PeerMethodGen {
 
   private void createMethod (){
     this.addException();
-    int converter = this.createConverter();
-    int caller = this.createCaller(converter);
-    int argValue = this.createArgValue(converter);
+    this.createResetConverterBase();
+    int caller = this.createCaller();
+    int argValue = this.createArgValue();
     int argType = this.createArgType(argValue);
     int callerClass = this.getCallerClass(caller);
     int method = this.getMethod(callerClass, argType);
@@ -133,7 +141,7 @@ public class PeerMethodGen {
       if (!PeerMethodGen.isPrimitiveType(this.mi.getReturnTypeName())){
         // If the method is not of type void, converts returnValue to a JPF
         // object
-        jpfReturnValue = this.convertJVM2JPF(converter, returnValue);
+        jpfReturnValue = this.convertJVM2JPF(returnValue);
       } else {
         jpfReturnValue = returnValue;
       }
@@ -141,11 +149,11 @@ public class PeerMethodGen {
 
     if(updateJPFState) {
       if (mi.isStatic())
-        this.updateJPFClass(converter, callerClass);
+        this.updateJPFClass(callerClass);
       else
-        this.updateJPFObj(converter, caller, 1);
+        this.updateJPFObj(caller, 1);
 
-      this.updateJPFArguments(converter, argValue);
+      this.updateJPFArguments(argValue);
     }
 
     this.addReturnStatement(jpfReturnValue);
@@ -153,24 +161,24 @@ public class PeerMethodGen {
 
   private void createCtor (){
     this.addException();
-    int converter = this.createConverter();
-    int argValue = this.createArgValue(converter);
+    this.createResetConverterBase();
+    int argValue = this.createArgValue();
     int argType = this.createArgType(argValue);
     int callerClass = this.getCallerClass(MJIEnv.NULL);
     int ctor = this.getConstructor(callerClass, argType);
     this.setAccessible(ctor);
     int returnValue = this.createNewInstance(ctor, argValue);
-    this.updateJPFObj(converter, returnValue, 1);
-    this.updateJPFArguments(converter, argValue);
+    this.updateJPFObj(returnValue, 1);
+    this.updateJPFArguments(argValue);
     this.addReturnStatement(MJIEnv.NULL);
   }
 
   private void createClinit (){
     this.addException();
-    int converter = this.createConverter();
-    int caller = this.createCaller(converter);
+    this.createResetConverterBase();
+    int caller = this.createCaller();
     int callerClass = this.getCallerClass(caller);
-    this.updateJPFClass(converter, callerClass);
+    this.updateJPFClass(callerClass);
     // just set it to some dummy value, since the method is of type of void
     this.addReturnStatement(MJIEnv.NULL);
   }
@@ -222,29 +230,16 @@ public class PeerMethodGen {
   }
 
   /**
-   * Adds bytecode to the body of the method that creates an instance of the
-   * Converter class. Adds "Converter converter = new Converter(env)" to the
-   * body of the method.
-   * 
-   * @return an index of the local variable that represents the Converter object
+   * Adds bytecode to the body of the method that resets the Converter Class. 
+   * Adds "Converter.reset(env)" to the body of the method.
    */
-  private int createConverter (){
-    this.il.append(peerClassGen._factory.createNew(conversionPkg + ".Converter"));
-    // Duplicate the top operand stack value
-    this.il.append(InstructionConstants.DUP);
-    // Load from local variable
+  private void createResetConverterBase (){
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
-    this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "<init>", Type.VOID, new Type[] { new ObjectType(PeerClassGen.MJIEnvCls) }, Constants.INVOKESPECIAL));
-    // Store into local variable
-    LocalVariableGen lg = this.nativeMth.addLocalVariable("converter", new ObjectType(conversionPkg + ".Converter"), null, null);
-    int converter = lg.getIndex();
-    this.il.append(InstructionFactory.createStore(Type.OBJECT, converter));
+    il.append(peerClassGen._factory.createInvoke(conversionPkg + ".ConverterBase", "reset", Type.VOID, new Type[] { new ObjectType("gov.nasa.jpf.vm.MJIEnv") }, Constants.INVOKESTATIC));
     
     if(genSource()) {
       this.sourceGen.printConvertorPart();
     }
-    
-    return converter;
   }
 
   /**
@@ -260,18 +255,20 @@ public class PeerMethodGen {
    * @return an index of the local variable that represents the caller object
    *         (non-static method) or class (static method)
    */
-  private int createCaller (int converter){
-    this.il.append(InstructionFactory.createLoad(Type.OBJECT, converter));
-    this.il.append(InstructionFactory.createLoad(Type.INT, 1));
+  private int createCaller (){
     LocalVariableGen lg;
+    this.il.append(InstructionFactory.createLoad(Type.INT, 1));
+    this.il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
 
+    Type[] types = { Type.INT, mjiEnvType };
     if (this.mi.isStatic()){
-      this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "getJVMCls", new ObjectType("java.lang.Class"), new Type[] { Type.INT }, Constants.INVOKEVIRTUAL));
+      this.il.append(peerClassGen._factory.createInvoke(jpf2jvmConverter, "obtainJVMCls", new ObjectType("java.lang.Class"), types, Constants.INVOKESTATIC));
       lg = this.nativeMth.addLocalVariable("caller", new ObjectType("java.lang.Class"), null, null);
     } else{
-      this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "getJVMObj", Type.OBJECT, new Type[] { Type.INT }, Constants.INVOKEVIRTUAL));
+      this.il.append(peerClassGen._factory.createInvoke(jpf2jvmConverter, "obtainJVMObj", Type.OBJECT, types, Constants.INVOKESTATIC));
       lg = this.nativeMth.addLocalVariable("caller", Type.OBJECT, null, null);
     }
+
     int caller = lg.getIndex();
     this.il.append(InstructionFactory.createStore(Type.OBJECT, caller));
 
@@ -292,7 +289,7 @@ public class PeerMethodGen {
    * @return an index of the local variable which is an array of type Object
    *         including the arguments values of the method
    */
-  private int createArgValue (int converter){
+  private int createArgValue (){
     String[] argTypes = this.mi.getArgumentTypeNames();
     int nArgs = argTypes.length;
 
@@ -316,9 +313,10 @@ public class PeerMethodGen {
       this.il.append(new PUSH(peerClassGen._cp, i));
       // if the current argument representing an object
       if (!PeerMethodGen.isPrimitiveType(argTypes[i])){
-        this.il.append(InstructionFactory.createLoad(Type.OBJECT, converter));
+        Type[] types = { Type.INT, mjiEnvType };
         this.il.append(InstructionFactory.createLoad(Type.INT, j));
-        this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "getJVMObj", Type.OBJECT, new Type[] { Type.INT }, Constants.INVOKEVIRTUAL));
+        this.il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
+        this.il.append(peerClassGen._factory.createInvoke(jpf2jvmConverter, "obtainJVMObj", Type.OBJECT, types, Constants.INVOKESTATIC));
         j++;
 
         if(genSource()) {
@@ -663,10 +661,11 @@ public class PeerMethodGen {
    * @return an index of the local variable that represents the JPF object
    *         corresponding to the given JVM object
    */
-  private int convertJVM2JPF (int converter, int JVMObj){
-    this.il.append(InstructionFactory.createLoad(Type.OBJECT, converter));
+  private int convertJVM2JPF (int JVMObj){
+    Type[] types = { Type.OBJECT, mjiEnvType };
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, JVMObj));
-    this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "getJPFObj", Type.INT, new Type[] { Type.OBJECT }, Constants.INVOKEVIRTUAL));
+    this.il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
+    this.il.append(peerClassGen._factory.createInvoke(jvm2jpfConverter, "obtainJPFObj", Type.INT, types, Constants.INVOKESTATIC));
     LocalVariableGen lg = this.nativeMth.addLocalVariable("JPFObj", Type.INT, null, null);
     int JPFObj = lg.getIndex();
     this.il.append(InstructionFactory.createStore(Type.INT, JPFObj));
@@ -691,11 +690,12 @@ public class PeerMethodGen {
    * @param JPFObj
    *          an index of the local variable that represents a JPF object
    */
-  private void updateJPFObj (int converter, int JVMObj, int JPFObj){
-    this.il.append(InstructionFactory.createLoad(Type.OBJECT, converter));
+  private void updateJPFObj (int JVMObj, int JPFObj){
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, JVMObj));
     this.il.append(InstructionFactory.createLoad(Type.INT, JPFObj));
-    this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "updateJPFObj", Type.VOID, new Type[] { Type.OBJECT, Type.INT }, Constants.INVOKEVIRTUAL));
+    this.il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
+    Type[] types = { Type.OBJECT, Type.INT, mjiEnvType };
+    this.il.append(peerClassGen._factory.createInvoke(jvm2jpfConverter, "updateJPFObj", Type.VOID, types, Constants.INVOKESTATIC));
 
     if(genSource()) {
       if(!mi.isCtor()) {
@@ -717,10 +717,11 @@ public class PeerMethodGen {
    * @param JPFCls
    *          an index of the local variable that represents a JPF class
    */
-  private void updateJPFClass (int converter, int JVMCls){
-    this.il.append(InstructionFactory.createLoad(Type.OBJECT, converter));
+  private void updateJPFClass (int JVMCls){
     this.il.append(InstructionFactory.createLoad(Type.OBJECT, JVMCls));
-    this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "getJPFCls", new ObjectType("gov.nasa.jpf.vm.ClassInfo"), new Type[] { new ObjectType("java.lang.Class") }, Constants.INVOKEVIRTUAL));
+    this.il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
+    Type[] types = { new ObjectType("java.lang.Class"), mjiEnvType};
+    this.il.append(peerClassGen._factory.createInvoke(jvm2jpfConverter, "obtainJPFCls", new ObjectType("gov.nasa.jpf.vm.ClassInfo"), types, Constants.INVOKESTATIC));
     this.il.append(InstructionConstants.POP);
 
     if(genSource()) {
@@ -740,7 +741,7 @@ public class PeerMethodGen {
    *          an index of the local variable that represents a JVM array that
    *          holds the value of input parameters
    */
-  private void updateJPFArguments (int converter, int argValue){
+  private void updateJPFArguments (int argValue){
     String[] type = mi.getArgumentTypeNames();
     int nArgs = type.length;
 
@@ -748,15 +749,16 @@ public class PeerMethodGen {
     for (int i = 0; i < nArgs; i++){
 
       if (!PeerMethodGen.isPrimitiveType(type[i])){
-        this.il.append(InstructionFactory.createLoad(Type.OBJECT, converter));
         // Loading the array element argsValue[i];
         this.il.append(InstructionFactory.createLoad(Type.OBJECT, argValue));
         this.il.append(new PUSH(peerClassGen._cp, i));
         this.il.append(InstructionConstants.AALOAD);
         // Loading the nth input parameter
         this.il.append(InstructionFactory.createLoad(Type.INT, j));
+        this.il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
+        Type[] types = { Type.OBJECT, Type.INT, mjiEnvType };
         // Invoking the method "updateJPFObj"
-        this.il.append(peerClassGen._factory.createInvoke(conversionPkg + ".Converter", "updateJPFObj", Type.VOID, new Type[] { Type.OBJECT, Type.INT }, Constants.INVOKEVIRTUAL));
+        this.il.append(peerClassGen._factory.createInvoke(jvm2jpfConverter, "updateJPFObj", Type.VOID, types, Constants.INVOKESTATIC));
         j++;
 
         if(genSource()) {
