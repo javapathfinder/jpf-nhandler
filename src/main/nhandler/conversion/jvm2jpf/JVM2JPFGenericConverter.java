@@ -12,9 +12,16 @@ import java.lang.reflect.Modifier;
 import nhandler.conversion.ConversionException;
 import nhandler.conversion.ConverterBase;
 
+/**
+ * This class is used to convert objects and classes from JVM to JPF. This is only
+ * applicable on types which are compatible between JPF and JVM, meaning that the same
+ * classes are used to represent them in both environments.
+ * 
+ * @author Nastaran Shafiei
+ */
 public class JVM2JPFGenericConverter extends JVM2JPFConverter {
   @Override
-  protected void setJPFClassFields(Class<?> JVMCls, StaticElementInfo sei, MJIEnv env) throws ConversionException {
+  protected void setStaticFields(Class<?> JVMCls, StaticElementInfo sei, MJIEnv env) throws ConversionException {
     Field fld[] = JVMCls.getDeclaredFields();
 
     for (int i = 0; i < fld.length; i++){
@@ -56,7 +63,7 @@ public class JVM2JPFGenericConverter extends JVM2JPFConverter {
           // If the current field is of primitive type
           else{
             try{
-              ConverterBase.setJPFPrimitiveField(sei, fi.getStorageOffset(), fld[i], JVMCls);
+              Utilities.setJPFPrimitiveField(sei, fi.getStorageOffset(), fld[i], JVMCls);
             } catch (IllegalAccessException e){
               e.printStackTrace();
             }
@@ -67,7 +74,7 @@ public class JVM2JPFGenericConverter extends JVM2JPFConverter {
   }
 
   @Override
-  protected void setJPFObjFields(Object JVMObj, DynamicElementInfo dei, MJIEnv env) throws ConversionException {
+  protected void setInstanceFields(Object JVMObj, DynamicElementInfo dei, MJIEnv env) throws ConversionException {
     Class<?> JVMCl = JVMObj.getClass();
     ClassInfo JPFCl = this.getJPFCls(JVMObj.getClass(), env);
 
@@ -109,7 +116,7 @@ public class JVM2JPFGenericConverter extends JVM2JPFConverter {
           // If the current field is of primitive type
           else{
             try{
-              ConverterBase.setJPFPrimitiveField(dei, fi.getStorageOffset(), fld[i], JVMObj);
+              Utilities.setJPFPrimitiveField(dei, fi.getStorageOffset(), fld[i], JVMObj);
             } catch (IllegalAccessException e){
               e.printStackTrace();
             }

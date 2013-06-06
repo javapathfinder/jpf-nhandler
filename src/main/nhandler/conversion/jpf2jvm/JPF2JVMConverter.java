@@ -12,9 +12,12 @@ import java.lang.reflect.Array;
 import nhandler.conversion.ConversionException;
 import nhandler.conversion.ConverterBase;
 
-public abstract class JPF2JVMConverter {
-
-  /********** Conversion from JPF to JVM ***********/
+/**
+ * This class is used to converter objects and classes from JPF to JVM
+ * 
+ * @author Nastaran Shafiei
+ */
+public abstract class JPF2JVMConverter extends ConverterBase {
 
   public static Class<?> obtainJVMCls (int JPFRef, MJIEnv env) throws ConversionException {
     if (JPFRef == MJIEnv.NULL) {
@@ -38,7 +41,7 @@ public abstract class JPF2JVMConverter {
   }
 
   protected Class<?> loadClass(String cname, MJIEnv env) throws ClassNotFoundException {
-    if(ConverterBase.isArray(cname)) {
+    if(Utilities.isArray(cname)) {
       return Class.forName(cname);
     } else {
       ClassLoader cl = env.getConfig().getClassLoader();
@@ -76,13 +79,13 @@ public abstract class JPF2JVMConverter {
 
         assert (JVMCls.getName() != ci.getName());
 
-        setJVMClassFields(JVMCls, sei, env);
+        setStaticFields(JVMCls, sei, env);
       }
     }
     return JVMCls;
   }
 
-  protected abstract void setJVMClassFields(Class<?> JVMCls, StaticElementInfo sei, MJIEnv env) throws ConversionException;
+  protected abstract void setStaticFields(Class<?> JVMCls, StaticElementInfo sei, MJIEnv env) throws ConversionException;
   
   /**
    * Returns a JVM object corresponding to the given JPF object. If such an
@@ -127,8 +130,8 @@ public abstract class JPF2JVMConverter {
           if (JVMCl == Class.class) {
             try {
               String name = env.getReferredClassInfo(JPFRef).getName();
-              if (ConverterBase.isPrimitiveClass(name)) {
-                JVMObj = ConverterBase.getPrimitiveClass(name);
+              if (Utilities.isPrimitiveClass(name)) {
+                JVMObj = Utilities.getPrimitiveClass(name);
               } else {
                 JVMObj = loadClass(name, env);
               }
@@ -138,18 +141,18 @@ public abstract class JPF2JVMConverter {
             return JVMObj;
           } else {
             // Creates a new instance of JVMCl
-            JVMObj = ConverterBase.instantiateFrom(JVMCl);
+            JVMObj = instantiateFrom(JVMCl);
           }
 
           ConverterBase.objMapJPF2JVM.put(JPFRef, JVMObj);
-          setJVMObjFields(JVMObj, dei, env);
+          setInstanceFields(JVMObj, dei, env);
         }
       }
     }
     return JVMObj;
   }
 
-  protected abstract void setJVMObjFields(Object JVMObj, DynamicElementInfo dei, MJIEnv env) throws ConversionException;
+  protected abstract void setInstanceFields(Object JVMObj, DynamicElementInfo dei, MJIEnv env) throws ConversionException;
 
   /**
    * Returns a JVM array corresponding to the given JPF array. If such an array
@@ -179,7 +182,7 @@ public abstract class JPF2JVMConverter {
 
         // Array of primitive type
         if (dei.getClassInfo().getComponentClassInfo().isPrimitive()) {
-          JVMArr = ConverterBase.createJVMPrimitiveArr(dei);
+          JVMArr = Utilities.createJVMPrimitiveArr(dei);
         }
         // Array of Non-primitives
         else {
@@ -206,6 +209,8 @@ public abstract class JPF2JVMConverter {
     return JVMArr;
   }
 
+  protected abstract Object instantiateFrom (Class<?> cl);
+
   protected Object createStringObject(int JPFRef, MJIEnv env) throws ConversionException {
     DynamicElementInfo str = (DynamicElementInfo) env.getHeap().get(JPFRef);
     if(!str.getClassInfo().isStringClassInfo()) {
@@ -221,4 +226,5 @@ public abstract class JPF2JVMConverter {
     ConverterBase.objMapJPF2JVM.put(JPFRef, JVMObj);
     return JVMObj;
   }
+
 }

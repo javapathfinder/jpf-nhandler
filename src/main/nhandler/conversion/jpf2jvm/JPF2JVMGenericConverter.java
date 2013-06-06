@@ -1,5 +1,6 @@
 package nhandler.conversion.jpf2jvm;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
@@ -9,12 +10,18 @@ import gov.nasa.jpf.vm.FieldInfo;
 import gov.nasa.jpf.vm.MJIEnv;
 import gov.nasa.jpf.vm.StaticElementInfo;
 import nhandler.conversion.ConversionException;
-import nhandler.conversion.ConverterBase;
 
+/**
+ * This class is used to convert objects and classes from JPF to JVM. This is only
+ * applicable on types which are compatible between JPF and JVM, meaning that the same
+ * classes are used to represent them in both environments.
+ * 
+ * @author Nastaran Shafiei
+ */
 public class JPF2JVMGenericConverter extends JPF2JVMConverter {
   
   @Override
-  protected void setJVMClassFields(Class<?> JVMCls, StaticElementInfo sei, MJIEnv env) throws ConversionException {
+  protected void setStaticFields(Class<?> JVMCls, StaticElementInfo sei, MJIEnv env) throws ConversionException {
     ClassInfo ci = sei.getClassInfo();
     while (JVMCls!=null) {
       Field fld[] = JVMCls.getDeclaredFields();
@@ -68,7 +75,7 @@ public class JPF2JVMGenericConverter extends JPF2JVMConverter {
             // If the current field is of primitive type
             else {
               try {
-                ConverterBase.setJVMPrimitiveField(fld[i], JVMCls, sei, fi);
+                Utilities.setJVMPrimitiveField(fld[i], JVMCls, sei, fi);
               } catch (IllegalAccessException e) {
                 e.printStackTrace();
               }
@@ -83,7 +90,7 @@ public class JPF2JVMGenericConverter extends JPF2JVMConverter {
   }
 
   @Override
-  protected void setJVMObjFields(Object JVMObj, DynamicElementInfo dei, MJIEnv env) throws ConversionException {
+  protected void setInstanceFields(Object JVMObj, DynamicElementInfo dei, MJIEnv env) throws ConversionException {
     Class<?> cls = JVMObj.getClass();
     ClassInfo JPFCl = dei.getClassInfo();
 
@@ -116,7 +123,7 @@ public class JPF2JVMGenericConverter extends JPF2JVMConverter {
           // Field is of primitive type
           else {
             try {
-              ConverterBase.setJVMPrimitiveField(fld[i], JVMObj, dei, fi);
+              Utilities.setJVMPrimitiveField(fld[i], JVMObj, dei, fi);
             } catch (IllegalAccessException e) {
               e.printStackTrace();
             }
@@ -126,5 +133,59 @@ public class JPF2JVMGenericConverter extends JPF2JVMConverter {
       cls = cls.getSuperclass();
       JPFCl = JPFCl.getSuperClass();
     }
+  }
+
+  /**
+   * Returns a new JVM object instantiated from the given class
+   * 
+   * @param cl
+   *          a JVM class
+   * 
+   * @return a new JVM object instantiated from the given class, cl
+   */
+  protected Object instantiateFrom (Class<?> cl) {
+    Object JVMObj = null;
+
+    if (cl == Class.class) { 
+      return cl; 
+    }
+
+    Constructor<?> ctor = getNoArgCtor(cl);
+    try {
+      ctor.setAccessible(true);
+      JVMObj = ctor.newInstance();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return JVMObj;
+  }
+
+  /**
+   * Returns a constructor with no arguments.
+   * 
+   * @param cl
+   *          a JVM class
+   * 
+   * @return a constructor with no arguments
+   */
+  protected Constructor<?> getNoArgCtor (Class<?> cl) {
+    Constructor<?>[] ctors = cl.getDeclaredConstructors();
+    Constructor<?> ctor = null;
+
+    // Check if the given class has a constructor with no arguments
+    for (Constructor<?> c : ctors) {
+      if (c.getParameterTypes().length == 0) {
+        ctor = c;
+      }
+    }
+
+    if (ctor == null) {
+      try {
+        ctor = sun.reflect.ReflectionFactory.getReflectionFactory().newConstructorForSerialization(cl, Object.class.getConstructor());
+      } catch (Exception e1) {
+        e1.printStackTrace();
+      }
+    }
+    return ctor;
   }
 }

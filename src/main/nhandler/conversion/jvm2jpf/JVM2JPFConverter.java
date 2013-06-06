@@ -13,10 +13,14 @@ import java.util.Iterator;
 import nhandler.conversion.ConversionException;
 import nhandler.conversion.ConverterBase;
 
-public abstract class JVM2JPFConverter {
+/**
+ * This class is used to converter objects and classes from JVM to JPF
+ * 
+ * @author Nastaran Shafiei
+ */
 
-  /********** Conversion from JVM to JPF ***********/
-  
+public abstract class JVM2JPFConverter extends ConverterBase {
+
   public static ClassInfo obtainJPFCls (Class<?> JVMCls, MJIEnv env) throws ConversionException{
     if(JVMCls == null) {
       return null;
@@ -88,7 +92,7 @@ public abstract class JVM2JPFConverter {
 
         ConverterBase.updatedJPFCls.add(JPFClsRef);
 
-        setJPFClassFields(JVMCls, sei, env);
+        setStaticFields(JVMCls, sei, env);
       }
     }
     return JPFCls;
@@ -100,7 +104,7 @@ public abstract class JVM2JPFConverter {
    * @param sei captures the value of static fields
    * @throws ConversionException
    */
-  protected abstract void setJPFClassFields(Class<?> JVMCls, StaticElementInfo sei, MJIEnv env) throws ConversionException;
+  protected abstract void setStaticFields(Class<?> JVMCls, StaticElementInfo sei, MJIEnv env) throws ConversionException;
 
   /**
    * Returns a JPF object corresponding to the given JVM object. If such an
@@ -181,7 +185,7 @@ public abstract class JVM2JPFConverter {
   protected boolean isValidJPFRef (Object JVMObj, int JPFObj, MJIEnv env) throws ConversionException{
     boolean isValid;
 
-    if(!ConverterBase.resetState) {
+    if(!ConverterBase.isResetState()) {
       return true;
     }
 
@@ -232,12 +236,12 @@ public abstract class JVM2JPFConverter {
         
         DynamicElementInfo dei = (DynamicElementInfo) env.getHeap().getModifiable(JPFObj);
 
-        setJPFObjFields(JVMObj, dei, env);
+        setInstanceFields(JVMObj, dei, env);
       }
     }
   }
 
-  protected abstract void setJPFObjFields(Object JVMObj, DynamicElementInfo dei, MJIEnv env) throws ConversionException;
+  protected abstract void setInstanceFields(Object JVMObj, DynamicElementInfo dei, MJIEnv env) throws ConversionException;
 
   /**
    * Updates the given JPF array according to the given JVM array.
@@ -263,7 +267,7 @@ public abstract class JVM2JPFConverter {
 
         // Array of primitive type
         if (dei.getClassInfo().getComponentClassInfo().isPrimitive()){
-          ConverterBase.setJPFPrimitiveArr(dei, JVMArr, env);
+          Utilities.setJPFPrimitiveArr(dei, JVMArr, env);
         }
         // Array of Non-primitives
         else{
@@ -370,7 +374,7 @@ public abstract class JVM2JPFConverter {
         this.updateJPFNonArrObj(JVMObj, JPFRef, env);
       }
     } else{
-      JPFRef = ConverterBase.createNewJPFArray(JVMObj, env);
+      JPFRef = Utilities.createNewJPFArray(JVMObj, env);
       this.updateJPFArrObj(JVMObj, JPFRef, env);
     }
 

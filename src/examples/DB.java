@@ -3,7 +3,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class MyDB {
+public class DB {
   private static String driver = "org.apache.derby.jdbc.EmbeddedDriver";
 
   private static String protocol = "jdbc:derby:memory";
