@@ -10,7 +10,7 @@ import nhandler.conversion.jvm2jpf.JVM2JPFConverter;
  */
 public interface ConverterFactory {
 
-  public JPF2JVMConverter getJPF2JVMConverter(String clsName);
+  public JPF2JVMConverter getJPF2JVMConverter(String clsName) throws NoSuitableConverterFoundException;
 
-  public JVM2JPFConverter getJVM2JPFConverter(String clsName);
+  public JVM2JPFConverter getJVM2JPFConverter(String clsName) throws NoSuitableConverterFoundException;
 }
