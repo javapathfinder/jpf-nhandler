@@ -9,7 +9,7 @@ package nhandler.conversion;
  */
 public class SimpleListConformanceChecker implements ConformanceChecker {
 
-  public static final String[] nonConformantClasses = { "java.util.Random", "java.lang.reflect.Method" };
+  public static final String[] nonConformantClasses = { "java.util.Random", "java.lang.reflect.Method", "java.lang.reflect.Field" };
 
   private static ConformanceChecker instance;
 
