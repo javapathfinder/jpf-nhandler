@@ -10,6 +10,7 @@ import gov.nasa.jpf.vm.StaticElementInfo;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import nhandler.conversion.ConversionException;
@@ -58,7 +59,7 @@ public class JVM2JPFjava_lang_reflect_MethodConverter extends JVM2JPFConverter {
       if (JPFRef == MJIEnv.NULL) {
         Method jvmMeth = (Method) JVMObj;
         Class<?> methClass = jvmMeth.getDeclaringClass();
-        String paramString = "(" + Utilities.getMethodParamString(jvmMeth) + ")";
+        String paramString = "(" + Utilities.getParamString(jvmMeth.getParameterTypes()) + ")";
 
         ClassInfo methCi = obtainJPFCls(methClass, env);
         MethodInfo mi = methCi.getMethod(jvmMeth.getName(), paramString, false);

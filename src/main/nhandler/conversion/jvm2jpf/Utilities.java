@@ -185,8 +185,7 @@ public class Utilities {
     }
   }
 
-  public static String getMethodParamString (Method meth) {
-    Class<?>[] params = meth.getParameterTypes();
+  public static String getParamString (Class<?>[] params) {
     StringBuilder r = new StringBuilder();
     for (Class<?> c : params) {
       String name = c.getName();
