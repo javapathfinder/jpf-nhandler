@@ -4,8 +4,9 @@ package nhandler.conversion;
  * Thrown when the generic converter cannot be used and there is no suitable
  * converter to use with a class
  * 
- * @author chinmay
+ * @author Chinmay Dabral
  */
+@SuppressWarnings("serial")
 public class NoSuitableConverterFoundException extends ConversionException {
 
   /**
