@@ -17,22 +17,35 @@ import nhandler.conversion.ConversionException;
 import nhandler.conversion.ConverterBase;
 
 /**
+ * A JVM2JPFConverter to convert java.lang.reflect.Field objects to their JPF
+ * counterparts
  * 
  * @author Chinmay Dabral
  */
 
 public class JVM2JPFjava_lang_reflect_FieldConverter extends JVM2JPFConverter {
 
+  /**
+   * No static fields to set
+   */
   @Override
   protected void setStaticFields (Class<?> JVMCls, StaticElementInfo sei, MJIEnv env) throws ConversionException {
 
   }
 
+  /**
+   * Don't need to do anything, everything is handled by getJPFObj()
+   */
   @Override
   protected void setInstanceFields (Object JVMObj, DynamicElementInfo dei, MJIEnv env) throws ConversionException {
 
   }
 
+  /**
+   * We get the required FieldInfo object from the ClassInfo, corresponding to
+   * the required field and register it. We then create a new JPF Field object
+   * and set its regIdx field got by registration
+   */
   @Override
   protected int getJPFObj (Object JVMObj, MJIEnv env) throws ConversionException {
     int JPFRef = MJIEnv.NULL;
@@ -65,6 +78,11 @@ public class JVM2JPFjava_lang_reflect_FieldConverter extends JVM2JPFConverter {
     return JPFRef;
   }
 
+  /**
+   * Create a new JPF java.lang.reflect.Field object
+   * @param env
+   * @return the ref for the created object
+   */
   private int getNewJPFFieldRef (MJIEnv env) {
     int JPFRef = MJIEnv.NULL;
     ClassInfo ci = null;
@@ -78,6 +96,13 @@ public class JVM2JPFjava_lang_reflect_FieldConverter extends JVM2JPFConverter {
     return JPFRef;
   }
 
+  /**
+   * Register the given FieldInfo, by reflectively calling the registerFieldInfo
+   * method of the JPF_java_lang_reflect_Field class
+   * @param env
+   * @param fi The FieldInfo to register
+   * @return The regIdx from registration
+   */
   private int registerFieldInfo (MJIEnv env, FieldInfo fi) {
     int regIdx = MJIEnv.NULL;
     try {
@@ -99,7 +124,7 @@ public class JVM2JPFjava_lang_reflect_FieldConverter extends JVM2JPFConverter {
     }
     return regIdx;
   }
-  
+
   @Override
   protected int getExistingJPFRef (Object JVMObj, boolean update, MJIEnv env) throws ConversionException {
     int JPFRef = MJIEnv.NULL;
