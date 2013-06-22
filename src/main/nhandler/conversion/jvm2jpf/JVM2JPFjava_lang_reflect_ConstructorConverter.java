@@ -3,40 +3,24 @@ package nhandler.conversion.jvm2jpf;
 import gov.nasa.jpf.util.MethodInfoRegistry;
 import gov.nasa.jpf.vm.ClassInfo;
 import gov.nasa.jpf.vm.DynamicElementInfo;
-import gov.nasa.jpf.vm.JPF_java_lang_reflect_Method;
+import gov.nasa.jpf.vm.JPF_java_lang_reflect_Constructor;
 import gov.nasa.jpf.vm.MJIEnv;
 import gov.nasa.jpf.vm.MethodInfo;
 import gov.nasa.jpf.vm.StaticElementInfo;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Iterator;
 
 import nhandler.conversion.ConversionException;
 import nhandler.conversion.ConverterBase;
 
-/**
- * A JVM2JPFConverter to convert JVM java.lang.reflect.Method objects to their
- * JPF counterparts
- * 
- * @author Chinmay Dabral
- */
+public class JVM2JPFjava_lang_reflect_ConstructorConverter extends JVM2JPFConverter {
 
-public class JVM2JPFjava_lang_reflect_MethodConverter extends JVM2JPFConverter {
-
-  /**
-   * No static fields in both java.lang.reflect.Method model and JVM classes
-   */
   @Override
   protected void setStaticFields (Class<?> JVMCls, StaticElementInfo sei, MJIEnv env) throws ConversionException {
-    return;
-  }
 
-  /**
-   * This is never called in this case, everything is handled by the overridden
-   * getJPFObj() itself
-   */
+  }
 
   @Override
   protected void setInstanceFields (Object JVMObj, DynamicElementInfo dei, MJIEnv env) throws ConversionException {
@@ -44,10 +28,7 @@ public class JVM2JPFjava_lang_reflect_MethodConverter extends JVM2JPFConverter {
   }
 
   /**
-   * We get the existing MethodInfo object associated with the method that the
-   * given JVM object points to. We then create a JPF Method object and set its
-   * regIdx field to point to the index of the corresponding MethodInfo in the
-   * MethodInfoRegistry
+   * This works the same way as the JVM2JPFConverter for Method
    */
   @Override
   protected int getJPFObj (Object JVMObj, MJIEnv env) throws ConversionException {
@@ -57,37 +38,37 @@ public class JVM2JPFjava_lang_reflect_MethodConverter extends JVM2JPFConverter {
       JPFRef = getExistingJPFRef(JVMObj, false, env);
 
       if (JPFRef == MJIEnv.NULL) {
-        Method jvmMeth = (Method) JVMObj;
-        Class<?> methClass = jvmMeth.getDeclaringClass();
-        String paramString = "(" + Utilities.getParamString(jvmMeth.getParameterTypes()) + ")";
+        Constructor<?> jvmCtor = (Constructor<?>) JVMObj;
+        Class<?> ctorClass = jvmCtor.getDeclaringClass();
+        String paramString = "(" + Utilities.getParamString(jvmCtor.getParameterTypes()) + ")";
 
-        ClassInfo methCi = obtainJPFCls(methClass, env);
-        MethodInfo mi = methCi.getMethod(jvmMeth.getName(), paramString, false);
+        ClassInfo ctorCi = obtainJPFCls(ctorClass, env);
+        MethodInfo mi = ctorCi.getMethod("<init>", paramString, false);
         System.out.println("methodInfo: " + mi);// TODO: remove
 
         // register methodinfo to get regIdx
         MethodInfoRegistry registry = getMethodInfoRegistry();
         int rIdx = registry.registerMethodInfo(mi);
         // create a Method object, and set regIdx for it
-        JPFRef = getNewJPFMethodRef(env);
+        JPFRef = getNewJPFConstructorRef(env);
         env.setIntField(JPFRef, "regIdx", rIdx);
         // put in map
-        ConverterBase.updatedJPFObj.put(JPFRef, jvmMeth);
+        ConverterBase.updatedJPFObj.put(JPFRef, jvmCtor);
       }
     }
     return JPFRef;
   }
 
   /**
-   * Reflectively get MethodInfoRegistry from JPF_java_lang_reflect_Method
+   * Reflectively get MethodInfoRegistry from JPF_java_lang_reflect_Constructor
    * 
    * @return the MethodInfoRegistry contained in
-   *         JPF_java_lang_reflect_Method.registry
+   *         JPF_java_lang_reflect_Constructor.registry
    */
   private MethodInfoRegistry getMethodInfoRegistry () {
     MethodInfoRegistry registry = null;
     try {
-      Field registryField = JPF_java_lang_reflect_Method.class.getDeclaredField("registry");
+      Field registryField = JPF_java_lang_reflect_Constructor.class.getDeclaredField("registry");
       registryField.setAccessible(true);
       try {
         registry = (MethodInfoRegistry) registryField.get(null);
@@ -104,6 +85,37 @@ public class JVM2JPFjava_lang_reflect_MethodConverter extends JVM2JPFConverter {
     return registry;
   }
 
+  /**
+   * Create a new JPF object of java.lang.reflect.Constructor type
+   * 
+   * @param env
+   * @return The ref for the created object
+   */
+  private int getNewJPFConstructorRef (MJIEnv env) {
+    int JPFRef = MJIEnv.NULL;
+    ClassInfo ci = null;
+    try {
+      ci = getJPFCls(Constructor.class, env);
+    } catch (ConversionException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
+    JPFRef = env.newObject(ci);
+    return JPFRef;
+  }
+
+  /*
+   * TODO: This might fail in some corner case as we're not checking jpf2jvm
+   * maps. Perhaps override getUpdatedJPFObj instead, get regIdx to check
+   * whether it still refers to the same Method as the JVM object. Same for
+   * Field and Method.
+   * 
+   * (non-Javadoc)
+   * 
+   * @see
+   * nhandler.conversion.jvm2jpf.JVM2JPFConverter#getExistingJPFRef(java.lang
+   * .Object, boolean, gov.nasa.jpf.vm.MJIEnv)
+   */
   @Override
   protected int getExistingJPFRef (Object JVMObj, boolean update, MJIEnv env) throws ConversionException {
     int JPFRef = MJIEnv.NULL;
@@ -121,25 +133,6 @@ public class JVM2JPFjava_lang_reflect_MethodConverter extends JVM2JPFConverter {
       }
     }
 
-    return JPFRef;
-  }
-
-  /**
-   * Create a new JPF object of java.lang.reflect.Method type
-   * 
-   * @param env
-   * @return The ref for the created object
-   */
-  private int getNewJPFMethodRef (MJIEnv env) {
-    int JPFRef = MJIEnv.NULL;
-    ClassInfo ci = null;
-    try {
-      ci = getJPFCls(Method.class, env);
-    } catch (ConversionException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-    JPFRef = env.newObject(ci);
     return JPFRef;
   }
 }
