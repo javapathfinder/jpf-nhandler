@@ -141,7 +141,7 @@ public abstract class JPF2JVMConverter extends ConverterBase {
             return JVMObj;
           } else {
             // Creates a new instance of JVMCl
-            JVMObj = instantiateFrom(JVMCl);
+            JVMObj = instantiateFrom(JVMCl, JPFRef, env);
           }
 
           ConverterBase.objMapJPF2JVM.put(JPFRef, JVMObj);
@@ -209,7 +209,7 @@ public abstract class JPF2JVMConverter extends ConverterBase {
     return JVMArr;
   }
 
-  protected abstract Object instantiateFrom (Class<?> cl);
+  protected abstract Object instantiateFrom (Class<?> cl, int jPFRef, MJIEnv env);
 
   protected Object createStringObject(int JPFRef, MJIEnv env) throws ConversionException {
     DynamicElementInfo str = (DynamicElementInfo) env.getHeap().get(JPFRef);

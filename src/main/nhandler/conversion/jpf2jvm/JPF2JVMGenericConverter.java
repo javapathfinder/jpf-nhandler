@@ -143,7 +143,7 @@ public class JPF2JVMGenericConverter extends JPF2JVMConverter {
    * 
    * @return a new JVM object instantiated from the given class, cl
    */
-  protected Object instantiateFrom (Class<?> cl) {
+  protected Object instantiateFrom (Class<?> cl, int JPFRef, MJIEnv env) {
     Object JVMObj = null;
 
     if (cl == Class.class) { 
