@@ -35,7 +35,8 @@ public class JVM2JPFjava_lang_reflect_MethodConverter extends JVM2JPFConverter {
   }
 
   /**
-   * 
+   * Get the MethodInfo for the Method represented by JVMObj, then register it
+   * to get the regIdx. Store this in the JPF object
    */
 
   @Override
