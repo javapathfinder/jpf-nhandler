@@ -3,6 +3,7 @@ package nhandler.conversion.jvm2jpf;
 import gov.nasa.jpf.util.MethodInfoRegistry;
 import gov.nasa.jpf.vm.ClassInfo;
 import gov.nasa.jpf.vm.DynamicElementInfo;
+import gov.nasa.jpf.vm.FieldInfo;
 import gov.nasa.jpf.vm.JPF_java_lang_reflect_Method;
 import gov.nasa.jpf.vm.MJIEnv;
 import gov.nasa.jpf.vm.MethodInfo;
@@ -34,48 +35,26 @@ public class JVM2JPFjava_lang_reflect_MethodConverter extends JVM2JPFConverter {
   }
 
   /**
-   * This is never called in this case, everything is handled by the overridden
-   * getJPFObj() itself
+   * 
    */
 
   @Override
   protected void setInstanceFields (Object JVMObj, DynamicElementInfo dei, MJIEnv env) throws ConversionException {
+    Method jvmMeth = (Method) JVMObj;
+    Class<?> methdDeclClass = jvmMeth.getDeclaringClass();
+    String paramString = "(" + Utilities.getParamString(jvmMeth.getParameterTypes()) + ")";
 
-  }
+    ClassInfo methDeclCi = obtainJPFCls(methdDeclClass, env);
+    MethodInfo mi = methDeclCi.getMethod(jvmMeth.getName(), paramString, false);
+    System.out.println("methodInfo: " + mi);// TODO: remove
 
-  /**
-   * We get the existing MethodInfo object associated with the method that the
-   * given JVM object points to. We then create a JPF Method object and set its
-   * regIdx field to point to the index of the corresponding MethodInfo in the
-   * MethodInfoRegistry
-   */
-  @Override
-  protected int getJPFObj (Object JVMObj, MJIEnv env) throws ConversionException {
-    int JPFRef = MJIEnv.NULL;
-    if (JVMObj != null) {
-      // First check if we already converted this object:
-      JPFRef = getExistingJPFRef(JVMObj, false, env);
-
-      if (JPFRef == MJIEnv.NULL) {
-        Method jvmMeth = (Method) JVMObj;
-        Class<?> methClass = jvmMeth.getDeclaringClass();
-        String paramString = "(" + Utilities.getParamString(jvmMeth.getParameterTypes()) + ")";
-
-        ClassInfo methCi = obtainJPFCls(methClass, env);
-        MethodInfo mi = methCi.getMethod(jvmMeth.getName(), paramString, false);
-        System.out.println("methodInfo: " + mi);// TODO: remove
-
-        // register methodinfo to get regIdx
-        MethodInfoRegistry registry = getMethodInfoRegistry();
-        int rIdx = registry.registerMethodInfo(mi);
-        // create a Method object, and set regIdx for it
-        JPFRef = getNewJPFMethodRef(env);
-        env.setIntField(JPFRef, "regIdx", rIdx);
-        // put in map
-        ConverterBase.updatedJPFObj.put(JPFRef, jvmMeth);
-      }
-    }
-    return JPFRef;
+    // register methodinfo to get regIdx
+    MethodInfoRegistry registry = getMethodInfoRegistry();
+    int rIdx = registry.registerMethodInfo(mi);
+    //Set regIdx for the object:
+    ClassInfo methCi = obtainJPFCls(Method.class, env);
+    FieldInfo fi = methCi.getDeclaredInstanceField("regIdx");
+    dei.setIntField(fi, rIdx);
   }
 
   /**
@@ -102,44 +81,5 @@ public class JVM2JPFjava_lang_reflect_MethodConverter extends JVM2JPFConverter {
       e.printStackTrace();
     }
     return registry;
-  }
-
-  @Override
-  protected int getExistingJPFRef (Object JVMObj, boolean update, MJIEnv env) throws ConversionException {
-    int JPFRef = MJIEnv.NULL;
-    boolean found = false;
-    if (ConverterBase.updatedJPFObj.containsValue(JVMObj)) {
-      Iterator<Integer> iterator = (ConverterBase.updatedJPFObj.keySet()).iterator();
-      Integer key;
-      while (!found && iterator.hasNext()) {
-        key = iterator.next();
-        Object value = ConverterBase.updatedJPFObj.get(key);
-        if (value == JVMObj) {
-          found = true;
-          JPFRef = key;
-        }
-      }
-    }
-
-    return JPFRef;
-  }
-
-  /**
-   * Create a new JPF object of java.lang.reflect.Method type
-   * 
-   * @param env
-   * @return The ref for the created object
-   */
-  private int getNewJPFMethodRef (MJIEnv env) {
-    int JPFRef = MJIEnv.NULL;
-    ClassInfo ci = null;
-    try {
-      ci = getJPFCls(Method.class, env);
-    } catch (ConversionException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
-    JPFRef = env.newObject(ci);
-    return JPFRef;
   }
 }
