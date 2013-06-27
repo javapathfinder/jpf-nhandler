@@ -11,10 +11,8 @@ import gov.nasa.jpf.vm.StaticElementInfo;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.Iterator;
 
 import nhandler.conversion.ConversionException;
-import nhandler.conversion.ConverterBase;
 
 public class JVM2JPFjava_lang_reflect_ConstructorConverter extends JVM2JPFConverter {
 

@@ -11,11 +11,8 @@ import gov.nasa.jpf.vm.StaticElementInfo;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Iterator;
 
 import nhandler.conversion.ConversionException;
-import nhandler.conversion.ConverterBase;
 
 /**
  * A JVM2JPFConverter to convert JVM java.lang.reflect.Method objects to their

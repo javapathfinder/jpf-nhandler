@@ -11,10 +11,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Iterator;
 
 import nhandler.conversion.ConversionException;
-import nhandler.conversion.ConverterBase;
 
 /**
  * A JVM2JPFConverter to convert java.lang.reflect.Field objects to their JPF
