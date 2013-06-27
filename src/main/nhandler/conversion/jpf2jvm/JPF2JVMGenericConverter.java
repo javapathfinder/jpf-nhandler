@@ -138,8 +138,9 @@ public class JPF2JVMGenericConverter extends JPF2JVMConverter {
   /**
    * Returns a new JVM object instantiated from the given class
    * 
-   * @param cl
-   *          a JVM class
+   * @param cl A JVM class
+   * @param JPFRef The JPF object being converted
+   * @param env MJIEnv
    * 
    * @return a new JVM object instantiated from the given class, cl
    */
