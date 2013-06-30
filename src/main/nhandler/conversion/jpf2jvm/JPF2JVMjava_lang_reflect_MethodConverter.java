@@ -1,18 +1,18 @@
 package nhandler.conversion.jpf2jvm;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-
-import com.sun.org.apache.bcel.internal.classfile.Method;
-
 import gov.nasa.jpf.vm.ClassInfo;
 import gov.nasa.jpf.vm.DynamicElementInfo;
 import gov.nasa.jpf.vm.JPF_java_lang_reflect_Method;
 import gov.nasa.jpf.vm.MJIEnv;
 import gov.nasa.jpf.vm.MethodInfo;
 import gov.nasa.jpf.vm.StaticElementInfo;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import nhandler.conversion.ConversionException;
+
 
 public class JPF2JVMjava_lang_reflect_MethodConverter extends JPF2JVMConverter {
 
@@ -25,11 +25,14 @@ public class JPF2JVMjava_lang_reflect_MethodConverter extends JPF2JVMConverter {
   }
 
   /**
-   * All the work is done in instantiateFrom
+   * Most of the work is done in instantiateFrom
    */
   @Override
   protected void setInstanceFields (Object JVMObj, DynamicElementInfo dei, MJIEnv env) throws ConversionException {
-    //TODO: setAccessible
+    assert JVMObj instanceof Method : "Not the correct converter!";
+    int JPFRef = dei.getObjectRef();
+    boolean isAccessible = env.getBooleanField(JPFRef, "isAccessible");
+    ((Method) JVMObj).setAccessible(isAccessible);
   }
 
   /**
