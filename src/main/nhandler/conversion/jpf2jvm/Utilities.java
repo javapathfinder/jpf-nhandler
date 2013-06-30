@@ -10,11 +10,11 @@ import java.lang.reflect.Field;
 import nhandler.conversion.ConversionException;
 
 /**
- *  Helper methods needed for the conversion from JPF to JVM 
+ * Helper methods needed for the conversion from JPF to JVM
  * 
  * @author Nastaran Shafiei
- */ 
-public class Utilities { 
+ */
+public class Utilities {
 
   /**
    * Sets a primitive field of a JVM object to a value of the corresponding
@@ -116,13 +116,12 @@ public class Utilities {
     return (name.equals("boolean") || name.equals("byte") || name.equals("int") || name.equals("short") || name.equals("long") || name.equals("char") || name.equals("float") || name.equals("double"));
   }
 
-
   /**
    * Returns a class corresponding to the given primitive type
    * 
    * @param name
    *          primitive type name
-   *          
+   * 
    * @return class corresponding to the given primitive type
    */
   public static Class<?> getPrimitiveClass (String name) {
@@ -140,13 +139,56 @@ public class Utilities {
       return char.class;
     } else if (name.equals("float")) {
       return float.class;
-    } else if (name.equals("double")) { 
-      return double.class; 
-    }
+    } else if (name.equals("double")) {
+      return double.class;
+    } else if (name.equals("void")) { return void.class; }
     return null;
   }
 
-  public static boolean isArray(String cname) {
+  public static boolean isArray (String cname) {
     return cname.startsWith("[");
+  }
+
+  public static Class<?>[] getClassesFromNames (String[] names) {
+    if (names == null) return null;
+    int length = names.length;
+    Class<?>[] classes = new Class<?>[length];
+    for (int i = 0; i < length; i++) {
+      String name = names[i];
+      int arrayDim = 0;
+      StringBuilder sb = new StringBuilder();
+      while (name.endsWith("[]")) {
+        name = name.substring(0, name.length() - 2);
+        arrayDim++;
+        sb.append("[");
+      }
+      if (arrayDim == 0) {
+        // Not an array
+        classes[i] = getPrimitiveClass(name);
+        if (classes[i] == null) {
+          try {
+            classes[i] = Class.forName(name); // TODO: Do we need some special
+                                              // classloader here?
+          } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+          }
+        }
+      } else {
+        if (isPrimitiveClass(name))
+          try {
+            sb.append(nhandler.conversion.jvm2jpf.Utilities.getPrimitiveTypeSymbol(name));
+          } catch (ConversionException e1) {
+            e1.printStackTrace();
+          }
+        else
+          sb.append('L').append(name).append(';');
+        try {
+          classes[i] = Class.forName(sb.toString());
+        } catch (ClassNotFoundException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+    return classes;
   }
 }
