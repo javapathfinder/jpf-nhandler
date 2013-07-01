@@ -113,6 +113,8 @@ public class JPF2JVMjava_lang_reflect_ConstructorConverter extends JPF2JVMConver
     } catch (SecurityException e) {
       e.printStackTrace();
     }
+    
+    getMethodInfo.setAccessible(true);
 
     try {
       mi = (MethodInfo) getMethodInfo.invoke(null, env, JPFRef);

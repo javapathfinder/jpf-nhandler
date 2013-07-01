@@ -155,6 +155,10 @@ public class Utilities {
     Class<?>[] classes = new Class<?>[length];
     for (int i = 0; i < length; i++) {
       String name = names[i];
+      if(name == null) {
+        classes[i] = null;
+        continue;
+      }
       int arrayDim = 0;
       StringBuilder sb = new StringBuilder();
       while (name.endsWith("[]")) {
