@@ -2,7 +2,7 @@ package nhandler.conversion.jpf2jvm;
 
 import gov.nasa.jpf.vm.ClassInfo;
 import gov.nasa.jpf.vm.DynamicElementInfo;
-import gov.nasa.jpf.vm.JPF_java_lang_reflect_Method;
+import gov.nasa.jpf.vm.JPF_java_lang_reflect_Constructor;
 import gov.nasa.jpf.vm.MJIEnv;
 import gov.nasa.jpf.vm.MethodInfo;
 import gov.nasa.jpf.vm.StaticElementInfo;
@@ -13,8 +13,7 @@ import java.lang.reflect.Method;
 
 import nhandler.conversion.ConversionException;
 
-
-public class JPF2JVMjava_lang_reflect_MethodConverter extends JPF2JVMConverter {
+public class JPF2JVMjava_lang_reflect_ConstructorConverter extends JPF2JVMConverter {
 
   /**
    * No static fields to set
@@ -25,29 +24,24 @@ public class JPF2JVMjava_lang_reflect_MethodConverter extends JPF2JVMConverter {
   }
 
   /**
-   * Most of the work is done in instantiateFrom, here we only
-   * call setAccessible, if needed
+   * Most of the work is done in instantiateFrom, here we only call
+   * setAccessible(), if needed
    */
   @Override
   protected void setInstanceFields (Object JVMObj, DynamicElementInfo dei, MJIEnv env) throws ConversionException {
-    assert JVMObj instanceof Method : "Not the correct converter!";
+    assert JVMObj instanceof Constructor<?> : "Not the correct converter!";
     int JPFRef = dei.getObjectRef();
     boolean isAccessible = env.getBooleanField(JPFRef, "isAccessible");
     ((Method) JVMObj).setAccessible(isAccessible);
   }
 
-  /**
-   * We need to get the following: Class<?> declaringClass, String name,
-   * Class<?>[] parameterTypes, Class<?> returnType, Class<?>[]
-   * checkedExceptions, int modifiers, int slot, String signature
-   */
   @Override
-  protected Object instantiateFrom (Class<?> cl, int JPFRef, MJIEnv env) {
-    assert cl == Method.class;
+  protected Object instantiateFrom (Class<?> cl, int jPFRef, MJIEnv env) {
+    assert cl == Constructor.class;
     Object JVMObj = null;
     Constructor<?> ctor = null;
     try {
-      ctor = cl.getDeclaredConstructor(Class.class, String.class, Class[].class, Class.class, Class[].class, int.class, int.class, String.class, byte[].class, byte[].class, byte[].class);
+      ctor = cl.getDeclaredConstructor(Class.class, Class[].class, Class[].class, int.class, int.class, String.class, byte[].class, byte[].class);
     } catch (NoSuchMethodException e) {
       e.printStackTrace();
     } catch (SecurityException e) {
@@ -55,9 +49,9 @@ public class JPF2JVMjava_lang_reflect_MethodConverter extends JPF2JVMConverter {
     }
     assert ctor != null;
     ctor.setAccessible(true);
-    
-    MethodInfo mi = JPF_java_lang_reflect_Method.getMethodInfo(env, JPFRef);
-    
+
+    MethodInfo mi = getConstructorMethodInfo(jPFRef, env);
+
     ClassInfo methDeclCi = mi.getClassInfo();
     int JPFCls = methDeclCi.getClassObjectRef();
     Class<?> clazz = null;
@@ -66,35 +60,27 @@ public class JPF2JVMjava_lang_reflect_MethodConverter extends JPF2JVMConverter {
     } catch (ConversionException e) {
       e.printStackTrace();
     }
-    
-    String name = mi.getName();
-    
+
     String[] parameterTypeNames = mi.getArgumentTypeNames();
     Class<?>[] parameterTypes = Utilities.getClassesFromNames(parameterTypeNames);
-    
-    String returnTypeName = mi.getReturnTypeName();
-    Class<?> returnType = Utilities.getClassesFromNames(new String[]{ returnTypeName })[0];
-    
+
     String[] exceptionNames = mi.getThrownExceptionClassNames();
     Class<?>[] exceptionTypes = Utilities.getClassesFromNames(exceptionNames);
-    
+
     int modifiers = mi.getModifiers();
-    
+
     String signature = mi.getGenericSignature();
-    
-    int slot = 1; //TODO: Don't know what this is, but it crashes VM if it's 0
-    
+
+    int slot = 1; // TODO: Don't know what this is
+
     try {
       JVMObj = ctor.newInstance(clazz,
-                                name,
                                 parameterTypes,
-                                returnType,
                                 exceptionTypes,
                                 modifiers,
                                 slot,
                                 signature,
-                                null, null, null); //Last three are related to annotations
-                                                    //and are null for now
+                                null, null); // Last two are related to annotations
     } catch (InstantiationException e) {
       e.printStackTrace();
     } catch (IllegalAccessException e) {
@@ -104,8 +90,41 @@ public class JPF2JVMjava_lang_reflect_MethodConverter extends JPF2JVMConverter {
     } catch (InvocationTargetException e) {
       e.printStackTrace();
     }
-    
     return JVMObj;
+  }
+
+  /**
+   * The function getMethodInfo in JPF_java_lang_reflect_Constructor isn't
+   * public, so we have to invoke it reflectively
+   * 
+   * @param JPFRef
+   *          Ref to a JPF Method object
+   * @param env
+   *          MJIEnv
+   * @return The MethodInfo object corresponding to the JPF Method ref
+   */
+  private MethodInfo getConstructorMethodInfo (int JPFRef, MJIEnv env) {
+    MethodInfo mi = null;
+    Method getMethodInfo = null;
+    try {
+      getMethodInfo = JPF_java_lang_reflect_Constructor.class.getDeclaredMethod("getMethodInfo", MJIEnv.class, int.class);
+    } catch (NoSuchMethodException e) {
+      e.printStackTrace();
+    } catch (SecurityException e) {
+      e.printStackTrace();
+    }
+
+    try {
+      mi = (MethodInfo) getMethodInfo.invoke(null, env, JPFRef);
+    } catch (IllegalAccessException e) {
+      e.printStackTrace();
+    } catch (IllegalArgumentException e) {
+      e.printStackTrace();
+    } catch (InvocationTargetException e) {
+      e.printStackTrace();
+    }
+
+    return mi;
   }
 
 }
