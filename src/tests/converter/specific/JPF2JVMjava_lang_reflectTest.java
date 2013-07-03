@@ -43,11 +43,43 @@ public class JPF2JVMjava_lang_reflectTest extends TestJPF {
       convertMethodTest(meth1, meth2);
     }
   }
-
+  
+  private native void convertConstructorTest (Constructor<?> ctor1, Constructor<?> ctor2);
+  
+  @Test
+  public void convertConstructorTest() {
+    if (verifyNoPropertyViolation(JPF_ARGS)) {
+      
+      Constructor<?> ctor1 = null, ctor2 = null;
+      try {
+        ctor1 = JPF2JVMjava_lang_reflectTest.TestClass.class.getConstructor(String.class);
+        ctor2 = JPF2JVMjava_lang_reflectTest.TestClass.class.getConstructor(Integer.class);
+      } catch (NoSuchMethodException e) {
+        e.printStackTrace();
+      } catch (SecurityException e) {
+        e.printStackTrace();
+      }
+      
+      ctor1.setAccessible(true);
+      ctor2.setAccessible(false);
+      
+      convertConstructorTest(ctor1, ctor2);
+    }
+  }
   public static class TestClass {
+    
+    public int f1 = 0;
     
     public TestClass () {
       
+    }
+    
+    public TestClass (String s) {
+      f1 = 1;
+    }
+    
+    public TestClass (Integer i) {
+      f1 = 2;
     }
     
     public static int meth (String s, int i, int[][][] i2, String[][][][] s2) {
