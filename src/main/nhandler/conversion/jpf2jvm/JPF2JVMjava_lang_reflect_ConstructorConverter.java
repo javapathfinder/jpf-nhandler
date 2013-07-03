@@ -32,7 +32,7 @@ public class JPF2JVMjava_lang_reflect_ConstructorConverter extends JPF2JVMConver
     assert JVMObj instanceof Constructor<?> : "Not the correct converter!";
     int JPFRef = dei.getObjectRef();
     boolean isAccessible = env.getBooleanField(JPFRef, "isAccessible");
-    ((Method) JVMObj).setAccessible(isAccessible);
+    ((Constructor<?>) JVMObj).setAccessible(isAccessible);
   }
 
   @Override
@@ -64,30 +64,11 @@ public class JPF2JVMjava_lang_reflect_ConstructorConverter extends JPF2JVMConver
     String[] parameterTypeNames = mi.getArgumentTypeNames();
     Class<?>[] parameterTypes = Utilities.getClassesFromNames(parameterTypeNames);
 
-    String[] exceptionNames = mi.getThrownExceptionClassNames();
-    Class<?>[] exceptionTypes = Utilities.getClassesFromNames(exceptionNames);
-
-    int modifiers = mi.getModifiers();
-
-    String signature = mi.getGenericSignature();
-
-    int slot = 1; // TODO: Don't know what this is
-
     try {
-      JVMObj = ctor.newInstance(clazz,
-                                parameterTypes,
-                                exceptionTypes,
-                                modifiers,
-                                slot,
-                                signature,
-                                null, null); // Last two are related to annotations
-    } catch (InstantiationException e) {
+      JVMObj = clazz.getDeclaredConstructor(parameterTypes);
+    } catch (NoSuchMethodException e) {
       e.printStackTrace();
-    } catch (IllegalAccessException e) {
-      e.printStackTrace();
-    } catch (IllegalArgumentException e) {
-      e.printStackTrace();
-    } catch (InvocationTargetException e) {
+    } catch (SecurityException e) {
       e.printStackTrace();
     }
     return JVMObj;

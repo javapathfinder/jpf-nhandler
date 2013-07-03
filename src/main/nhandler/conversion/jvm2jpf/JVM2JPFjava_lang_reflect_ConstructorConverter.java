@@ -45,6 +45,9 @@ public class JVM2JPFjava_lang_reflect_ConstructorConverter extends JVM2JPFConver
     ClassInfo ctorCi = getJPFCls(JVMObj.getClass(), env);
     FieldInfo idFi = ctorCi.getInstanceField("regIdx");
     dei.setIntField(idFi, rIdx);
+
+    boolean isAccessible = ((Constructor<?>) JVMObj).isAccessible();
+    dei.setBooleanField("isAccessible", isAccessible);
   }
 
   /**

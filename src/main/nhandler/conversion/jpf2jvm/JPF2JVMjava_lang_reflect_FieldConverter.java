@@ -58,35 +58,12 @@ public class JPF2JVMjava_lang_reflect_FieldConverter extends JPF2JVMConverter {
     
     String name = fi.getName();
     
-    String typeName = fi.getType();
-    System.out.println("typeName: " + typeName); // TODO: remove
-    Class<?> type = Utilities.getClassesFromNames(new String[]{ typeName })[0];
-    System.out.println("type: " + type); //TODO: remove
-    
-    int modifiers = fi.getModifiers();
-    System.out.println("modifiers: " + modifiers); //TODO: remove
-    
-    String signature = fi.getGenericSignature();
-    System.out.println("signature: " + signature); //TODO: remove
-    
-    int slot = 0; //TODO: Don't know what this is
-    
     try {
-      JVMObj = ctor.newInstance(clazz,
-                                name,
-                                type,
-                                modifiers,
-                                slot,
-                                signature,
-                                null); // Last one is related to annotations
-    } catch (InstantiationException e) {
-      e.printStackTrace();
-    } catch (IllegalAccessException e) {
-      e.printStackTrace();
-    } catch (IllegalArgumentException e) {
-      e.printStackTrace();
-    } catch (InvocationTargetException e) {
-      e.printStackTrace();
+      JVMObj = clazz.getDeclaredField(name);
+    } catch (NoSuchFieldException e1) {
+      e1.printStackTrace();
+    } catch (SecurityException e1) {
+      e1.printStackTrace();
     }
     
     return JVMObj;

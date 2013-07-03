@@ -72,36 +72,11 @@ public class JPF2JVMjava_lang_reflect_MethodConverter extends JPF2JVMConverter {
     String[] parameterTypeNames = mi.getArgumentTypeNames();
     Class<?>[] parameterTypes = Utilities.getClassesFromNames(parameterTypeNames);
     
-    String returnTypeName = mi.getReturnTypeName();
-    Class<?> returnType = Utilities.getClassesFromNames(new String[]{ returnTypeName })[0];
-    
-    String[] exceptionNames = mi.getThrownExceptionClassNames();
-    Class<?>[] exceptionTypes = Utilities.getClassesFromNames(exceptionNames);
-    
-    int modifiers = mi.getModifiers();
-    
-    String signature = mi.getGenericSignature();
-    
-    int slot = 1; //TODO: Don't know what this is, but it crashes VM if it's 0
-    
     try {
-      JVMObj = ctor.newInstance(clazz,
-                                name,
-                                parameterTypes,
-                                returnType,
-                                exceptionTypes,
-                                modifiers,
-                                slot,
-                                signature,
-                                null, null, null); //Last three are related to annotations
-                                                    //and are null for now
-    } catch (InstantiationException e) {
+      JVMObj = clazz.getDeclaredMethod(name, parameterTypes);
+    } catch (NoSuchMethodException e) {
       e.printStackTrace();
-    } catch (IllegalAccessException e) {
-      e.printStackTrace();
-    } catch (IllegalArgumentException e) {
-      e.printStackTrace();
-    } catch (InvocationTargetException e) {
+    } catch (SecurityException e) {
       e.printStackTrace();
     }
     
