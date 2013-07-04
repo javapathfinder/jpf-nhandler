@@ -26,7 +26,11 @@ public class JPF2JVMjava_lang_reflect_FieldConverter extends JPF2JVMConverter {
    */
   @Override
   protected void setInstanceFields (Object JVMObj, DynamicElementInfo dei, MJIEnv env) throws ConversionException {
-
+    assert JVMObj instanceof Field;
+    
+    int JPFRef = dei.getObjectRef();
+    boolean isAccessible = env.getBooleanField(JPFRef, "isAccessible");
+    ((Field) JVMObj).setAccessible(isAccessible);
   }
 
   @Override
