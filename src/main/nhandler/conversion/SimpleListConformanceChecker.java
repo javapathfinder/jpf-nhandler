@@ -11,7 +11,7 @@ public class SimpleListConformanceChecker implements ConformanceChecker {
 
   public static final String[] nonConformantClasses = { "java.util.Random", "java.lang.reflect.Method",
                                                         "java.lang.reflect.Field", "java.lang.reflect.Constructor",
-                                                        "java.io.File" };
+                                                        "java.io.File", "java.text.DecimalFormat" };
 
   private static ConformanceChecker instance;
 
