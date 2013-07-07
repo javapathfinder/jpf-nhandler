@@ -5,7 +5,9 @@ import gov.nasa.jpf.vm.Fields;
 import gov.nasa.jpf.vm.MJIEnv;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import nhandler.conversion.ConversionException;
 
@@ -233,6 +235,23 @@ public class Utilities {
       return "S";
     else
       throw new ConversionException("Unknown primitive type");
+  }
+  
+  /**
+   * Checks if a Map has an exact object (using == operator)
+   * @param map
+   * @param obj object to check for
+   * @return
+   */
+  public static boolean hasMapExactObject(Map<?, ?> map, Object obj) {
+    if(map == null || obj == null)
+      return false;
+    Collection<?> values = map.values();
+    for(Object i : values) {
+      if(i == obj)
+        return true;
+    }
+    return false;
   }
 
 }
