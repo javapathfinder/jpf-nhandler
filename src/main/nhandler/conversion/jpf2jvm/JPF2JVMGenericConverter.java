@@ -86,6 +86,8 @@ public class JPF2JVMGenericConverter extends JPF2JVMConverter {
 
       JVMCls = JVMCls.getSuperclass();
       ci = ci.getSuperClass();
+      if(ci != null)
+        sei = ci.getStaticElementInfo();
     }
   }
 
