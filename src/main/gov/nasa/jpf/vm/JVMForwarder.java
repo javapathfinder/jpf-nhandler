@@ -203,27 +203,23 @@ public class JVMForwarder extends PropertyListenerAdapter {
   }
 
   private void delegateUnhandledNative (MethodInfo mi){
-    MethodInfo new_m = new DelegatedNativeMethodInfo(mi);
-    ClassInfo ci = mi.getClassInfo();
-    ci.putDeclaredMethod(new_m);
+    NativeMethodInfo new_m = new DelegatedNativeMethodInfo(mi);
+    new_m.replace(mi);
   }
 
   private void skipUnhandledNative (MethodInfo mi){
-    MethodInfo new_m = new SkippedNativeMethodInfo(mi);
-    ClassInfo ci = mi.getClassInfo();
-    ci.putDeclaredMethod(new_m);
+    NativeMethodInfo new_m = new SkippedNativeMethodInfo(mi);
+    new_m.replace(mi);
   }
 
   private void delegateMethod (MethodInfo mi){
-    MethodInfo new_m = new DelegatedMethodInfo(mi);
-    ClassInfo ci = mi.getClassInfo();
-    ci.putDeclaredMethod(new_m);
+    NativeMethodInfo new_m = new DelegatedMethodInfo(mi);
+    new_m.replace(mi);
   }
 
   private void skipMethod (MethodInfo mi){
-    MethodInfo new_m = new SkippedMethodInfo(mi);
-    ClassInfo ci = mi.getClassInfo();
-    ci.putDeclaredMethod(new_m);
+    NativeMethodInfo new_m = new SkippedMethodInfo(mi);
+    new_m.replace(mi);
   }
 
   /**
