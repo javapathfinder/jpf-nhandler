@@ -41,7 +41,7 @@ public abstract class JVM2JPFConverter extends ConverterBase {
 
   public static void updateJPFObj (Object JVMObj, int JPFObj, MJIEnv env) throws ConversionException {
     if (JVMObj == null){ 
-      return; 
+      return;
     }
 
     JVM2JPFConverter converter = ConverterBase.converterFactory.getJVM2JPFConverter(JVMObj.getClass().getName());
@@ -123,13 +123,9 @@ public abstract class JVM2JPFConverter extends ConverterBase {
   protected int getJPFObj (Object JVMObj, MJIEnv env) throws ConversionException {
     int JPFRef = MJIEnv.NULL;
     if (JVMObj != null){
-      if (JVMObj.getClass() == Class.class){
-        JPFRef = (this.getJPFCls((Class<?>) JVMObj, env)).getClassObjectRef();
-      } else{
-        JPFRef = this.getExistingJPFRef(JVMObj, true, env);
-        if (JPFRef == MJIEnv.NULL){
-          JPFRef = this.getNewJPFRef(JVMObj, env);
-        }
+      JPFRef = this.getExistingJPFRef(JVMObj, true, env);
+      if (JPFRef == MJIEnv.NULL){
+        JPFRef = this.getNewJPFRef(JVMObj, env);
       }
     }
     return JPFRef;
@@ -220,20 +216,6 @@ public abstract class JVM2JPFConverter extends ConverterBase {
         ConverterBase.updatedJPFObj.put(JPFObj, JVMObj);
         ConverterBase.objMapJPF2JVM.put(JPFObj, JVMObj);
 
-        // Why do we need that? Because JPF might have not leaded the class
-        // before! JPF classloader does not recognize them!
-        // I don't now why exactly!
-        // INVESTIGATE: Why not arrays?
-        if (JVMObj.getClass() == Class.class){
-          try{
-            Class<?> temp = (Class<?>) JVMObj;
-            if (!temp.isArray() && !temp.isPrimitive())
-              env.getConfig().getClassLoader().loadClass(temp.getName());
-          } catch (ClassNotFoundException e1){
-            e1.printStackTrace();
-          }
-        }
-        
         DynamicElementInfo dei = (DynamicElementInfo) env.getHeap().getModifiable(JPFObj);
 
         setInstanceFields(JVMObj, dei, env);
