@@ -125,24 +125,7 @@ public abstract class JPF2JVMConverter extends ConverterBase {
           int JPFClsRef = JPFCl.getStaticElementInfo().getClassObjectRef();
           Class<?> JVMCl = this.getJVMCls(JPFClsRef, env);
 
-          // There is only one instance of every class. There is no need to update
-          // Class objects
-          if (JVMCl == Class.class) {
-            try {
-              String name = env.getReferredClassInfo(JPFRef).getName();
-              if (Utilities.isPrimitiveClass(name)) {
-                JVMObj = Utilities.getPrimitiveClass(name);
-              } else {
-                JVMObj = loadClass(name, env);
-              }
-            } catch (ClassNotFoundException e) {
-              e.printStackTrace();
-            }
-            return JVMObj;
-          } else {
-            // Creates a new instance of JVMCl
-            JVMObj = instantiateFrom(JVMCl, JPFRef, env);
-          }
+          JVMObj = instantiateFrom(JVMCl, JPFRef, env);
 
           ConverterBase.objMapJPF2JVM.put(JPFRef, JVMObj);
           setInstanceFields(JVMObj, dei, env);

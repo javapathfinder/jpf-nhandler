@@ -9,7 +9,6 @@ import gov.nasa.jpf.vm.StaticElementInfo;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.text.Format;
-import java.text.NumberFormat;
 import java.util.HashMap;
 
 import nhandler.conversion.ConversionException;
