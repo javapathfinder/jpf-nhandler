@@ -340,21 +340,16 @@ public abstract class JVM2JPFConverter extends ConverterBase {
     int JPFRef = MJIEnv.NULL;
     Class<?> JVMCls = JVMObj.getClass();
     if (!JVMCls.isArray()){
-      // we treat Strings differently, until we immigrate to JDK7
-      if(JVMObj.getClass()==String.class) {
-        JPFRef = env.newString(JVMObj.toString());
-      } else {
-        ClassInfo fci = null;
-        try{
-          fci = this.getJPFCls(JVMCls, env);
-        } catch (ClassInfoException e){
-          System.out.println("WARNING: the class " + JVMCls + " is ignored!");
-          return MJIEnv.NULL;
-        }
-
-        JPFRef = env.newObject(fci);
-        this.updateJPFNonArrObj(JVMObj, JPFRef, env);
+      ClassInfo fci = null;
+      try{
+        fci = this.getJPFCls(JVMCls, env);
+      } catch (ClassInfoException e){
+        System.out.println("WARNING: the class " + JVMCls + " is ignored!");
+        return MJIEnv.NULL;
       }
+
+      JPFRef = env.newObject(fci);
+      this.updateJPFNonArrObj(JVMObj, JPFRef, env);
     } else{
       JPFRef = Utilities.createNewJPFArray(JVMObj, env);
       this.updateJPFArrObj(JVMObj, JPFRef, env);

@@ -119,9 +119,9 @@ public abstract class JPF2JVMConverter extends ConverterBase {
         ClassInfo JPFCl = dei.getClassInfo();
 
         // we treat Strings differently
-        if(JPFCl.isStringClassInfo()) {
+        /*if(JPFCl.isStringClassInfo()) {
           JVMObj = createStringObject(JPFRef, env);
-        } else {
+        } else*/ {
           int JPFClsRef = JPFCl.getStaticElementInfo().getClassObjectRef();
           Class<?> JVMCl = this.getJVMCls(JPFClsRef, env);
 
