@@ -19,7 +19,6 @@ public class JPF2JVMjava_lang_StringConverter extends JPF2JVMConverter {
 
   @Override
   protected Object instantiateFrom (Class<?> cl, int JPFRef, MJIEnv env) {
-    System.out.println("JPF2JVM String");
     assert cl == String.class;
     
     Object JVMObj = env.getStringObject(JPFRef);

@@ -14,7 +14,6 @@ public class JVM2JPFjava_lang_StringConverter extends JVM2JPFConverter {
 
   @Override
   protected void setInstanceFields (Object JVMObj, DynamicElementInfo dei, MJIEnv env) throws ConversionException {
-    System.out.println("JVM2JPF String");
     assert JVMObj instanceof String;
     
     String jvmString = (String) JVMObj;
