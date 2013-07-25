@@ -32,6 +32,7 @@ public class JVM2JPFjava_util_concurrent_atomic_AtomicIntegerArrayConverter exte
     } catch (SecurityException e1) {
       e1.printStackTrace();
     }
+    arrayField.setAccessible(true);
     int[] array = null;
     try {
       array = (int[]) arrayField.get(JVMObj);
