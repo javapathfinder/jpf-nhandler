@@ -13,7 +13,8 @@ public class SimpleListConformanceChecker implements ConformanceChecker {
                                                         "java.lang.reflect.Field", "java.lang.reflect.Constructor",
                                                         "java.io.File", "java.text.DecimalFormat",
                                                         "java.lang.Class", "java.text.SimpleDateFormat",
-                                                        "java.util.regex.Pattern", "java.lang.String" };
+                                                        "java.util.regex.Pattern", "java.lang.String",
+                                                        "java.util.concurrent.atomic.AtomicIntegerArray" };
 
   private static ConformanceChecker instance;
 
