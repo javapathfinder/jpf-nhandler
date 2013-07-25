@@ -21,7 +21,7 @@ public class JPF2JVMjava_util_concurrent_atomic_AtomicLongArrayConverter extends
 
   @Override
   protected Object instantiateFrom (Class<?> cl, int JPFRef, MJIEnv env) {
-    assert cl == AtomicLongArray.class;
+    assert cl == AtomicLongArray.class : "Not the right converter";
     
     Object JVMObj = null;
     
