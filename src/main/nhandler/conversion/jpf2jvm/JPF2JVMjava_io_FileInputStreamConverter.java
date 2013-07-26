@@ -22,6 +22,11 @@ public class JPF2JVMjava_io_FileInputStreamConverter extends JPF2JVMConverter {
 
   }
 
+  /**
+   * All the tasks are delegated by JPF FileInputStream to a JPF FileDescriptor object
+   * That object, in turn, delegates to a JVM FileInputStream object
+   * We have to get this object and return it
+   */
   @Override
   protected Object instantiateFrom (Class<?> cl, int JPFRef, MJIEnv env) {
     assert cl == FileInputStream.class;
@@ -39,6 +44,13 @@ public class JPF2JVMjava_io_FileInputStreamConverter extends JPF2JVMConverter {
     return JVMObj;
   }
   
+  /**
+   * The delegatees for FileInputStream and FileOutputStream are stored by
+   * the FileDescriptor native peer in a DynamicObjectArray
+   * @param JPFRef JPF ref for a FileDescriptor
+   * @param env
+   * @return The delegatee FileInputStream object
+   */
   private DynamicObjectArray<Object> getDynamicObjectArrayFromPeer(int JPFRef, MJIEnv env) {
     NativePeer peer = env.getClassInfo(JPFRef).getNativePeer();
     Field DOAField = null;
