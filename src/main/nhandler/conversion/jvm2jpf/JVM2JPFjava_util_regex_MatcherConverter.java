@@ -58,13 +58,56 @@ public class JVM2JPFjava_util_regex_MatcherConverter extends JVM2JPFConverter {
       assert value != null;
       assert value == JVMObj;   // This is an update call, so JVMObj is an existing delegatee
     } else { // This is not an update call
+      // Update nInstances:
       ClassInfo ci = dei.getClassInfo();
       StaticElementInfo sei = ci.getModifiableStaticElementInfo();
       int nInstances = sei.getIntField("nInstances");
       dei.setIntField("id", nInstances);
       sei.setIntField("nInstances", nInstances + 1);
+      
+      // Set the "input" field:
+      setInputField((Matcher) JVMObj, dei, env);
+      
+      // Set the "pattern" field:
+      int JPFPat = obtainJPFObj(((Matcher) JVMObj).pattern(), env);
+      dei.setReferenceField("pattern", JPFPat);
+      
       matchers.put(nInstances, (Matcher) JVMObj);
     }
+  }
+  
+  /**
+   * Set the "input" field (on which the Matcher operates)
+   * from the given JVM Matcher object
+   * @param matcher JVM Matcher object
+   * @param dei DynamicElementInfo for the JPF object to set the field on
+   */
+  private void setInputField(Matcher matcher, DynamicElementInfo dei, MJIEnv env) throws ConversionException{
+    Field field = null;
+    try {
+      field = Matcher.class.getDeclaredField("text");
+    } catch (NoSuchFieldException e) {
+      e.printStackTrace();
+    } catch (SecurityException e) {
+      e.printStackTrace();
+    }
+    
+    field.setAccessible(true);
+    
+    CharSequence cs = null;
+    
+    try {
+      cs = (CharSequence) field.get(matcher);
+    } catch (IllegalArgumentException e) {
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      e.printStackTrace();
+    }
+    
+    int JPFString = obtainJPFObj(new StringBuilder(cs).toString(), env);
+    
+    System.out.println(cs);
+    dei.setReferenceField("input", JPFString);
   }
 
 }

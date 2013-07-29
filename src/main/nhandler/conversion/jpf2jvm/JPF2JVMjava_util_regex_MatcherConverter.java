@@ -60,7 +60,6 @@ public class JPF2JVMjava_util_regex_MatcherConverter extends JPF2JVMConverter {
     } catch (InvocationTargetException e) {
       e.printStackTrace();
     }
-    
     return matcher;
   }
 

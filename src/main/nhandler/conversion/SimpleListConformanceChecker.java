@@ -17,7 +17,7 @@ public class SimpleListConformanceChecker implements ConformanceChecker {
                                                         "java.util.concurrent.atomic.AtomicIntegerArray",
                                                         "java.util.concurrent.atomic.AtomicLongArray",
                                                         "java.util.concurrent.atomic.AtomicReferenceArray",
-                                                        "java.io.FileInputStream" };
+                                                        "java.io.FileInputStream", "java.util.regex.Matcher" };
 
   private static ConformanceChecker instance;
 
