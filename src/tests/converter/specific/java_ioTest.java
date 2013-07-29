@@ -24,7 +24,7 @@ public class java_ioTest extends TestJPF {
   public static final String FILE_PATH1 = "42.txt",
       FILE_PATH2 = "43.txt";
   
-  public native File convertFileTest(File file);
+  private native File convertFileTest(File file);
   
   @Test
   public void convertFileTest() {
@@ -33,10 +33,6 @@ public class java_ioTest extends TestJPF {
       File file = new File(FILE_PATH1);
       
       file = convertFileTest(file);
-      System.out.println(file.getPath());
-      
-      
-      
       assertEquals(FILE_PATH2, file.getPath());
     }
   }
