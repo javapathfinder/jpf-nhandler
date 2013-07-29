@@ -23,11 +23,23 @@ public class java_langTest extends TestJPF {
   @Test
   public void convertClassTest() {
     if (verifyNoPropertyViolation(JPF_ARGS)) {
-      System.out.println("foobar");
       Class<?> clazz = Integer.class;
 
       clazz = convertClassTest(clazz);
       assertEquals(Float.class, clazz);
+    }
+  }
+  
+  private native String convertStringTest(String string);
+  
+  @Test
+  public void convertStringTest() {
+    if (verifyNoPropertyViolation(JPF_ARGS)) {
+      String string = "Zaphod Beeblebrox";
+      
+      string = convertStringTest(string);
+      
+      assertEquals("Ford Prefect", string);
     }
   }
 
