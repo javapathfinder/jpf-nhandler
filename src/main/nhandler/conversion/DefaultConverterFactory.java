@@ -26,6 +26,7 @@ public class DefaultConverterFactory implements ConverterFactory {
 
   @Override
   public JPF2JVMConverter getJPF2JVMConverter (String clsName) throws NoSuitableConverterFoundException {
+    
     if (!checker.isConformant(clsName)) {
       if (jpf2jvmconverters.containsKey(clsName)) return jpf2jvmconverters.get(clsName);
 

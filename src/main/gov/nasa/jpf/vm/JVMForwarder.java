@@ -21,8 +21,10 @@ import java.io.File;
 import java.lang.reflect.Method;
 
 import nhandler.conversion.ConverterBase;
+import nhandler.conversion.lazy.LazyResolver;
 
 import gov.nasa.jpf.Config;
+import gov.nasa.jpf.JPF;
 import gov.nasa.jpf.PropertyListenerAdapter;
 import gov.nasa.jpf.vm.ClassInfo;
 import gov.nasa.jpf.vm.Instruction;
@@ -213,8 +215,14 @@ public class JVMForwarder extends PropertyListenerAdapter {
     ClassInfo ci = mi.getClassInfo();
     ci.putDeclaredMethod(new_m);
   }
+  
+  private void testLazyResolver(MethodInfo mi) {
+    
+    LazyResolver.resolve(LazyResolver.class, (Method) null);
+  }
 
   private void delegateMethod (MethodInfo mi){
+//    testLazyResolver(mi);
     MethodInfo new_m = new DelegatedMethodInfo(mi);
     ClassInfo ci = mi.getClassInfo();
     ci.putDeclaredMethod(new_m);
