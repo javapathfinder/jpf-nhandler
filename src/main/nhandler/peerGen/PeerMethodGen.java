@@ -283,19 +283,21 @@ public class PeerMethodGen {
       j++;
     }
     
+    il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
+    il.append(new PUSH(peerClassGen._cp, mi.getClassName()));
+    il.append(new PUSH(peerClassGen._cp, mi.getName()));
     if (mi.isStatic()) {
-      // Pass env, className, methodName, MJIEnv.NULL (callingObj) and arguments array
-      il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
-      il.append(new PUSH(peerClassGen._cp, mi.getClassName()));
-      System.out.println(mi.getName()); // TODO: remove
-      il.append(new PUSH(peerClassGen._cp, mi.getName()));
+      // Pass MJIEnv.NULL for callerObj if the method is static
       il.append(new PUSH(peerClassGen._cp, MJIEnv.NULL));
-      il.append(InstructionFactory.createLoad(Type.OBJECT, argsToTranslate));
-      
-      il.append(peerClassGen._factory.createInvoke("nhandler.conversion.lazy.LazyResolver", "resolve", Type.VOID,
-                                                   new Type[] { mjiEnvType, Type.STRING,Type.STRING, Type.INT, new ArrayType(Type.INT, 1) },
-                                                   Constants.INVOKESTATIC));
+    } else {
+      // Else pass robj (index 1)
+      il.append(InstructionFactory.createLoad(Type.INT, 1));
     }
+    il.append(InstructionFactory.createLoad(Type.OBJECT, argsToTranslate));
+    // Call LazyResolver.resolve() 
+    il.append(peerClassGen._factory.createInvoke("nhandler.conversion.lazy.LazyResolver", "resolve", Type.VOID,
+                                                 new Type[] { mjiEnvType, Type.STRING,Type.STRING, Type.INT, new ArrayType(Type.INT, 1) },
+                                                 Constants.INVOKESTATIC));
   }
 
   /**

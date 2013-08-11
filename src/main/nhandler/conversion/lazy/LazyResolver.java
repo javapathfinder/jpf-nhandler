@@ -25,7 +25,6 @@ public class LazyResolver {
       e1.printStackTrace();
     }
     
-    
     URL classFileUrl = clazz.getResource(clazz.getSimpleName() + ".class");
     URI classFileUri = null;
     try {
@@ -60,15 +59,4 @@ public class LazyResolver {
     System.out.println(clazz.getName());
     System.out.println(constructor.getName());
   }
-  
-  /*public static void main (String[] args) {
-    
-    try {
-      resolve(LazyResolver.class, LazyResolver.class.getDeclaredMethod("resolve", new Class<?>[] { Class.class, Method.class }));
-    } catch (NoSuchMethodException e) {
-      e.printStackTrace();
-    } catch (SecurityException e) {
-      e.printStackTrace();
-    }
-  }*/
 }
