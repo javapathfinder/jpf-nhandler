@@ -215,14 +215,8 @@ public class JVMForwarder extends PropertyListenerAdapter {
     ClassInfo ci = mi.getClassInfo();
     ci.putDeclaredMethod(new_m);
   }
-  
-  private void testLazyResolver(MethodInfo mi) {
-    
-    LazyResolver.resolve(LazyResolver.class, (Method) null);
-  }
 
   private void delegateMethod (MethodInfo mi){
-//    testLazyResolver(mi);
     MethodInfo new_m = new DelegatedMethodInfo(mi);
     ClassInfo ci = mi.getClassInfo();
     ci.putDeclaredMethod(new_m);

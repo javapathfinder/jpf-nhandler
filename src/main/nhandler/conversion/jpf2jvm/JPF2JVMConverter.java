@@ -11,7 +11,6 @@ import java.lang.reflect.Array;
 
 import nhandler.conversion.ConversionException;
 import nhandler.conversion.ConverterBase;
-import nhandler.conversion.TestCodeAnalysis;
 
 /**
  * This class is used to converter objects and classes from JPF to JVM
