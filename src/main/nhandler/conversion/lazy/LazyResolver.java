@@ -8,16 +8,22 @@ import gov.nasa.jpf.vm.MJIEnv;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
 public class LazyResolver {
-  public static void resolve(Class<?> clazz, Method method) {
+  public static void resolve(MJIEnv env, String className, String methodName, int callingObj, int[] args) {
     System.out.println("**Lazy Resolver**");
-    System.out.println(clazz.getName());
-    System.out.println(method.getName());
+    System.out.println(className);
+    System.out.println(methodName);
+    
+    Class<?> clazz = null;
+    try {
+      clazz = Class.forName(className);
+    } catch (ClassNotFoundException e1) {
+      e1.printStackTrace();
+    }
     
     
     URL classFileUrl = clazz.getResource(clazz.getSimpleName() + ".class");
@@ -37,21 +43,25 @@ public class LazyResolver {
     ClassFileParser parser = new ClassFileParser(classFile);
     ClassInfo ci = null;
     try {
-      ci = new ClassInfo(clazz.getName(), null, parser, classFileUrl.toString());
+      // TODO: should we pass env.getSystemClassLoaderInfo()?
+      ci = new ClassInfo(clazz.getName(), env.getSystemClassLoaderInfo(), parser, classFileUrl.toString());
     } catch (ClassParseException e) {
       e.printStackTrace();
     }
     
-    
   }
   
-  public static void resolve(Class<?> clazz, Constructor<?> constructor) {
+  public static void test() {
+    System.out.println("LazyResolver: test()");
+  }
+  
+  public static void resolve(Class<?> clazz, Constructor<?> constructor, int callingObj, int[] args, MJIEnv env) {
     System.out.println("**Lazy Resolver**");
     System.out.println(clazz.getName());
     System.out.println(constructor.getName());
   }
   
-  public static void main (String[] args) {
+  /*public static void main (String[] args) {
     
     try {
       resolve(LazyResolver.class, LazyResolver.class.getDeclaredMethod("resolve", new Class<?>[] { Class.class, Method.class }));
@@ -60,5 +70,5 @@ public class LazyResolver {
     } catch (SecurityException e) {
       e.printStackTrace();
     }
-  }
+  }*/
 }
