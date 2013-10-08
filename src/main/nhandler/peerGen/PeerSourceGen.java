@@ -85,7 +85,11 @@ public class PeerSourceGen {
     gotoNextLine();
     append("import nhandler.conversion.ConversionException;");
     gotoNextLine();
-    append("import nhandler.conversion.Converter;");
+    append("import nhandler.conversion.ConverterBase;");
+    gotoNextLine();
+    append("import nhandler.conversion.jvm2jpf.JVM2JPFConverter;");
+    gotoNextLine();
+    append("import nhandler.conversion.jpf2jvm.JPF2JVMConverter;");
     gotoNextLine();
     append("import java.lang.reflect.InvocationTargetException;");
     gotoNextLine();
@@ -257,7 +261,7 @@ public class PeerSourceGen {
 
     protected void printSetObjArgVal (int index){
       addDoubleIndent();
-      append("argValue[" + index + "] = Converter.obtainJVMObj(arg" + index + ");");
+      append("argValue[" + index + "] = JPF2JVMConverter.obtainJVMObj(arg" + index + ", env);");
       gotoNextLine();
     }
 
@@ -388,7 +392,7 @@ public class PeerSourceGen {
       addComment("Updates the object that invokes the method to be handled in JPF");
 
       addDoubleIndent();
-      append("converter.updateJPFObj(returnValue, robj);");
+      append("JVM2JPFConverter.updateJPFObj(returnValue, robj, env);");
       addBlankLine();
 
       addUpdateArgsComment = true;
@@ -403,7 +407,7 @@ public class PeerSourceGen {
       }
 
       addDoubleIndent();
-      append("converter.updateJPFObj(argValue[" + index + "], arg" + index + ", env);");
+      append("JVM2JPFConverter.updateJPFObj(argValue[" + index + "], arg" + index + ", env);");
       if(index == nArgs-1) {
         addBlankLine();
       } else {
