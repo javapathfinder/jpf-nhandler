@@ -104,7 +104,7 @@ public abstract class JPF2JVMConverter extends ConverterBase {
    * object. If such an object already exists, it is returned. Otherwise a new
    * one is created.
    */
-   protected Object getJVMNonArrObj (int JPFRef, MJIEnv env) throws ConversionException {
+  protected Object getJVMNonArrObj (int JPFRef, MJIEnv env) throws ConversionException {
     Object JVMObj = null;
     if (JPFRef != MJIEnv.NULL) {
       // First check if the object has been already created

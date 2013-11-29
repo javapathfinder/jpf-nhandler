@@ -86,6 +86,9 @@ public class JPF2JVMGenericConverter extends JPF2JVMConverter {
 
       JVMCls = JVMCls.getSuperclass();
       ci = ci.getSuperClass();
+      if(ci != null) {
+        sei = ci.getStaticElementInfo();
+      }
     }
   }
 
@@ -155,6 +158,7 @@ public class JPF2JVMGenericConverter extends JPF2JVMConverter {
       ctor.setAccessible(true);
       JVMObj = ctor.newInstance();
     } catch (Exception e) {
+      System.out.println("Cannot instantiate from " + cl + " using ctor " + ctor);
       e.printStackTrace();
     }
     return JVMObj;
@@ -183,6 +187,7 @@ public class JPF2JVMGenericConverter extends JPF2JVMConverter {
       try {
         ctor = sun.reflect.ReflectionFactory.getReflectionFactory().newConstructorForSerialization(cl, Object.class.getConstructor());
       } catch (Exception e1) {
+        System.out.println("Cannot create a default constructor to instantiate from");
         e1.printStackTrace();
       }
     }
