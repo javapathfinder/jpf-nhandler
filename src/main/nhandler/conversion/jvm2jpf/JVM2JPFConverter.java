@@ -5,6 +5,7 @@ import gov.nasa.jpf.vm.ClassInfo;
 import gov.nasa.jpf.vm.ClassInfoException;
 import gov.nasa.jpf.vm.ClassLoaderInfo;
 import gov.nasa.jpf.vm.DynamicElementInfo;
+import gov.nasa.jpf.vm.ElementInfo;
 import gov.nasa.jpf.vm.MJIEnv;
 import gov.nasa.jpf.vm.StaticElementInfo;
 
@@ -69,22 +70,21 @@ public abstract class JVM2JPFConverter extends ConverterBase {
     if (JVMCls != null){
       // retrieving the integer representing the Class in JPF
       JPFCls = ClassLoaderInfo.getCurrentResolvedClassInfo(JVMCls.getName());
-      StaticElementInfo sei = JPFCls.getModifiableStaticElementInfo();
-
-      if (sei != null){
-        JPFClsRef = sei.getObjectRef();
-      }
 
       // First check if the class has been already updated
       if (!ConverterBase.updatedJPFCls.contains(JPFClsRef)){
+        StaticElementInfo sei = null;
+        
         /**
          * If the corresponding ClassInfo does not exist, a new ClassInfo object
          * is created and will be added to the loadedClasses.
          */
         if (!JPFCls.isRegistered()){
           JPFCls.registerClass(env.getThreadInfo());
-          sei = JPFCls.getModifiableStaticElementInfo();
+          sei = JPFCls.getStaticElementInfo();
           JPFClsRef = sei.getObjectRef();
+        } else {
+          sei = JPFCls.getModifiableStaticElementInfo();
         }
 
         // This is to avoid JPF to initialized the class
@@ -370,7 +370,9 @@ public abstract class JVM2JPFConverter extends ConverterBase {
           return MJIEnv.NULL;
         }
 
-        JPFRef = env.newObject(fci);
+        ElementInfo ei = env.getHeap().newObject(fci, env.getThreadInfo());
+        JPFRef = ei.getObjectRef();
+        
         this.updateJPFNonArrObj(JVMObj, JPFRef, env);
       }
     } else{
