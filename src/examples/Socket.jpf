@@ -10,6 +10,10 @@ nhandler.delegateUnhandledNative = true
 # the following method need to be delegated to the underlying JVM on windows
 # machines, OW they would lead to unsupportedOperationException. On other OS
 # they can run on the JPF side.
-nhandler.spec.delegate = java.net.PlainSocketImpl.<init>,java.net.DualStackPlainSocketImpl.*
+#nhandler.spec.delegate = java.net.PlainSocketImpl.<init>,java.net.DualStackPlainSocketImpl.*
 
 nhandler.spec.filter = java.io.FileDescriptor.*
+
+nhandler.genSource = true
+
+handler.resetVMState = false

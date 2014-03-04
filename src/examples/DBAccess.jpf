@@ -1,6 +1,8 @@
 @using=jpf-nhandler
 target=DBAccess
 
+classpath=${jpf-nhandler}/lib/examples-lib/db-derby-10.9.1.0/lib/*.jar;\
+
 native_classpath=${jpf-nhandler}/lib/examples-lib/db-derby-10.9.1.0/lib/*.jar;\
 
 nhandler.resetVMState=false

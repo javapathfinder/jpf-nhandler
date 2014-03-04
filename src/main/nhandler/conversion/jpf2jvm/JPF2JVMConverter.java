@@ -118,6 +118,10 @@ public abstract class JPF2JVMConverter extends ConverterBase {
         DynamicElementInfo dei = (DynamicElementInfo) env.getHeap().get(JPFRef);
         ClassInfo JPFCl = dei.getClassInfo();
 
+        if (!JPFCl.isRegistered()){
+          JPFCl.registerClass(env.getThreadInfo());
+        }
+        
         // we treat Strings differently
         if(JPFCl.isStringClassInfo()) {
           JVMObj = createStringObject(JPFRef, env);
