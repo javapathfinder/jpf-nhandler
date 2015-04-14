@@ -68,7 +68,7 @@ public class ConverterBase {
     // for the cases that nhandler is configured to re-use existing maps (that
     // is "nhandler.resetVMState" is set to false) we need to identify and remove 
     // those objects that have been garbage collected or don't exist anymore due 
-    // to bracktracking
+    // to bracktracking - note that this is provided that SGOIDs are unique.
     else {
       Integer[] keys = objMapJPF2JVM.keySet().toArray(new Integer[objMapJPF2JVM.size()]);
       for(int i=0; i<keys.length; i++){
