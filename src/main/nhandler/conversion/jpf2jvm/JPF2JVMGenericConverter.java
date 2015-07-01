@@ -97,7 +97,7 @@ public class JPF2JVMGenericConverter extends JPF2JVMConverter {
     Class<?> cls = JVMObj.getClass();
     ClassInfo JPFCl = dei.getClassInfo();
 
-    while (cls!=null) {
+    while (cls!=null && JPFCl!=null && cls.getName().equals(JPFCl.getName())) {
       Field fld[] = cls.getDeclaredFields();
 
       for (int i = 0; i < fld.length; i++) {
@@ -135,6 +135,13 @@ public class JPF2JVMGenericConverter extends JPF2JVMConverter {
       }
       cls = cls.getSuperclass();
       JPFCl = JPFCl.getSuperClass();
+      
+      if((cls==null && JPFCl!=null)||
+          (cls!=null && JPFCl==null)||
+          ((cls!=null && JPFCl!=null) && !cls.getName().equals(JPFCl.getName()))) {
+        System.out.println("WARNING: inconsistencies between the model " + JVMObj.getClass() +
+                           " and its corresponding standard class has been found.");
+      }
     }
   }
 
