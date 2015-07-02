@@ -125,7 +125,13 @@ public abstract class JVM2JPFConverter extends ConverterBase {
     if (JVMObj != null){
       if (JVMObj.getClass() == Class.class){
         JPFRef = (this.getJPFCls((Class<?>) JVMObj, env)).getClassObjectRef();
-      } else{
+      }  
+      /** by uncommenting this code, when converting JVM objects to JPF objects, 
+          nhandler uses the current ClassLoaderInfo for the JPFClassLoader object **/
+//      else if (JVMObj == env.getConfig().getClassLoader()) {
+//        JPFRef = ClassLoaderInfo.getCurrentClassLoader().getClassLoaderObjectRef();
+//      } 
+      else{
         JPFRef = this.getExistingJPFRef(JVMObj, true, env);
         if (JPFRef == MJIEnv.NULL){
           JPFRef = this.getNewJPFRef(JVMObj, env);
