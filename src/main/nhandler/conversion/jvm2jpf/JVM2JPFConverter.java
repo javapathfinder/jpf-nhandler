@@ -273,7 +273,7 @@ public abstract class JVM2JPFConverter extends ConverterBase {
 
         // Array of primitive type
         if (dei.getClassInfo().getComponentClassInfo().isPrimitive()){
-          Utilities.setJPFPrimitiveArr(dei, JVMArr, env);
+          JVM2JPFUtilities.setJPFPrimitiveArr(dei, JVMArr, env);
         }
         // Array of Non-primitives
         else{
@@ -382,7 +382,7 @@ public abstract class JVM2JPFConverter extends ConverterBase {
         this.updateJPFNonArrObj(JVMObj, JPFRef, env);
       }
     } else{
-      JPFRef = Utilities.createNewJPFArray(JVMObj, env);
+      JPFRef = JVM2JPFUtilities.createNewJPFArray(JVMObj, env);
       this.updateJPFArrObj(JVMObj, JPFRef, env);
     }
 

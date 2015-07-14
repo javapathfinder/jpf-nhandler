@@ -75,7 +75,7 @@ public class JPF2JVMGenericConverter extends JPF2JVMConverter {
             // If the current field is of primitive type
             else {
               try {
-                Utilities.setJVMPrimitiveField(fld[i], JVMCls, sei, fi);
+                JPF2JVMUtilities.setJVMPrimitiveField(fld[i], JVMCls, sei, fi);
               } catch (IllegalAccessException e) {
                 e.printStackTrace();
               }
@@ -126,7 +126,7 @@ public class JPF2JVMGenericConverter extends JPF2JVMConverter {
           // Field is of primitive type
           else {
             try {
-              Utilities.setJVMPrimitiveField(fld[i], JVMObj, dei, fi);
+              JPF2JVMUtilities.setJVMPrimitiveField(fld[i], JVMObj, dei, fi);
             } catch (IllegalAccessException e) {
               e.printStackTrace();
             }
