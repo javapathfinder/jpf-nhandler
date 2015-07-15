@@ -13,7 +13,7 @@ import nhandler.conversion.ConversionException;
  * 
  * @author Nastaran Shafiei 
  */
-public class Utilities {
+public class JVM2JPFUtilities {
 
   /**
    * Creates a new JPF array which has the same type and same size as the given

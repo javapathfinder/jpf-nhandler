@@ -14,7 +14,7 @@ import nhandler.conversion.ConversionException;
  * 
  * @author Nastaran Shafiei
  */ 
-public class Utilities { 
+public class JPF2JVMUtilities { 
 
   /**
    * Sets a primitive field of a JVM object to a value of the corresponding

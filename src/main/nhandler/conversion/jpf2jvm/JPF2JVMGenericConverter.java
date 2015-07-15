@@ -9,6 +9,7 @@ import gov.nasa.jpf.vm.DynamicElementInfo;
 import gov.nasa.jpf.vm.FieldInfo;
 import gov.nasa.jpf.vm.MJIEnv;
 import gov.nasa.jpf.vm.StaticElementInfo;
+import gov.nasa.jpf.vm.Types;
 import nhandler.conversion.ConversionException;
 
 /**
@@ -60,24 +61,30 @@ public class JPF2JVMGenericConverter extends JPF2JVMConverter {
            * fields have to be set.
            */
           if (!isFinal) {
-            // If the current field is of reference type
-            if (fi.isReference()) {
-              int fieldValueRef = sei.getFields().getReferenceValue(fi.getStorageOffset());
-              Object JVMField = obtainJVMObj(fieldValueRef, env);
-              try {
-                fld[i].set(null, JVMField);
-              } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-              } catch (IllegalAccessException e) {
-                e.printStackTrace();
+            String jpfType = Types.asTypeName(fi.getType());
+            String jvmType = Types.asTypeName(fld[i].getType().getName());
+            
+            // note that if types are not the same, the current field is ignored 
+            if (jpfType.equals(jvmType)) {
+              // If the current field is of reference type
+              if(!fld[i].getType().isPrimitive()) {
+                int fieldValueRef = sei.getFields().getReferenceValue(fi.getStorageOffset());
+                Object JVMField = obtainJVMObj(fieldValueRef, env);
+                try {
+                  fld[i].set(null, JVMField);
+                } catch (IllegalArgumentException e) {
+                  e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                  e.printStackTrace();
+                }
               }
-            }
-            // If the current field is of primitive type
-            else {
-              try {
-                JPF2JVMUtilities.setJVMPrimitiveField(fld[i], JVMCls, sei, fi);
-              } catch (IllegalAccessException e) {
-                e.printStackTrace();
+              // If the current field is of primitive type
+              else {
+                try {
+                  JPF2JVMUtilities.setJVMPrimitiveField(fld[i], JVMCls, sei, fi);
+                } catch (IllegalAccessException e) {
+                  e.printStackTrace();
+                }
               }
             }
           }
@@ -110,25 +117,31 @@ public class JPF2JVMGenericConverter extends JPF2JVMConverter {
         FieldInfo fi = JPFCl.getInstanceField(fld[i].getName());
 
         if (fi != null && isNonStaticField) {
-          // Field is of reference type
-          if (fi.isReference()) {
-            int fieldValueRef = dei.getFields().getReferenceValue(fi.getStorageOffset());
-            Object JVMField = obtainJVMObj(fieldValueRef, env);
+          String jpfType = Types.asTypeName(fi.getType());
+          String jvmType = Types.asTypeName(fld[i].getType().getName());
+          
+          // note that if types are not the same, the current field is ignored 
+          if(jpfType.equals(jvmType)) {
+            // Field is of reference type
+            if(!fld[i].getType().isPrimitive()) {
+              int fieldValueRef = dei.getFields().getReferenceValue(fi.getStorageOffset());
+              Object JVMField = obtainJVMObj(fieldValueRef, env);
 
-            try {
-              fld[i].set(JVMObj, JVMField);
-            } catch (IllegalArgumentException e) {
-              e.printStackTrace();
-            } catch (IllegalAccessException e) {
-              e.printStackTrace();
+              try {
+                fld[i].set(JVMObj, JVMField);
+              } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+              } catch (IllegalAccessException e) {
+                e.printStackTrace();
+              }
             }
-          }
-          // Field is of primitive type
-          else {
-            try {
-              JPF2JVMUtilities.setJVMPrimitiveField(fld[i], JVMObj, dei, fi);
-            } catch (IllegalAccessException e) {
-              e.printStackTrace();
+            // Field is of primitive type
+            else {
+              try {
+                JPF2JVMUtilities.setJVMPrimitiveField(fld[i], JVMObj, dei, fi);
+              } catch (IllegalAccessException e) {
+                e.printStackTrace();
+              }
             }
           }
         }
