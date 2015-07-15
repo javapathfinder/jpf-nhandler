@@ -5,6 +5,8 @@ import gov.nasa.jpf.vm.Fields;
 import gov.nasa.jpf.vm.MJIEnv;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.Map;
 
 import nhandler.conversion.ConversionException;
 
@@ -13,7 +15,7 @@ import nhandler.conversion.ConversionException;
  * 
  * @author Nastaran Shafiei 
  */
-public class JVM2JPFUtilities {
+public class Utilities {
 
   /**
    * Creates a new JPF array which has the same type and same size as the given
@@ -182,5 +184,72 @@ public class JVM2JPFUtilities {
     } else{
       throw new ConversionException("Unknown array type " + type);
     }
+  }
+  
+  public static String getPrimitiveTypeSymbol(String type) throws ConversionException
+  {
+    if(type.equals("byte"))
+      return "B";
+    else if(type.equals("int"))
+      return "I";
+    else if(type.equals("boolean"))
+      return "Z";
+    else if(type.equals("char"))
+      return "C";
+    else if(type.equals("double"))
+      return "D";
+    else if(type.equals("float"))
+      return "F";
+    else if(type.equals("long"))
+      return "J";
+    else if(type.equals("short"))
+      return "S";
+    else
+      throw new ConversionException("Unknown primitive type");
+  }
+  
+  public static String getParamString (Class<?>[] params) {
+    StringBuilder r = new StringBuilder();
+    for (Class<?> c : params) {
+      String name = c.getName();
+      if (name.contains(".")) {
+        // non-primitive type, or array of non-primitive type
+        name = name.replace(".", "/");
+        if (!name.startsWith("[")) {
+          // non-primitive type (not array)
+          name = "L" + name + ";";
+        }
+      } else {
+        //primitive type, or array of primitive type
+        if(!name.startsWith("["))
+        {
+          try {
+            name = getPrimitiveTypeSymbol(name);
+          } catch (ConversionException e) {
+            e.printStackTrace();
+            System.exit(1);
+          }
+        }
+      }
+      r.append(name);
+    }
+    return r.toString();
+  }
+  
+  /**
+   * Checks if a Map has an exact object (using == operator)
+   * @param map
+   * @param obj object to check for
+   * @return
+   */
+  public static boolean hasMapExactObject(Map<?, ?> map, Object obj) {
+    if(map == null || obj == null)
+      return false;
+    Collection<?> values = map.values();
+    for(Object i : values) {
+      if(i == obj)
+        return true;
+    }
+    return false;
   }
 }

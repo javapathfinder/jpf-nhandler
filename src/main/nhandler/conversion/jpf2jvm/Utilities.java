@@ -14,7 +14,7 @@ import nhandler.conversion.ConversionException;
  * 
  * @author Nastaran Shafiei
  */ 
-public class JPF2JVMUtilities { 
+public class Utilities { 
 
   /**
    * Sets a primitive field of a JVM object to a value of the corresponding
@@ -148,5 +148,52 @@ public class JPF2JVMUtilities {
 
   public static boolean isArray(String cname) {
     return cname.startsWith("[");
+  }
+  
+  public static Class<?>[] getClassesFromNames (String[] names) {
+    if (names == null) return null;
+    int length = names.length;
+    Class<?>[] classes = new Class<?>[length];
+    for (int i = 0; i < length; i++) {
+      String name = names[i];
+      if(name == null) {
+        classes[i] = null;
+        continue;
+      }
+      int arrayDim = 0;
+      StringBuilder sb = new StringBuilder();
+      while (name.endsWith("[]")) {
+        name = name.substring(0, name.length() - 2);
+        arrayDim++;
+        sb.append("[");
+      }
+      if (arrayDim == 0) {
+        // Not an array
+        classes[i] = getPrimitiveClass(name);
+        if (classes[i] == null) {
+          try {
+            classes[i] = Class.forName(name); // TODO: Do we need some special
+                                              // classloader here?
+          } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+          }
+        }
+      } else {
+        if (isPrimitiveClass(name))
+          try {
+            sb.append(nhandler.conversion.jvm2jpf.Utilities.getPrimitiveTypeSymbol(name));
+          } catch (ConversionException e1) {
+            e1.printStackTrace();
+          }
+        else
+          sb.append('L').append(name).append(';');
+        try {
+          classes[i] = Class.forName(sb.toString());
+        } catch (ClassNotFoundException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+    return classes;
   }
 }

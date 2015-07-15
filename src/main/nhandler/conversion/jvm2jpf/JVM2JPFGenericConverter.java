@@ -69,7 +69,7 @@ public class JVM2JPFGenericConverter extends JVM2JPFConverter {
             // If the current field is of primitive type
             else{
               try{
-                JVM2JPFUtilities.setJPFPrimitiveField(sei, fi.getStorageOffset(), fld[i], JVMCls);
+                Utilities.setJPFPrimitiveField(sei, fi.getStorageOffset(), fld[i], JVMCls);
               } catch (IllegalAccessException e){
                 e.printStackTrace();
               }
@@ -128,7 +128,7 @@ public class JVM2JPFGenericConverter extends JVM2JPFConverter {
             // If the current field is of primitive type
             else{
               try{
-                JVM2JPFUtilities.setJPFPrimitiveField(dei, fi.getStorageOffset(), fld[i], JVMObj);
+                Utilities.setJPFPrimitiveField(dei, fi.getStorageOffset(), fld[i], JVMObj);
               } catch (IllegalAccessException e){
                 e.printStackTrace();
               }

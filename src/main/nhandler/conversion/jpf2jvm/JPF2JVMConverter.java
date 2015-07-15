@@ -41,7 +41,7 @@ public abstract class JPF2JVMConverter extends ConverterBase {
   }
 
   protected Class<?> loadClass(String cname, MJIEnv env) throws ClassNotFoundException {
-    if(JPF2JVMUtilities.isArray(cname)) {
+    if(Utilities.isArray(cname)) {
       return Class.forName(cname);
     } else {
       ClassLoader cl = env.getConfig().getClassLoader();
@@ -134,8 +134,8 @@ public abstract class JPF2JVMConverter extends ConverterBase {
           if (JVMCl == Class.class) {
             try {
               String name = env.getReferredClassInfo(JPFRef).getName();
-              if (JPF2JVMUtilities.isPrimitiveClass(name)) {
-                JVMObj = JPF2JVMUtilities.getPrimitiveClass(name);
+              if (Utilities.isPrimitiveClass(name)) {
+                JVMObj = Utilities.getPrimitiveClass(name);
               } else {
                 JVMObj = loadClass(name, env);
               }
@@ -145,7 +145,7 @@ public abstract class JPF2JVMConverter extends ConverterBase {
             return JVMObj;
           } else {
             // Creates a new instance of JVMCl
-            JVMObj = instantiateFrom(JVMCl);
+            JVMObj = instantiateFrom(JVMCl, JPFRef, env);
           }
 
           ConverterBase.objMapJPF2JVM.put(JPFRef, JVMObj);
@@ -186,7 +186,7 @@ public abstract class JPF2JVMConverter extends ConverterBase {
 
         // Array of primitive type
         if (dei.getClassInfo().getComponentClassInfo().isPrimitive()) {
-          JVMArr = JPF2JVMUtilities.createJVMPrimitiveArr(dei);
+          JVMArr = Utilities.createJVMPrimitiveArr(dei);
         }
         // Array of Non-primitives
         else {
@@ -213,7 +213,7 @@ public abstract class JPF2JVMConverter extends ConverterBase {
     return JVMArr;
   }
 
-  protected abstract Object instantiateFrom (Class<?> cl);
+  protected abstract Object instantiateFrom (Class<?> cl, int JPFRef, MJIEnv env);
 
   protected Object createStringObject(int JPFRef, MJIEnv env) throws ConversionException {
     DynamicElementInfo str = (DynamicElementInfo) env.getHeap().get(JPFRef);
