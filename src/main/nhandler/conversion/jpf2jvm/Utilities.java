@@ -148,7 +148,7 @@ public class Utilities {
   public static boolean isArray (String cname) {
     return cname.startsWith("[");
   }
-
+  
   public static Class<?>[] getClassesFromNames (String[] names) {
     if (names == null) return null;
     int length = names.length;

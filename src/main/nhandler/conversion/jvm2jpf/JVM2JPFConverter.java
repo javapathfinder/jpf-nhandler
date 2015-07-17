@@ -5,6 +5,7 @@ import gov.nasa.jpf.vm.ClassInfo;
 import gov.nasa.jpf.vm.ClassInfoException;
 import gov.nasa.jpf.vm.ClassLoaderInfo;
 import gov.nasa.jpf.vm.DynamicElementInfo;
+import gov.nasa.jpf.vm.ElementInfo;
 import gov.nasa.jpf.vm.MJIEnv;
 import gov.nasa.jpf.vm.StaticElementInfo;
 
@@ -77,12 +78,17 @@ public abstract class JVM2JPFConverter extends ConverterBase {
 
       // First check if the class has been already updated
       if (!ConverterBase.updatedJPFCls.contains(JPFClsRef)){
+        StaticElementInfo sei = null;
+        
         /**
          * If the corresponding ClassInfo does not exist, a new ClassInfo object
          * is created and will be added to the loadedClasses.
          */
         if (!JPFCls.isRegistered()){
           JPFCls.registerClass(env.getThreadInfo());
+          sei = JPFCls.getStaticElementInfo();
+          JPFClsRef = sei.getObjectRef();
+        } else {
           sei = JPFCls.getModifiableStaticElementInfo();
           JPFClsRef = sei.getObjectRef();
         }
@@ -123,9 +129,19 @@ public abstract class JVM2JPFConverter extends ConverterBase {
   protected int getJPFObj (Object JVMObj, MJIEnv env) throws ConversionException {
     int JPFRef = MJIEnv.NULL;
     if (JVMObj != null){
-      JPFRef = this.getExistingJPFRef(JVMObj, true, env);
-      if (JPFRef == MJIEnv.NULL){
-        JPFRef = this.getNewJPFRef(JVMObj, env);
+      if (JVMObj.getClass() == Class.class){
+        JPFRef = (this.getJPFCls((Class<?>) JVMObj, env)).getClassObjectRef();
+      }  
+      /** by uncommenting this code, when converting JVM objects to JPF objects, 
+          nhandler uses the current ClassLoaderInfo for the JPFClassLoader object **/
+//      else if (JVMObj == env.getConfig().getClassLoader()) {
+//        JPFRef = ClassLoaderInfo.getCurrentClassLoader().getClassLoaderObjectRef();
+//      } 
+      else{
+        JPFRef = this.getExistingJPFRef(JVMObj, true, env);
+        if (JPFRef == MJIEnv.NULL){
+          JPFRef = this.getNewJPFRef(JVMObj, env);
+        }
       }
     }
     return JPFRef;
@@ -216,6 +232,20 @@ public abstract class JVM2JPFConverter extends ConverterBase {
         ConverterBase.updatedJPFObj.put(JPFObj, JVMObj);
         ConverterBase.objMapJPF2JVM.put(JPFObj, JVMObj);
 
+        // Why do we need that? Because JPF might have not leaded the class
+        // before! JPF classloader does not recognize them!
+        // I don't now why exactly!
+        // INVESTIGATE: Why not arrays?
+        if (JVMObj.getClass() == Class.class){
+          try{
+            Class<?> temp = (Class<?>) JVMObj;
+            if (!temp.isArray() && !temp.isPrimitive())
+              env.getConfig().getClassLoader().loadClass(temp.getName());
+          } catch (ClassNotFoundException e1){
+            e1.printStackTrace();
+          }
+        }
+        
         DynamicElementInfo dei = (DynamicElementInfo) env.getHeap().getModifiable(JPFObj);
 
         setInstanceFields(JVMObj, dei, env);
@@ -340,13 +370,17 @@ public abstract class JVM2JPFConverter extends ConverterBase {
     int JPFRef = MJIEnv.NULL;
     Class<?> JVMCls = JVMObj.getClass();
     if (!JVMCls.isArray()){
-      ClassInfo fci = null;
-      try{
-        fci = this.getJPFCls(JVMCls, env);
-      } catch (ClassInfoException e){
-        System.out.println("WARNING: the class " + JVMCls + " is ignored!");
-        return MJIEnv.NULL;
-      }
+      // we treat Strings differently, until we immigrate to JDK7
+      if(JVMObj.getClass()==String.class) {
+        JPFRef = env.newString(JVMObj.toString());
+      } else {
+        ClassInfo fci = null;
+        try{
+          fci = this.getJPFCls(JVMCls, env);
+        } catch (ClassInfoException e){
+          System.out.println("WARNING: the class " + JVMCls + " is ignored!");
+          return MJIEnv.NULL;
+        }
 
       JPFRef = env.newObject(fci);
       this.updateJPFNonArrObj(JVMObj, JPFRef, env);

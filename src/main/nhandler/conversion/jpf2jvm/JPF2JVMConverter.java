@@ -104,7 +104,7 @@ public abstract class JPF2JVMConverter extends ConverterBase {
    * object. If such an object already exists, it is returned. Otherwise a new
    * one is created.
    */
-   protected Object getJVMNonArrObj (int JPFRef, MJIEnv env) throws ConversionException {
+  protected Object getJVMNonArrObj (int JPFRef, MJIEnv env) throws ConversionException {
     Object JVMObj = null;
     if (JPFRef != MJIEnv.NULL) {
       // First check if the object has been already created
@@ -118,6 +118,10 @@ public abstract class JPF2JVMConverter extends ConverterBase {
         DynamicElementInfo dei = (DynamicElementInfo) env.getHeap().get(JPFRef);
         ClassInfo JPFCl = dei.getClassInfo();
 
+        if (!JPFCl.isRegistered()){
+          JPFCl.registerClass(env.getThreadInfo());
+        }
+        
         // we treat Strings differently
         /*if(JPFCl.isStringClassInfo()) {
           JVMObj = createStringObject(JPFRef, env);
@@ -125,7 +129,24 @@ public abstract class JPF2JVMConverter extends ConverterBase {
           int JPFClsRef = JPFCl.getStaticElementInfo().getClassObjectRef();
           Class<?> JVMCl = this.getJVMCls(JPFClsRef, env);
 
-          JVMObj = instantiateFrom(JVMCl, JPFRef, env);
+          // There is only one instance of every class. There is no need to update
+          // Class objects
+          if (JVMCl == Class.class) {
+            try {
+              String name = env.getReferredClassInfo(JPFRef).getName();
+              if (Utilities.isPrimitiveClass(name)) {
+                JVMObj = Utilities.getPrimitiveClass(name);
+              } else {
+                JVMObj = loadClass(name, env);
+              }
+            } catch (ClassNotFoundException e) {
+              e.printStackTrace();
+            }
+            return JVMObj;
+          } else {
+            // Creates a new instance of JVMCl
+            JVMObj = instantiateFrom(JVMCl, JPFRef, env);
+          }
 
           ConverterBase.objMapJPF2JVM.put(JPFRef, JVMObj);
           setInstanceFields(JVMObj, dei, env);
@@ -192,7 +213,7 @@ public abstract class JPF2JVMConverter extends ConverterBase {
     return JVMArr;
   }
 
-  protected abstract Object instantiateFrom (Class<?> cl, int jPFRef, MJIEnv env);
+  protected abstract Object instantiateFrom (Class<?> cl, int JPFRef, MJIEnv env);
 
   protected Object createStringObject(int JPFRef, MJIEnv env) throws ConversionException {
     DynamicElementInfo str = (DynamicElementInfo) env.getHeap().get(JPFRef);

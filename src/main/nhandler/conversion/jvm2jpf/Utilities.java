@@ -5,9 +5,6 @@ import gov.nasa.jpf.vm.Fields;
 import gov.nasa.jpf.vm.MJIEnv;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import nhandler.conversion.ConversionException;
 
@@ -186,7 +183,29 @@ public class Utilities {
       throw new ConversionException("Unknown array type " + type);
     }
   }
-
+  
+  public static String getPrimitiveTypeSymbol(String type) throws ConversionException
+  {
+    if(type.equals("byte"))
+      return "B";
+    else if(type.equals("int"))
+      return "I";
+    else if(type.equals("boolean"))
+      return "Z";
+    else if(type.equals("char"))
+      return "C";
+    else if(type.equals("double"))
+      return "D";
+    else if(type.equals("float"))
+      return "F";
+    else if(type.equals("long"))
+      return "J";
+    else if(type.equals("short"))
+      return "S";
+    else
+      throw new ConversionException("Unknown primitive type");
+  }
+  
   public static String getParamString (Class<?>[] params) {
     StringBuilder r = new StringBuilder();
     for (Class<?> c : params) {
@@ -215,28 +234,6 @@ public class Utilities {
     return r.toString();
   }
   
-  public static String getPrimitiveTypeSymbol(String type) throws ConversionException
-  {
-    if(type.equals("byte"))
-      return "B";
-    else if(type.equals("int"))
-      return "I";
-    else if(type.equals("boolean"))
-      return "Z";
-    else if(type.equals("char"))
-      return "C";
-    else if(type.equals("double"))
-      return "D";
-    else if(type.equals("float"))
-      return "F";
-    else if(type.equals("long"))
-      return "J";
-    else if(type.equals("short"))
-      return "S";
-    else
-      throw new ConversionException("Unknown primitive type");
-  }
-  
   /**
    * Checks if a Map has an exact object (using == operator)
    * @param map
@@ -253,5 +250,4 @@ public class Utilities {
     }
     return false;
   }
-
 }
