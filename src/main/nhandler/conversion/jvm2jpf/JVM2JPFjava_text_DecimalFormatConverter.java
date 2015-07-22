@@ -59,7 +59,7 @@ public class JVM2JPFjava_text_DecimalFormatConverter extends JVM2JPFConverter {
     assert formatters != null : "JPF_java_text_Format.init() hasn't been called";
     // TODO: Do we call init() ourselves if formatters == null?
 
-    if (Utilities.hasMapExactObject(formatters, JVMObj)) {
+    if (JVM2JPFUtilities.hasMapExactObject(formatters, JVMObj)) {
       // This means the JVM object is a delegatee for a pre-existing
       // JPF object. So we don't need to do anything
       // This also means that the given JPF object should have this JVM

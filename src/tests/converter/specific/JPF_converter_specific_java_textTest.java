@@ -84,7 +84,6 @@ public class JPF_converter_specific_java_textTest extends NativePeer{
     
     Calendar calendar = Calendar.getInstance();
     calendar.setTimeInMillis(SDF_INPUT);
-    System.out.println(ret[1].format(calendar.getTime()));
     
     int JPFret = MJIEnv.NULL;
     try {

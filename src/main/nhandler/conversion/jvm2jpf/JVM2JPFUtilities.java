@@ -5,6 +5,8 @@ import gov.nasa.jpf.vm.Fields;
 import gov.nasa.jpf.vm.MJIEnv;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.Map;
 
 import nhandler.conversion.ConversionException;
 
@@ -13,7 +15,7 @@ import nhandler.conversion.ConversionException;
  * 
  * @author Nastaran Shafiei
  */
-public class Utilities {
+public class JVM2JPFUtilities {
 
   /**
    * Creates a new JPF array which has the same type and same size as the given
@@ -241,8 +243,9 @@ public class Utilities {
    * @return
    */
   public static boolean hasMapExactObject(Map<?, ?> map, Object obj) {
-    if(map == null || obj == null)
+    if(map == null || obj == null) {
       return false;
+    }
     Collection<?> values = map.values();
     for(Object i : values) {
       if(i == obj)

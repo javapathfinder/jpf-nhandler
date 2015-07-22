@@ -32,7 +32,7 @@ public class JVM2JPFjava_lang_reflect_ConstructorConverter extends JVM2JPFConver
   protected void setInstanceFields (Object JVMObj, DynamicElementInfo dei, MJIEnv env) throws ConversionException {
     Constructor<?> jvmCtor = (Constructor<?>) JVMObj;
     Class<?> ctorDeclClass = jvmCtor.getDeclaringClass();
-    String paramString = "(" + Utilities.getParamString(jvmCtor.getParameterTypes()) + ")";
+    String paramString = "(" + JVM2JPFUtilities.getParamString(jvmCtor.getParameterTypes()) + ")";
 
     ClassInfo ctorDeclCi = obtainJPFCls(ctorDeclClass, env);
     MethodInfo mi = ctorDeclCi.getMethod("<init>", paramString, false);

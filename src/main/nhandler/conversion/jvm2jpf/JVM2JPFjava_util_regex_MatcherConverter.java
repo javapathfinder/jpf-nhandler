@@ -53,7 +53,7 @@ public class JVM2JPFjava_util_regex_MatcherConverter extends JVM2JPFConverter {
     }
     
     assert matchers != null;
-    if (Utilities.hasMapExactObject(matchers, JVMObj)) {
+    if (JVM2JPFUtilities.hasMapExactObject(matchers, JVMObj)) {
       Matcher value = matchers.get(id);
       assert value != null;
       assert value == JVMObj;   // This is an update call, so JVMObj is an existing delegatee

@@ -27,8 +27,8 @@ public class JPF2JVMjava_lang_ClassConverter extends JPF2JVMConverter {
     Object JVMObj = null;
     try {
       String name = env.getReferredClassInfo(JPFRef).getName();
-      if (Utilities.isPrimitiveClass(name)) {
-        JVMObj = Utilities.getPrimitiveClass(name);
+      if (JPF2JVMUtilities.isPrimitiveClass(name)) {
+        JVMObj = JPF2JVMUtilities.getPrimitiveClass(name);
       } else {
         JVMObj = loadClass(name, env);
       }

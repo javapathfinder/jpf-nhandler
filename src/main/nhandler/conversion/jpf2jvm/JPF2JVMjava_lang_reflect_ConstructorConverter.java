@@ -62,7 +62,7 @@ public class JPF2JVMjava_lang_reflect_ConstructorConverter extends JPF2JVMConver
     }
 
     String[] parameterTypeNames = mi.getArgumentTypeNames();
-    Class<?>[] parameterTypes = Utilities.getClassesFromNames(parameterTypeNames);
+    Class<?>[] parameterTypes = JPF2JVMUtilities.getClassesFromNames(parameterTypeNames);
 
     try {
       JVMObj = clazz.getDeclaredConstructor(parameterTypes);

@@ -41,7 +41,7 @@ public abstract class JPF2JVMConverter extends ConverterBase {
   }
 
   protected Class<?> loadClass(String cname, MJIEnv env) throws ClassNotFoundException {
-    if(Utilities.isArray(cname)) {
+    if(JPF2JVMUtilities.isArray(cname)) {
       return Class.forName(cname);
     } else {
       ClassLoader cl = env.getConfig().getClassLoader();
@@ -134,8 +134,8 @@ public abstract class JPF2JVMConverter extends ConverterBase {
           if (JVMCl == Class.class) {
             try {
               String name = env.getReferredClassInfo(JPFRef).getName();
-              if (Utilities.isPrimitiveClass(name)) {
-                JVMObj = Utilities.getPrimitiveClass(name);
+              if (JPF2JVMUtilities.isPrimitiveClass(name)) {
+                JVMObj = JPF2JVMUtilities.getPrimitiveClass(name);
               } else {
                 JVMObj = loadClass(name, env);
               }
@@ -186,7 +186,7 @@ public abstract class JPF2JVMConverter extends ConverterBase {
 
         // Array of primitive type
         if (dei.getClassInfo().getComponentClassInfo().isPrimitive()) {
-          JVMArr = Utilities.createJVMPrimitiveArr(dei);
+          JVMArr = JPF2JVMUtilities.createJVMPrimitiveArr(dei);
         }
         // Array of Non-primitives
         else {

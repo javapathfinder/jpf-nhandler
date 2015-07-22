@@ -14,7 +14,7 @@ import nhandler.conversion.ConversionException;
  * 
  * @author Nastaran Shafiei
  */
-public class Utilities {
+public class JPF2JVMUtilities {
 
   /**
    * Sets a primitive field of a JVM object to a value of the corresponding
@@ -180,7 +180,7 @@ public class Utilities {
       } else {
         if (isPrimitiveClass(name))
           try {
-            sb.append(nhandler.conversion.jvm2jpf.Utilities.getPrimitiveTypeSymbol(name));
+            sb.append(nhandler.conversion.jvm2jpf.JVM2JPFUtilities.getPrimitiveTypeSymbol(name));
           } catch (ConversionException e1) {
             e1.printStackTrace();
           }

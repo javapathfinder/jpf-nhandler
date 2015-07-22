@@ -78,7 +78,6 @@ public abstract class JVM2JPFConverter extends ConverterBase {
 
       // First check if the class has been already updated
       if (!ConverterBase.updatedJPFCls.contains(JPFClsRef)){
-        StaticElementInfo sei = null;
         
         /**
          * If the corresponding ClassInfo does not exist, a new ClassInfo object
@@ -279,7 +278,7 @@ public abstract class JVM2JPFConverter extends ConverterBase {
 
         // Array of primitive type
         if (dei.getClassInfo().getComponentClassInfo().isPrimitive()){
-          Utilities.setJPFPrimitiveArr(dei, JVMArr, env);
+          JVM2JPFUtilities.setJPFPrimitiveArr(dei, JVMArr, env);
         }
         // Array of Non-primitives
         else{
@@ -382,10 +381,13 @@ public abstract class JVM2JPFConverter extends ConverterBase {
           return MJIEnv.NULL;
         }
 
-      JPFRef = env.newObject(fci);
-      this.updateJPFNonArrObj(JVMObj, JPFRef, env);
+        ElementInfo ei = env.getHeap().newObject(fci, env.getThreadInfo());
+        JPFRef = ei.getObjectRef();
+        
+        this.updateJPFNonArrObj(JVMObj, JPFRef, env);
+      }
     } else{
-      JPFRef = Utilities.createNewJPFArray(JVMObj, env);
+      JPFRef = JVM2JPFUtilities.createNewJPFArray(JVMObj, env);
       this.updateJPFArrObj(JVMObj, JPFRef, env);
     }
 

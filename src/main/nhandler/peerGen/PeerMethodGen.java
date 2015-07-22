@@ -107,7 +107,6 @@ public class PeerMethodGen {
    * of this method.
    */
   public void create() {
-    System.out.println("PeerMethodGen create()"); //TODO: remove
     if(mi.isClinit()) {
       this.createClinit();
     } else if(mi.isCtor()) {
@@ -129,8 +128,6 @@ public class PeerMethodGen {
   private void createMethod (){
     this.addException();
     this.createResetConverterBase();
-    System.out.println("foobar"); //TODO: remove
-    this.createCallLazyResolver();
     int caller = this.createCaller();
     int argValue = this.createArgValue();
     int argType = this.createArgType(argValue);
@@ -243,61 +240,6 @@ public class PeerMethodGen {
     if(genSource()) {
       this.sourceGen.printConvertorPart();
     }
-  }
-  
-  private void createCallLazyResolver() {
-    System.out.println("createCallLazyResolver()");
-    // TODO: remove:
-    il.append(peerClassGen._factory.createInvoke(conversionPkg + ".lazy.LazyResolver", "test", Type.VOID, Type.NO_ARGS, Constants.INVOKESTATIC));
-    
-    String[] argTypes = this.mi.getArgumentTypeNames();
-    int nArgs = argTypes.length;
-    
-    // Count reference type args:
-    int translateCount = 0;
-    for (String argType : argTypes) {
-      System.out.println(argType); // TODO: remove
-      if (!isPrimitiveType(argType))
-        translateCount++;
-    }
-    
-    // Need to translate only reference type args
-    // int[] argsToTranslate = new int[translateC/ount]
-    this.il.append(new PUSH(peerClassGen._cp, translateCount));
-    this.il.append(peerClassGen._factory.createNewArray(Type.INT, (short) 1));
-    LocalVariableGen lg = this.nativeMth.addLocalVariable("argsToTranslate", new ArrayType(Type.INT, 1), null, null);
-    int argsToTranslate = lg.getIndex();
-    this.il.append(InstructionFactory.createStore(Type.OBJECT, argsToTranslate));
-    
-    // Now store all object refs for reference type args
-    int j = 2, k = 0; // Skip first two arguments (MJIEnv and caller obj/class ref)
-    for (String argType : argTypes) {
-      
-      if (!isPrimitiveType(argType)) {
-        assert k < translateCount : k;
-        il.append(InstructionFactory.createLoad(Type.OBJECT, argsToTranslate));
-        il.append(new PUSH(peerClassGen._cp, k));
-        il.append(InstructionFactory.createLoad(Type.INT, j));
-        k++;
-      }
-      j++;
-    }
-    
-    il.append(InstructionFactory.createLoad(Type.OBJECT, 0));
-    il.append(new PUSH(peerClassGen._cp, mi.getClassName()));
-    il.append(new PUSH(peerClassGen._cp, mi.getName()));
-    if (mi.isStatic()) {
-      // Pass MJIEnv.NULL for callerObj if the method is static
-      il.append(new PUSH(peerClassGen._cp, MJIEnv.NULL));
-    } else {
-      // Else pass robj (index 1)
-      il.append(InstructionFactory.createLoad(Type.INT, 1));
-    }
-    il.append(InstructionFactory.createLoad(Type.OBJECT, argsToTranslate));
-    // Call LazyResolver.resolve() 
-    il.append(peerClassGen._factory.createInvoke("nhandler.conversion.lazy.LazyResolver", "resolve", Type.VOID,
-                                                 new Type[] { mjiEnvType, Type.STRING,Type.STRING, Type.INT, new ArrayType(Type.INT, 1) },
-                                                 Constants.INVOKESTATIC));
   }
 
   /**

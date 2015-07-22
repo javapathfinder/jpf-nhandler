@@ -40,7 +40,7 @@ public class JVM2JPFjava_lang_reflect_MethodConverter extends JVM2JPFConverter {
   protected void setInstanceFields (Object JVMObj, DynamicElementInfo dei, MJIEnv env) throws ConversionException {
     Method jvmMeth = (Method) JVMObj;
     Class<?> methdDeclClass = jvmMeth.getDeclaringClass();
-    String paramString = "(" + Utilities.getParamString(jvmMeth.getParameterTypes()) + ")";
+    String paramString = "(" + JVM2JPFUtilities.getParamString(jvmMeth.getParameterTypes()) + ")";
 
     ClassInfo methDeclCi = obtainJPFCls(methdDeclClass, env);
     MethodInfo mi = methDeclCi.getMethod(jvmMeth.getName(), paramString, false);

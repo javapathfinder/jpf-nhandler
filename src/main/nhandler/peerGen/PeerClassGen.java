@@ -108,7 +108,6 @@ public class PeerClassGen implements Constants {
  * @throws IOException 
    */
   private PeerClassGen (ClassInfo ci, MJIEnv env) throws IOException {
-    System.out.println("PeerClassGen constructor()"); //TODO: remove
     String className = ci.getName();
     this.env = env;
     String peerName = PeerClassGen.getNativePeerClsName(className);
@@ -200,7 +199,6 @@ public class PeerClassGen implements Constants {
    * @return a Method object corresponding to the given NativeMethodInfo object
    */
   public Method createMethod (NativeMethodInfo mi){
-    System.out.println("PeerClassGen createMethod()"); //TODO: remove
     Method method = this.getExistingMethod(mi);
     if (method != null) {
       return method;

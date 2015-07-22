@@ -70,7 +70,7 @@ public class JPF2JVMjava_lang_reflect_MethodConverter extends JPF2JVMConverter {
     String name = mi.getName();
     
     String[] parameterTypeNames = mi.getArgumentTypeNames();
-    Class<?>[] parameterTypes = Utilities.getClassesFromNames(parameterTypeNames);
+    Class<?>[] parameterTypes = JPF2JVMUtilities.getClassesFromNames(parameterTypeNames);
     
     try {
       JVMObj = clazz.getDeclaredMethod(name, parameterTypes);
