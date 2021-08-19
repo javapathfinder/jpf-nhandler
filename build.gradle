@@ -1,0 +1,122 @@
+apply plugin: "java"
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+repositories {
+    mavenCentral()
+}
+
+ext.getJpfJar = { ->
+    // find home directory
+    File home = new File(System.getProperty("user.home"));
+    if (!home.exists()) {
+        throw new GradleException("home directory cannot be found");
+    }
+    if (!home.isDirectory()) {
+        throw new GradleException("home is not a directory");
+    }
+	
+    // find .jpf directory	
+    File dotJpf = new File(home, ".jpf");
+    if (!dotJpf.exists()) {
+        throw new GradleException(".jpf directory cannot be found");
+    }
+    if (!dotJpf.isDirectory()) {
+        throw new GradleException(".jpf is not a directory");
+    }
+	
+    // find site.properties file	
+    File siteProperties = new File(dotJpf, "site.properties");
+    if (!siteProperties.exists()) {
+        throw new GradleException("site.properties file cannot be found");
+    }
+    if (!siteProperties.isFile()) {
+        throw new GradleException("site.properties is not a file");
+    }
+
+    try {
+        // open site.properties file
+        Properties properties = new Properties();
+        FileInputStream file = new FileInputStream(siteProperties);
+        properties.load(file);
+        file.close();
+
+        // find jpf-core directory
+        if (!properties.containsKey("jpf-core")) {
+            throw new GradleException("site.properties file does not contain jpf-core");
+        }
+        String path = properties.getProperty("jpf-core");
+        path = path.replace('${user.home}', home.toString());
+        File jpfCore = new File(path);			
+        if (!jpfCore.exists()) {
+            throw new GradleException("jpf-core directory cannot be found");
+        }
+        if (!jpfCore.isDirectory()) {
+            throw new GradleException("jpf-core is not a directory");
+        }
+
+        // find build directory
+        File build = new File(jpfCore, "build");
+        if (!build.exists()) {
+            throw new GradleException("build directory cannot be found");
+        }
+        if (!build.isDirectory()) {
+            throw new GradleException("build is not a directory");
+        }
+	
+        // find jpf.jar		
+	File jpfJar = new File(build, "jpf.jar");
+        if (!jpfJar.exists()) {
+            throw new GradleException("jpf.jar file cannot be found");
+        }
+        if (!jpfJar.isFile()) {
+            throw new GradleException("jpf.jar is not a file");
+        }
+
+        return jpfJar.toString();
+    } catch (IOException e) {
+        throw new GradleException("site.properties file cannot be read"); 
+    }
+}
+
+dependencies {
+    // jpf-core
+    implementation files(getJpfJar())
+
+    // JUnit 4
+    testImplementation 'junit:junit:4.12'
+
+    // bcel
+    implementation 'org.apache.bcel:bcel:6.5.0'
+
+    // jars used in the examples
+    implementation fileTree(dir: 'lib/example', include: ['*/*.jar'])
+}
+
+jar {
+    archiveBaseName = 'jpf-nhandler'
+    exclude('example/**')   
+    destinationDirectory.set(file("${buildDir}"))
+}
+
+test {
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+    
+    afterSuite { testDescriptor, result ->
+        if (!testDescriptor.parent) {
+            println "Test Execution: ${result.resultType}"
+
+            def summaryFields = ["${result.testCount} tests",
+                                 "${result.successfulTestCount} passed",
+                                 "${result.failedTestCount} failed",
+                                 "${result.skippedTestCount} skipped"]
+
+            println ("Summary: " + summaryFields.join(", "))
+        }
+    }
+}
+
+defaultTasks "jar"
