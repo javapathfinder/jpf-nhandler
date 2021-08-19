@@ -1,12 +1,12 @@
 @using = jpf-nhandler
 
-target = CommonMath
+target = example.CommonMath
 
 classpath =\
- ${jpf-nhandler}/lib/examples-lib/commons-math3-3.1.jar;\
+ ${jpf-nhandler}/lib/example/commons-math3-3.6.1/commons-math3-3.6.1.jar;\
 
 native_classpath =\
- ${jpf-nhandler}/lib/examples-lib/commons-math3-3.1.jar;\
+ ${jpf-nhandler}/lib/example/commons-math3-3.6.1/commons-math3-3.6.1.jar;\
 
 nhandler.delegateUnhandledNative = true
 

@@ -1,6 +1,6 @@
 @using=jpf-nhandler
 
-target=Jar
+target=example.Jar
 
 nhandler.delegateUnhandledNative=true
 

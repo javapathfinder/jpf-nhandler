@@ -7,7 +7,7 @@
 
 @using = jpf-nhandler
 
-target = SimpleSender
+target = example.SimpleSender
 
 nhandler.clean = true
 
@@ -24,8 +24,7 @@ nhandler.spec.delegate =\
  org.jgroups.JChannel.close\
 
 classpath =\
- ${jpf-nhandler}/lib/examples-lib/jgroups-3.2.5.jar;\
+ ${jpf-nhandler}/lib/example/jgroups-3.2.5/jgroups-3.2.5.jar
 
 native_classpath =\
- ${jpf-nhandler}/lib/examples-lib/jgroups-3.2.5.jar;\
- ${jpf-nhandler}/build/examples 
+ ${jpf-nhandler}/lib/example/jgroups-3.2.5/jgroups-3.2.5.jar

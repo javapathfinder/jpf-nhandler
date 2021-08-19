@@ -15,25 +15,27 @@
  * <http://www.gnu.org/licenses/>.
  */
 
+package example;
+
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class Jar {
-   public static void main(String[] args) {
-       try {
-    	   String dir = System.getProperty("user.dir") + "/src/examples/file.jar";
-           JarFile file = new JarFile(dir);
-           Enumeration<JarEntry> entries = file.entries();
-           while (entries.hasMoreElements()) {
-               JarEntry entry = entries.nextElement();
-               System.out.println(entry.getName());
-           }
-           file.close();
-       }
-       catch (IOException e) {
-           System.out.println("Something went wrong");
-       }
-   }
+	public static void main(String[] args) {
+		try {
+			String dir = System.getProperty("user.dir") + "/file.jar";
+			JarFile file = new JarFile(dir);
+			Enumeration<JarEntry> entries = file.entries();
+			while (entries.hasMoreElements()) {
+				JarEntry entry = entries.nextElement();
+				System.out.println(entry.getName());
+			}
+			file.close();
+		}
+		catch (IOException e) {
+			System.out.println("Something went wrong");
+		}
+	}
 }

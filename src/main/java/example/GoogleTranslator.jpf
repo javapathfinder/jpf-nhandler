@@ -4,15 +4,15 @@
 
 @using = jpf-nhandler
 
-target = GoogleTranslator
+target = example.GoogleTranslator
 
 classpath =\
- ${jpf-nhandler}/lib/examples-lib/google-api-translate-java-0.97.jar;\
- ${jpf-nhandler}/lib/examples-lib/json-20090211.jar;\
+ ${jpf-nhandler}/lib/example/google-api-translate-java-0.97/google-api-translate-java-0.97.jar,\
+ ${jpf-nhandler}/lib/example/json-20090211/json-20090211.jar
 
 native_classpath =\
- ${jpf-nhandler}/lib/examples-lib/google-api-translate-java-0.97.jar;\
- ${jpf-nhandler}/lib/examples-lib/json-20090211.jar;\
+ ${jpf-nhandler}/lib/example/google-api-translate-java-0.97/google-api-translate-java-0.97.jar,\
+ ${jpf-nhandler}/lib/example/json-20090211/json-20090211.jar
 
 # retrieveJSON Forms an HTTP request, sends it using GET method and 
 # returns the result of the request as a JSONObject.

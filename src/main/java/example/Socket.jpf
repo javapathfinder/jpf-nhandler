@@ -3,7 +3,7 @@
 
 @using = jpf-nhandler
 
-target = Client
+target = example.Client
 
 nhandler.delegateUnhandledNative = true
 
