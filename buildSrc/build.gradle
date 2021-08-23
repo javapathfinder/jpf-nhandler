@@ -1,0 +1,8 @@
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // to read properties file
+    implementation 'commons-configuration:commons-configuration:1.10'
+}
