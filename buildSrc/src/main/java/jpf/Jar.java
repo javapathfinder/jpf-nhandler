@@ -26,6 +26,8 @@ import org.gradle.api.GradleException;
 
 /**
  * Utility class to find the full path of the jar file of jpf-core.
+ * It also issues a warning if the key "extensions" in the site.properties
+ * file has more than one value.
  * 
  * @author Franck van Breugel
  */
@@ -70,6 +72,19 @@ public class Jar {
 			configuration.load(siteProperties);
                         // add system properties
 			configuration.append(new SystemConfiguration());
+
+			// check extensions
+			if (configuration.containsKey("extensions")) {
+				String[] value = configuration.getStringArray("extensions");
+				if (value.length > 1) {
+					System.out.println("WARNING: in the site.properties file, the property \"extensions\" has");
+					System.out.println("more than one value.  However, it suffices to use");
+					System.out.println("extensions = ${jpf-core}");
+					System.out.println("(see https://github.com/javapathfinder/jpf-core/wiki/Creating-site-properties-file).");
+					System.out.println("Note that having other projects, such as jpf-nas, as extensions may cause");
+					System.out.println("jpf-nhandler's tests to fail.");
+				}
+			}
 
 			// find jpf-core directory
 			if (!configuration.containsKey("jpf-core")) {
