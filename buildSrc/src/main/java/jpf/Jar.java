@@ -73,19 +73,6 @@ public class Jar {
                         // add system properties
 			configuration.append(new SystemConfiguration());
 
-			// check extensions
-			if (configuration.containsKey("extensions")) {
-				String[] value = configuration.getStringArray("extensions");
-				if (value.length > 1) {
-					System.out.println("WARNING: in the site.properties file, the property \"extensions\" has");
-					System.out.println("more than one value.  However, it suffices to use");
-					System.out.println("extensions = ${jpf-core}");
-					System.out.println("(see https://github.com/javapathfinder/jpf-core/wiki/Creating-site-properties-file).");
-					System.out.println("Note that having other projects, such as jpf-nas, as extensions may cause");
-					System.out.println("jpf-nhandler's tests to fail.");
-				}
-			}
-
 			// find jpf-core directory
 			if (!configuration.containsKey("jpf-core")) {
 				throw new GradleException("site.properties file does not contain jpf-core");
@@ -97,6 +84,23 @@ public class Jar {
 			}
 			if (!jpfCore.isDirectory()) {
 				throw new GradleException("jpf-core is not a directory");
+			}
+
+			// check extensions
+			if (configuration.containsKey("extensions")) {
+				String[] value = configuration.getStringArray("extensions");
+				if (value.length > 1) {
+					System.out.println("WARNING: in the site.properties file, the property \"extensions\" has");
+					System.out.println("more than one value.  However, it suffices to use");
+					System.out.println("extensions = ${jpf-core}");
+					System.out.println("(see https://github.com/javapathfinder/jpf-core/wiki/Creating-site-properties-file).");
+				} else if (value.length == 1) {
+					if (!value[0].equals(path)) {
+						System.out.println("WARNING: in the site.properties file, the property \"extensions\" does");
+						System.out.println("not have the value ${jpf-core}");
+						System.out.println("(see https://github.com/javapathfinder/jpf-core/wiki/Creating-site-properties-file).");
+					}
+				}
 			}
 
 			// find build directory
