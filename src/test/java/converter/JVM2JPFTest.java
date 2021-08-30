@@ -38,7 +38,8 @@ import org.junit.Test;
  * @author Franck van Breugel
  */
 public class JVM2JPFTest extends TestJPF {
-  private final static String[] JPF_ARGS = {};
+  // override vm.class property as it may have been set by other extensions of JPF
+  private final static String[] JPF_ARGS = { "+test.vm.class = gov.nasa.jpf.vm.SingleProcessVM" };
 
   private static MJIEnv env;
 
@@ -54,7 +55,7 @@ public class JVM2JPFTest extends TestJPF {
 
   @Test
   public void convertStringTest (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       String s1 = new String("Hello World");
       String s2 = createStringTest();
 
@@ -66,7 +67,7 @@ public class JVM2JPFTest extends TestJPF {
 
   @Test
   public void convertIntegerTest (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       Integer i1 = new Integer(100);
       Integer i2 = createIntegerTest();
 
@@ -78,7 +79,7 @@ public class JVM2JPFTest extends TestJPF {
 
   @Test
   public void convertArrayTest (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       String[] arr1 = { "e1", "e2", "e3" };
       String[] arr2 = createArrayTest();
 
@@ -93,7 +94,7 @@ public class JVM2JPFTest extends TestJPF {
 
   @Test
   public void convertHashMapTest (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       HashMap<Integer, String> map1 = new HashMap<Integer, String>();
       map1.put(0, "zero");
       map1.put(1, "one");
@@ -123,7 +124,7 @@ public class JVM2JPFTest extends TestJPF {
 
   @Test
   public void convertClassTest () throws IllegalArgumentException, SecurityException, IllegalAccessException{
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       Class<?> cls1 = createClassTest();
       Class<?> cls2 = JVM2JPFTestConversion.class;
       assertTrue(cls1 == cls2);

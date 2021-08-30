@@ -25,7 +25,8 @@ import java.util.Random;
 import org.junit.Test;
 
 public class JPF2JVMjava_utilTest extends TestJPF {
-  private final static String[] JPF_ARGS = {};
+  // override vm.class and nhandler.resetVMState property as they may have been set by other extensions of JPF
+  private final static String[] JPF_ARGS = { "+test.vm.class = gov.nasa.jpf.vm.SingleProcessVM", "+test.nhandler.resetVMState=true" };
 
   private static MJIEnv env;
 

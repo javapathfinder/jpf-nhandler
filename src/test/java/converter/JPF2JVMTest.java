@@ -36,7 +36,8 @@ import org.junit.Test;
  * @author Franck van Breugel
  */
 public class JPF2JVMTest extends TestJPF {
-  private final static String[] JPF_ARGS = {};
+  // override vm.class property as it may have been set by other extensions of JPF
+  private final static String[] JPF_ARGS = { "+test.vm.class = gov.nasa.jpf.vm.SingleProcessVM" };
 
   private static MJIEnv env;
 
@@ -52,7 +53,7 @@ public class JPF2JVMTest extends TestJPF {
 
   @Test
   public void convertStringTest (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       String s = new String("Hello World");
       convertStringTest(s);
     }
@@ -62,7 +63,7 @@ public class JPF2JVMTest extends TestJPF {
 
   @Test
   public void convertIntegerTest (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       Integer i = new Integer(100);
       convertIntegerTest(i);
     }
@@ -72,7 +73,7 @@ public class JPF2JVMTest extends TestJPF {
 
   @Test
   public void convertArrayTest (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       String[] arr = { "e1", "e2", "e3" };
       convertArrayTest(arr);
     }
@@ -82,7 +83,7 @@ public class JPF2JVMTest extends TestJPF {
 
   @Test
   public void convertHashMapTest (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       HashMap<Integer, String> map = new HashMap<Integer, String>();
       map.put(0, "zero");
       map.put(1, "one");
@@ -103,7 +104,7 @@ public class JPF2JVMTest extends TestJPF {
 
   @Test
   public void convertClassTest (){
-    if (verifyNoPropertyViolation()){
+    if (verifyNoPropertyViolation(JPF_ARGS)){
       JPF2JVMTestConversion.inc(10);
       convertClassTest(JPF2JVMTestConversion.class);
     }

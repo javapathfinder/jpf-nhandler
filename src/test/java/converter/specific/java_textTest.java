@@ -27,7 +27,9 @@ import gov.nasa.jpf.util.test.TestJPF;
 import gov.nasa.jpf.vm.MJIEnv;
 
 public class java_textTest extends TestJPF {
-  private final static String[] JPF_ARGS = {};
+  // override vm.class property as it may have been set by other extensions of JPF
+  private final static String[] JPF_ARGS = { "+test.vm.class = gov.nasa.jpf.vm.SingleProcessVM" };
+
 
   private static MJIEnv env;
 

@@ -22,8 +22,8 @@ import gov.nasa.jpf.util.test.TestJPF;
 import org.junit.Test;
 
 public class StringTest extends TestJPF {
-
-  private final static String[] JPF_ARGS = { "+nhandler.spec.delegate=java.lang.String.*" };
+  // override vm.class property as it may have been set by other extensions of JPF
+  private final static String[] JPF_ARGS = { "+nhandler.spec.delegate=java.lang.String.*", 						"+test.vm.class = gov.nasa.jpf.vm.SingleProcessVM" };
 
   public static void main (String[] args){
     runTestsOfThisClass(args);

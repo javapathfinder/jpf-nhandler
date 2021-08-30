@@ -25,8 +25,8 @@ import java.io.File;
 import org.junit.Test;
 
 public class java_ioTest extends TestJPF {
-
-  private final static String[] JPF_ARGS = {};
+  // override vm.class property as it may have been set by other extensions of JPF
+  private final static String[] JPF_ARGS = { "+test.vm.class = gov.nasa.jpf.vm.SingleProcessVM" };
 
   private static MJIEnv env;
 
