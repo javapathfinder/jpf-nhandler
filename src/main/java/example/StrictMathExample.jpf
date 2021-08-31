@@ -1,0 +1,5 @@
+@using = jpf-nhandler
+
+target = example.StrictMathExample
+
+nhandler.delegateUnhandledNative = true

@@ -1,0 +1,10 @@
+@using=jpf-nhandler
+
+target=example.DBAccess
+
+classpath=${jpf-nhandler}/lib/example/db-derby-10.9.1.0/derby.jar
+
+native_classpath=${jpf-nhandler}/lib/example/db-derby-10.9.1.0/derby.jar
+
+nhandler.resetVMState=false
+nhandler.spec.delegate=example.DB.createConnection,example.DB.createTable,example.DB.insertAddress,example.DB.shutdown

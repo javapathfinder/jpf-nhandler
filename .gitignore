@@ -1,10 +1,8 @@
-.version
-nbproject/private/
+.git/
+.gradle/
+bin/
 build/
-dist/
-tmp/
 onthefly/
-activity*.png
 *.class
 *~
 *.DS_Store
