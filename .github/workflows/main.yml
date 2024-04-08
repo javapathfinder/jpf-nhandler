@@ -1,9 +1,7 @@
 name: build
-
 on:
   push:
   pull_request:
-
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -20,22 +18,17 @@ jobs:
         with:
           java-version: 11
           distribution: "adopt"
-
       - name: build jpf-core
         run:
           cd $HOME/work/jpf-nhandler;
           git clone https://github.com/javapathfinder/jpf-core.git;
           cd jpf-core;
           ./gradlew build
-
       - name: create site.properties file
         run:
           mkdir $HOME/.jpf;
           echo "jpf-core = ${HOME}/work/jpf-nhandler/jpf-core" >> $HOME/.jpf/site.properties;
-          echo "jpf-numeric = ${HOME}/work/jpf-nhandler/jpf-numeric" >> $HOME/.jpf/site.properties;
-          echo "jpf-aprop = ${HOME}/work/jpf-nhandler/jpf-aprop" >> $HOME/.jpf/site.properties;
-          echo "extensions=${HOME}/work/jpf-nhandler/jpf-core,${HOME}/work/jpf-nhandler/jpf-aprop" >> $HOME/.jpf/site.properties;
-          echo "jpf-nhandler = ${HOME}/work/jpf-nhandler/jpf-nhandler" >> $HOME/.jpf/site.properties
+          echo "extensions=${HOME}/work/jpf-nhandler/jpf-core" >> $HOME/.jpf/site.properties;
 
       - name: Build and test jpf-nhandler
         run:
