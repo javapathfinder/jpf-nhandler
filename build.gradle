@@ -32,13 +32,9 @@ test {
         events "passed", "skipped", "failed"
     }
 
-    jvmArgs += ['--add-exports', 'java.base/jdk.internal.misc=ALL-UNNAMED',
-                '--add-opens', 'java.base/jdk.internal.misc=ALL-UNNAMED',
-	            '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
-                '--add-opens', 'java.base/java.util=ALL-UNNAMED',
-                '--add-opens','java.base/java.util.regex=ALL-UNNAMED',
-                '--add-opens','java.base/java.lang.reflect=ALL-UNNAMED'
-    ]
+    jvmArgs += ['--add-exports', 'java.base/jdk.internal.misc=ALL-UNNAMED','--add-opens', 'java.base/jdk.internal.misc=ALL-UNNAMED','--add-opens',
+                'java.base/java.lang=ALL-UNNAMED','--add-opens', 'java.base/java.util=ALL-UNNAMED','--add-opens', 'java.base/java.util.regex=ALL-UNNAMED',
+                '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED']
     
     afterSuite { testDescriptor, result ->
         if (!testDescriptor.parent) {
