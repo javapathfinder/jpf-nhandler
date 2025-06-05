@@ -37,12 +37,13 @@ dependencies {
 sourceSets {
     main {
         java {
-            srcDirs = ['src/main']
+            srcDirs = ['src/main/java']
+            exclude 'example/**'
         }
     }
     test {
         java {
-            srcDirs = ['src/tests']
+            srcDirs = ['src/test/java']
         }
     }
 }
