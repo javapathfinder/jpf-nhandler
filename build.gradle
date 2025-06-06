@@ -12,9 +12,14 @@ repositories {
     mavenCentral()
 }
 
+def jpfCorePath = project.hasProperty('jpfCorePath') ? project.property('jpfCorePath') : System.getenv('JPF_CORE_PATH')
+if (!jpfCorePath) {
+    jpfCorePath = '../jpf-core/build' // this the default path
+}
+
 dependencies {
     // JPF-core dependency (adjust path as needed)
-    implementation files("/home/finn/jpf-push/jpf-core/build/jpf.jar")
+    implementation files("${jpfCorePath}/jpf.jar")
 
     // JGroups (for example/Client.java, SimpleSender.java, SimpleReciever.java)
     implementation 'org.jgroups:jgroups:5.4.4.Final'
