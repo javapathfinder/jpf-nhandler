@@ -13,7 +13,6 @@ repositories {
 }
 
 dependencies {
-    // JPF-core dependency (adjust path as needed)
     implementation files(jpf.Jar.getFullPath())
 
     // JGroups (for example/Client.java, SimpleSender.java, SimpleReciever.java)
