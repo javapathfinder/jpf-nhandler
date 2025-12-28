@@ -39,23 +39,20 @@ public class Jar {
 	 * @throws GradleException if something goes wrong
 	 */
 	public static String getFullPath() {
-		// find home directory
-		File home = new File(System.getProperty("user.home"));
-		if (!home.exists()) {
-			throw new GradleException("home directory cannot be found");
-		}
-		if (!home.isDirectory()) {
-			throw new GradleException("home is not a directory");
-		}
+        File devHome = new File(System.getProperty("user.dir")).getParentFile();
+        File dotJpf = new File(devHome, ".jpf");
 
-		// find .jpf directory	
-		File dotJpf = new File(home, ".jpf");
-		if (!dotJpf.exists()) {
-			throw new GradleException(".jpf directory cannot be found");
-		}
-		if (!dotJpf.isDirectory()) {
-			throw new GradleException(".jpf is not a directory");
-		}
+        if (!dotJpf.exists() || !dotJpf.isDirectory()) {
+            File home = new File(System.getProperty("user.home"));
+            dotJpf = new File(home, ".jpf");
+        }
+
+        if (!dotJpf.exists()) {
+            throw new GradleException(".jpf directory cannot be found in " + dotJpf.getAbsolutePath());
+        }
+        if (!dotJpf.isDirectory()) {
+            throw new GradleException(".jpf is not a directory");
+        }
 
 		// find site.properties file	
 		File siteProperties = new File(dotJpf, "site.properties");
