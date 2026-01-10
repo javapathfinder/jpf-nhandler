@@ -10,7 +10,7 @@ When a method call `o.m(a)` is delegated, jpf-nhandler performs the following st
 
 The implementation of jpf-nhandler mainly relies on **MJI (Model Java Interface)**. Native peers are generated on-the-fly using the **BCEL** library. These generated peers are referred to as **on-the-fly (OTF) peers**.
 
----
+
 
 ## Main Applications
 
@@ -28,7 +28,7 @@ jpf-nhandler is primarily used for the following purposes:
 4. **Performance improvement**  
    Delegating methods may also speed up JPF execution.
 
----
+
 
 ## Requirements
 
@@ -82,7 +82,7 @@ cd jpf-nhandler
 ./gradlew build
 ```
 
-Warnings related to internal Java APIs may appear and are expected.
+**Warnings related to internal Java APIs may appear and are expected.*
 
 4. **Run Tests**
 ```
