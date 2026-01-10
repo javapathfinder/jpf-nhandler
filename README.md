@@ -88,15 +88,15 @@ Warnings related to internal Java APIs may appear and are expected.
 ./gradlew test
 ```
 
-Expected result:
+   Expected result:
 
-a.All tests pass
-b.No failures or skipped tests
+   a.All tests pass
+   b.No failures or skipped tests
 
 5. Register jpf-nhandler
 
-Add jpf-nhandler to your site.properties file.
-Refer to the jpf-core documentation for details.
+   Add jpf-nhandler to your site.properties file.
+   Refer to the jpf-core documentation for details.
 
 Running JPF with jpf-nhandler
 ----------------------------
@@ -194,14 +194,14 @@ You can find the GNU GPL at:
 http://www.gnu.org/licenses
 
 Questions/Feedback
-------------------------------
+-------------------
 
 For questions, comments, or suggestions, please contact:
 
 📧 nastaran.shafiei@gmail.com
 
 
-ACknowledgements
-------
+Acknowledgements
+----------------
 
 Thanks to Peter Mehlitz for his help with the development of jpf-nhandler.
