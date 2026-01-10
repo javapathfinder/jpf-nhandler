@@ -85,45 +85,9 @@ jpf-nhandler can be configured in variety of ways. Here are some examples:
 
         nhandler.clean = false
 
-Limitations of jpf-nhandler
----------------------------
-
-  1. The implementation of some classes is platform-specific, for instance 
-     java.lang.System. jpf-nhandler cannot be used for such classes due to 
-     inconsistencies between JPF and the host JVM.
-
-  2. Since jpf-nhandler relies on transforming objects and classes between 
-     JPF and the host JVM, the state of a class or object should consist 
-     of the same fields and superclasses in both the host JVM and JPF. This 
-     limits the application of jpf-nhandler for types with JPF model classes 
-     that are inconsistent with the actual class in the Java library.
-
-  3. The side effects of the delegated method should be only observable through 
-     the return value, the arguments of the method, and the object or class
-     invoking the method, e.g. the lock() method in the class 
-     java.util.concurrent.locks.ReentrantLock cannot be handled.
-
-  4. jpf-nhandler cannot handle certain objects of which part of their state 
-     is kept natively, e.g. java.awt.Window
 
 
-Licensing of jpf-nhandler
--------------------------
 
-This extension is free software: you can redistribute it and/or modify it 
-under the terms of the GNU General Public License as published by the Free 
-Software Foundation, either version 3 of the License, or (at your option) 
-any later version.
-
-This extension is distributed in the hope that it will be useful, but WITHOUT 
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
-You can find a copy of the GNU General Public License at
-http://www.gnu.org/licenses
-
-The licenses of the jar files in lib/example have been included.  These jar files
-are used in the examples.
 
 Installing of jpf-nhandler
 --------------------------
@@ -215,13 +179,83 @@ execution goes back and forth between JPF and the underlying host JVM,
 both JPF and the host JVM should be able to access these classes.
 
 
-Questions/comments/suggestions
+Configuration Options
+---------------------
+1.Delegating Methods
+
+Delegate a specific constructor:
+
+nhandler.spec.delegate = a.b.C.<init>
+
+
+Delegate all methods of a class:
+
+nhandler.spec.delegate = java.lang.String.*
+
+2.Skipping Methods
+
+Skip a method (executed as empty and returns a dummy value):
+
+nhandler.spec.skip = java.io.FileDescriptor.write
+
+3.Delegate Only Unhandled Native Calls
+nhandler.delegateUnhandledNative = true
+
+4.On-the-Fly Native Peers
+
+jpf-nhandler generates native peers dynamically.
+
+Generated peers are stored in:
+
+jpf-nhandler/onthefly/
+
+5.Generate Source Code for OTF Peers
+nhandler.genSource = true
+
+6.Compile Generated Sources Manually
+javac -cp "<JPF_HOME>/build/jpf.jar:<NHANDLER_HOME>/build/jpf-nhandler.jar" onthefly/*.java
+
+7.Reuse Generated Peers Across Runs
+
+Since on-the-fly bytecode generation is expensive, peers can be reused:
+
+nhandler.clean = false
+
+
+
+Limitations of jpf-nhandler
+---------------------------
+
+  1. Platform-specific classes (e.g., java.lang.System) cannot be handled due to inconsistencies between JPF and the host JVM. 
+
+  2. Delegated objects and classes must have identical fields and superclasses in both environments.
+
+  3. Side effects must be observable only via return values, arguments, or the invoking object.
+
+  4. Objects with native-managed state (e.g., java.awt.Window) cannot be handled.
+  5. Methods such as java.util.concurrent.locks.ReentrantLock.lock() cannot be delegated.
+
+
+Licensing of jpf-nhandler
+-------------------------
+
+jpf-nhandler is free software distributed under the
+GNU General Public License v3 (or later).
+
+Licenses of third-party JAR files in lib/example are included with the project.
+
+You can find the GNU GPL at:
+http://www.gnu.org/licenses
+
+Questions/Feedback
 ------------------------------
 
-Please email them to nastaran.shafiei@gmail.com
+For questions, comments, or suggestions, please contact:
+
+📧 nastaran.shafiei@gmail.com
 
 
-Thanks
+ACknowledgements
 ------
 
-to Peter Mehlitz for his help with the development of jpf-nhandler.
+Thanks to Peter Mehlitz for his help with the development of jpf-nhandler.
