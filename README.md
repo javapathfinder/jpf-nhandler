@@ -184,43 +184,46 @@ Configuration Options
 1.Delegating Methods
 
 Delegate a specific constructor:
-
+```
 nhandler.spec.delegate = a.b.C.<init>
-
+```
 
 Delegate all methods of a class:
-
+```
 nhandler.spec.delegate = java.lang.String.*
-
+```
 2.Skipping Methods
 
 Skip a method (executed as empty and returns a dummy value):
-
+```
 nhandler.spec.skip = java.io.FileDescriptor.write
-
+```
 3.Delegate Only Unhandled Native Calls
+```
 nhandler.delegateUnhandledNative = true
-
+```
 4.On-the-Fly Native Peers
-
+```
 jpf-nhandler generates native peers dynamically.
-
+```
 Generated peers are stored in:
-
+```
 jpf-nhandler/onthefly/
-
+```
 5.Generate Source Code for OTF Peers
+```
 nhandler.genSource = true
-
+```
 6.Compile Generated Sources Manually
+```
 javac -cp "<JPF_HOME>/build/jpf.jar:<NHANDLER_HOME>/build/jpf-nhandler.jar" onthefly/*.java
-
+```
 7.Reuse Generated Peers Across Runs
 
 Since on-the-fly bytecode generation is expensive, peers can be reused:
-
+```
 nhandler.clean = false
-
+```
 
 
 Limitations of jpf-nhandler
