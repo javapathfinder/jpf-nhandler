@@ -65,39 +65,38 @@ jpf-nhandler/
 
 Installing jpf-nhandler
 -----------------------
-1. Install jpf-core
+1. **Install jpf-core**
 
 Install jpf-core by following the instructions on the jpf-core wiki.
 Cloning the master branch and building with the Gradle wrapper is recommended.
 
 Note: Some jpf-core tests may fail. This does not prevent using JPF.
 
-2. Clone jpf-nhandler
+2. **Clone jpf-nhandler**
 ```
 git clone https://github.com/javapathfinder/jpf-nhandler.git
 cd jpf-nhandler
 ```
-3. Build jpf-nhandler
+3. **Build jpf-nhandler**
 ```
 ./gradlew build
 ```
 
 Warnings related to internal Java APIs may appear and are expected.
 
-4. Run Tests
+4. **Run Tests**
 ```
 ./gradlew test
 ```
+**Expected result:*
+- All tests pass
+- No failures or skipped tests
 
-   Expected result:
 
-   a.All tests pass
-   b.No failures or skipped tests
+5. **Register jpf-nhandler**
 
-5. Register jpf-nhandler
-
-   Add jpf-nhandler to your site.properties file.
-   Refer to the jpf-core documentation for details.
+   - Add jpf-nhandler to your site.properties file.
+   - Refer to the jpf-core documentation for details.
 
 Running JPF with jpf-nhandler
 ----------------------------
