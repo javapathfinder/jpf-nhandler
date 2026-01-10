@@ -58,9 +58,10 @@ jpf-nhandler/
 ├── build.gradle
 └── README.md
 ```
-1.src/main/java contains the core implementation.
-2.src/test/java contains unit tests.
-3.onthefly/ stores generated native peer sources and bytecode (optional).
+1. `src/main/java` contains the core implementation.
+2. `src/test/java` contains unit tests.
+3. `onthefly/` stores generated native peer sources and bytecode (optional).
+
 
 Installing jpf-nhandler
 -----------------------
