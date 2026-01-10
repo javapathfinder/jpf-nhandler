@@ -115,11 +115,13 @@ native_classpath = path-to-application-classes
 
 Important Note on Classpaths
 ----------------------------
-Classes belonging to the System Under Test (SUT) must be accessible to both:
-1.JPF (classpath)
-2.Host JVM (native_classpath)
+Classes belonging to the **System Under Test (SUT)** must be accessible to both:
+
+1. **JPF** (`classpath`)
+2. **Host JVM** (`native_classpath`)
 
 Since execution alternates between JPF and the host JVM, the same directories or JAR files must be specified for both properties.
+
 
 
 Configuration Options
