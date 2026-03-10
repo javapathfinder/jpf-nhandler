@@ -50,9 +50,18 @@ sourceSets {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.compilerArgs += [
+            // Allow access to jdk.internal.misc (used by jpf-core internals)
             '--add-exports', 'java.base/jdk.internal.misc=ALL-UNNAMED',
+            // Allow access to jdk.internal.reflect (ReflectionFactory; replaces sun.reflect in Java 11+)
+            '--add-exports', 'java.base/jdk.internal.reflect=ALL-UNNAMED',
+            // Open packages that nhandler accesses reflectively (setAccessible, private ctors/fields)
             '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.io=ALL-UNNAMED',
             '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.util.concurrent.atomic=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.util.regex=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.text=ALL-UNNAMED',
             '--add-reads', 'java.base=ALL-UNNAMED'
     ]
 }
@@ -60,9 +69,18 @@ tasks.withType(JavaCompile).configureEach {
 test {
     useJUnitPlatform()
     jvmArgs = [
+            // Allow access to jdk.internal.misc (used by jpf-core internals)
             '--add-exports', 'java.base/jdk.internal.misc=ALL-UNNAMED',
+            // Allow access to jdk.internal.reflect (ReflectionFactory; replaces sun.reflect in Java 11+)
+            '--add-exports', 'java.base/jdk.internal.reflect=ALL-UNNAMED',
+            // Open packages that nhandler accesses reflectively (setAccessible, private ctors/fields)
             '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
-            '--add-opens', 'java.base/java.util=ALL-UNNAMED'
+            '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.io=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.util.concurrent.atomic=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.util.regex=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.text=ALL-UNNAMED'
     ]
 }
 
