@@ -30,6 +30,8 @@ dependencies {
     // JUnit 5 for tests
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+    // JUnit Vintage Engine to run JUnit 4 tests on JUnit Platform
+    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.9.2'
 }
 
 
