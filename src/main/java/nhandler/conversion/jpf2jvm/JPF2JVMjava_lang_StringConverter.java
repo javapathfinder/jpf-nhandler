@@ -38,8 +38,26 @@ public class JPF2JVMjava_lang_StringConverter extends JPF2JVMConverter {
   protected Object instantiateFrom (Class<?> cl, int JPFRef, MJIEnv env) {
     assert cl == String.class;
     
-    Object JVMObj = env.getStringObject(JPFRef);
-    return JVMObj;
+    try {
+      Object JVMObj = env.getStringObject(JPFRef);
+      return JVMObj;
+    } catch (gov.nasa.jpf.JPFException e) {
+      // Fallback for compact strings mismatch (JDK 11 byte[] vs legacy char[])
+      // Handles cases like JarFile String fields where JPF String value is CharArrayFields
+      // but getStringBytes expects ByteArrayFields (see jpf-nhandler#14, jpf-core#507 context)
+      if (e.getMessage() != null && e.getMessage().contains("not a byte[]")) {
+        try {
+          char[] chars = env.getStringChars(JPFRef);
+          if (chars != null) {
+            System.out.println("INFO: String conversion fallback to char[] for JPFRef " + JPFRef);
+            return new String(chars);
+          }
+        } catch (Exception e2) {
+          // ignore, rethrow original
+        }
+      }
+      throw e;
+    }
   }
 
 }

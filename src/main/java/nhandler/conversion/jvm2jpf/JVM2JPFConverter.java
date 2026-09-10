@@ -86,7 +86,46 @@ public abstract class JVM2JPFConverter extends ConverterBase {
 
     if (JVMCls != null){
       // retrieving the integer representing the Class in JPF
-      JPFCls = ClassLoaderInfo.getCurrentResolvedClassInfo(JVMCls.getName());
+      try {
+        JPFCls = ClassLoaderInfo.getCurrentResolvedClassInfo(JVMCls.getName());
+      } catch (ClassInfoException ex) {
+        // Handle synthetic lambda / dynamic proxy classes (see jpf-nhandler#14, jpf-core#507)
+        // These have names like java.util.jar.JarFile$$Lambda$40/0x... which JPF cannot resolve
+        String clsName = JVMCls.getName();
+        boolean isSyntheticLambda = JVMCls.isSynthetic() || clsName.contains("$$Lambda$") || clsName.contains("/0x");
+        if (isSyntheticLambda) {
+          // Try functional interfaces first (preserves Function.apply etc.)
+          for (Class<?> iface : JVMCls.getInterfaces()) {
+            try {
+              JPFCls = ClassLoaderInfo.getCurrentResolvedClassInfo(iface.getName());
+              System.out.println("INFO: lambda " + clsName + " mapped to interface " + iface.getName());
+              break;
+            } catch (ClassInfoException ex2) {
+              // continue to next interface
+            }
+          }
+          // Try superclass if no interface matched
+          if (JPFCls == null && JVMCls.getSuperclass() != null) {
+            try {
+              JPFCls = ClassLoaderInfo.getCurrentResolvedClassInfo(JVMCls.getSuperclass().getName());
+              System.out.println("INFO: lambda " + clsName + " mapped to superclass " + JVMCls.getSuperclass().getName());
+            } catch (ClassInfoException ex3) {
+              // ignore, fallback to Object
+            }
+          }
+          // Final fallback to Object (as suggested in #14, but narrow)
+          if (JPFCls == null) {
+            try {
+              JPFCls = ClassLoaderInfo.getCurrentResolvedClassInfo(Object.class.getName());
+              System.out.println("WARNING: lambda " + clsName + " is ignored, using Object as fallback");
+            } catch (ClassInfoException ex4) {
+              throw ex;
+            }
+          }
+        } else {
+          throw ex;
+        }
+      }
       StaticElementInfo sei = JPFCls.getModifiableStaticElementInfo();
 
       if (sei != null){
